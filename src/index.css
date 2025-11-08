@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,33 +10,33 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 96%;
+    --foreground: 0 0% 11%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 96%;
+    --card-foreground: 0 0% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 96%;
+    --popover-foreground: 0 0% 11%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 0% 11%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 46%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 86%;
+    --muted-foreground: 0 0% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 0 0% 86%;
+    --accent-foreground: 0 0% 11%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 86%;
+    --input: 0 0% 86%;
+    --ring: 0 0% 11%;
 
     --radius: 0.5rem;
 
@@ -56,33 +58,33 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 11%;
+    --foreground: 0 0% 100%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 11%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0 0% 96%;
+    --primary-foreground: 0 0% 11%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 46%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 80%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -102,12 +104,84 @@ All colors MUST be HSL.
   overflow: hidden;
 }
 
+@layer components {
+  /* Button Components */
+  .btn-primary {
+    @apply bg-design-primary border border-design-primary text-design-white rounded-button;
+  }
+
+  .btn-secondary {
+    @apply bg-design-secondary border border-design-secondary text-design-white rounded-button;
+  }
+
+  .btn-outline {
+    @apply bg-transparent border border-design-primary text-design-white rounded-button;
+  }
+
+  .chip-primary {
+    @apply bg-transparent border border-design-secondary text-design-primary rounded-chip;
+  }
+
+  /* Common Floating Input Animations */
+  .floating-input-container {
+    @apply relative;
+  }
+
+  .floating-input-container input,
+  .floating-input-container select,
+  .floating-input-container textarea {
+    @apply block w-full rounded-lg border bg-background px-3 py-3 text-base file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-transparent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm transition-colors;
+  }
+
+  .floating-input-container input,
+  .floating-input-container select {
+    @apply h-12;
+  }
+
+  .floating-input-container textarea {
+    @apply min-h-[2.5rem] resize-y;
+  }
+
+  .floating-input-container input:focus,
+  .floating-input-container select:focus,
+  .floating-input-container textarea:focus {
+    @apply border-primary focus:border-primary;
+  }
+
+  .floating-input-container input.error,
+  .floating-input-container select.error,
+  .floating-input-container textarea.error {
+    @apply border-red-500 focus-visible:ring-red-500;
+  }
+
+  .floating-input-container label {
+    @apply absolute left-3 transition-all duration-300 ease-out pointer-events-none font-medium;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .floating-input-container input:not(:placeholder-shown) + label,
+  .floating-input-container input:focus + label,
+  .floating-input-container select:not(:placeholder-shown) + label,
+  .floating-input-container select:focus + label,
+  .floating-input-container textarea:not(:placeholder-shown) + label,
+  .floating-input-container textarea:focus + label {
+    @apply scale-75 -translate-y-2 top-0 text-xs text-primary bg-background px-1;
+  }
+
+  .floating-input-container .error-message {
+    @apply mt-1 text-sm text-red-600;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }

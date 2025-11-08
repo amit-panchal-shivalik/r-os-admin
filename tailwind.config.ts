@@ -18,11 +18,29 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'sans': ['Bricolage Grotesque', 'sans-serif'],
+			},
+			fontSize: {
+				'h1': ['20px', { lineHeight: '30px' }],
+				'h2': ['16px', { lineHeight: '24px' }],
+				'h3': ['14px', { lineHeight: '20px' }],
+				'h4': ['12px', { lineHeight: '18px' }],
+			},
 			colors: {
+				// Design System Colors
+				'design-primary': '#1b1b1b',
+				'design-secondary': '#757575',
+				'design-description': '#f6f6f6',
+				'design-border': '#f6f6f6',
+				'design-background': '#f6f6f6',
+				'design-white': '#ffffff',
+
+				// Existing shadcn colors
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
-				background: 'hsl(var(--background))',	
+				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
@@ -66,7 +84,9 @@ export default {
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				'button': '28px',
+				'chip': '8px'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -92,5 +112,24 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		// Design System Components
+		function({ addComponents }) {
+			addComponents({
+				'.btn-primary': {
+					'@apply bg-design-primary border border-design-primary text-design-white rounded-button': {},
+				},
+				'.btn-secondary': {
+					'@apply bg-design-secondary border border-design-secondary text-design-white rounded-button': {},
+				},
+				'.btn-outline': {
+					'@apply bg-transparent border border-design-primary text-design-white rounded-button': {},
+				},
+				'.chip-primary': {
+					'@apply bg-transparent border border-design-secondary text-design-primary rounded-chip': {},
+				},
+			})
+		}
+	],
 } satisfies Config;

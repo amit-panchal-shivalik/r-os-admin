@@ -11,6 +11,12 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
     },
+    preview: {
+      allowedHosts: [
+        'realos.devpress.net',
+        'localhost',
+      ],
+    },
     plugins: [
       react(),
       mode === 'development' && componentTagger(),
