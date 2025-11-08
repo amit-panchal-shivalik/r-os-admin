@@ -10,20 +10,22 @@ interface PrivateRouteProps {
 export const PrivateRoute = ({ children, requiredRole }: PrivateRouteProps) => {
   const { isAuthenticated, user } = useAuth();
   const location = useLocation();
+  
+  const currentPath = location.pathname;
+  
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   
-  const userPermissions = user.role == "superadmin" ? ROLE_ROUTES.SuperAdmin : ROLE_ROUTES.Manager;
-  const currentPath = location.pathname;
-  console.log("userPermissions", userPermissions);
-  console.log("currentPath", currentPath);
+  // Normalize role comparison (handle case-insensitive and different formats)
+  const userRole = user?.role?.toLowerCase() || '';
+  const isSuperAdmin = userRole === 'superadmin' || userRole.includes('superadmin');
+  const userPermissions = isSuperAdmin ? ROLE_ROUTES.SuperAdmin : ROLE_ROUTES.Manager;
   
-  const hasAccess = userPermissions.includes(currentPath);
-  console.log("has access", hasAccess);
-  
+  const hasAccess = userPermissions.includes(currentPath) || currentPath === '/';
 
-  if (false) {
+
+  if (!hasAccess) {
     return <Navigate to="/unauthorized" replace />;
   }
 

@@ -10,6 +10,7 @@ import { FloorsPage } from '../pages/building-details/FloorsPage';
 import { BlocksPage } from '../pages/building-details/BlocksPage';
 import { UnitsPage } from '../pages/building-details/UnitsPage';
 import { NoticeBoardPage } from '../pages/building-details/NoticeBoardPage';
+import SocietyManagement from '../pages/society-management/SocietyManagement';
 
 /* current user roles */
 const getUserRoles = (): string => {
@@ -32,12 +33,10 @@ const RedirectByRole = () => {
   }
 
   // Find the first matching default route
-  if (ROLE_DEFAULTS[role]) {
-    return <Navigate to={ROLE_DEFAULTS[role]} replace />;
-  }
-
-  // Fallback for unknown / Guest
-  return <Navigate to="/dashboard" replace />;
+  const defaultRoute = role?.toLowerCase() === "superadmin" 
+    ? "/society-management" 
+    : "/dashboard";
+  return <Navigate to={defaultRoute} replace />;
 };
 
 /* ────── Main router ────── */
@@ -76,6 +75,7 @@ export const AppRoutes = () => {
 
         {/* All private pages  */}
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="society-management" element={<SocietyManagement />} />
         
         {/* Building Settings Routes */}
         <Route path="building-settings/building-details" element={<BuildingDetailsPage />} />
@@ -98,7 +98,7 @@ export const AppRoutes = () => {
       </Route>
 
       {/* Global catch-all (outside private area) */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };
