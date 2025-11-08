@@ -11,19 +11,19 @@ const SearchInput: React.FC<SearchInputProps> = ({
 }) => {
     return (
         <div
-            className={`relative mb-2 w-full ${className}`}
+            className={`relative w-full ${className}`}
             onClick={onClick}
         >
+            <label className="standard-label">Search</label>
             <input
                 type="text"
                 placeholder={placeholder}
-                className="p-1 pl-10 pr-4 bg-[#f1f1f1] border-none ml-1 text-[#000033] w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                style={{ paddingLeft: '2.5rem !important' }}
+                className="px-4 py-3 pl-10 pr-4 bg-background border text-foreground w-full rounded-lg focus:outline-none focus:ring-1 focus:ring-design-primary"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
             />
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <IconSearch className="w-4 h-4 text-gray-500" />
+            <div className="absolute left-3 bottom-3 pointer-events-none">
+                <IconSearch className="w-4 h-4 text-muted-foreground" />
             </div>
         </div>
     );
