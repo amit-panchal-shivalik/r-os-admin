@@ -31,20 +31,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (token && userData) {
       try {
         const parsedUser = JSON.parse(userData);
-        // Transform userRoles to role if needed
+        // Handle both new and existing user data formats
         const transformedUser: User = {
-          id: parsedUser.id || '',
-          name: parsedUser.firstName + ' ' + parsedUser.lastName || '',
+          id: parsedUser.id || parsedUser._id || '',
+          name: parsedUser.name || (parsedUser.firstName && parsedUser.lastName ? parsedUser.firstName + ' ' + parsedUser.lastName : 'User'),
           email: parsedUser.email || '',
-          phone: parsedUser.phone || '',
-          role: parsedUser.userRoles?.join(',') || '',
+          phone: parsedUser.phone || parsedUser.mobileNumber || '',
+          role: parsedUser.role || (parsedUser.userRoles ? parsedUser.userRoles.join(',') : 'user'),
           avatar: parsedUser.avatar || ''
         };
         setUser(transformedUser);
         setIsAuthenticated(true);
       } catch (error) {
+        console.error('Error parsing user data:', error);
         localStorage.removeItem('auth_token');
         localStorage.removeItem('userInfo');
+        setIsAuthenticated(false);
+        setUser(null);
       }
     }
   }, []);
