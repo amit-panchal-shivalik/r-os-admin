@@ -3,7 +3,7 @@ import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { OtpPage } from '../pages/auth/OtpPage';
-import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { DashboardLayoutAntd } from '../components/layout/DashboardLayoutAntd';
 import { BuildingsListPage } from '../pages/buildings/BuildingsListPage';
 import { CreateBuildingPage } from '../pages/buildings/CreateBuildingPage';
 import { BuildingDetailsPage } from '../pages/buildings/BuildingDetailsPage';
@@ -11,6 +11,42 @@ import { BuildingSettingsPage } from '../pages/buildings/BuildingSettingsPage';
 import { BlocksPage } from '../pages/buildings/BlocksPage';
 import { FloorsPage } from '../pages/buildings/FloorsPage';
 import { UnitsPage } from '../pages/buildings/UnitsPage';
+import DashboardPage from '../pages/dashboard/DashboardPage';
+
+// Building Settings
+import BlocksPageNew from '../pages/building-settings/BlocksPage';
+import FloorsPageNew from '../pages/building-settings/FloorsPage';
+import UnitsPageNew from '../pages/building-settings/UnitsPage';
+
+// Parking
+import ParkingAreasPage from '../pages/parking/ParkingAreasPage';
+import ParkingSpotsPage from '../pages/parking/ParkingSpotsPage';
+import ParkingRequestsPage from '../pages/parking/ParkingRequestsPage';
+
+// Notices
+import NoticesPage from '../pages/notices/NoticesPage';
+
+// Amenities
+import AmenitiesPage from '../pages/amenities/AmenitiesPage';
+import AmenitySlotsPage from '../pages/amenities/AmenitySlotsPage';
+
+// Committee
+import CommitteeMembersPage from '../pages/committee/CommitteeMembersPage';
+
+// Employees
+import EmployeesPage from '../pages/employees/EmployeesPage';
+
+// Complaints
+import ComplaintsPage from '../pages/complaints/ComplaintsPage';
+
+// Events
+import EventsPage from '../pages/events/EventsPage';
+
+// Visitors
+import VisitorsPage from '../pages/visitors/VisitorsPage';
+
+// Maintenance
+import MaintenanceBillsPage from '../pages/maintenance/MaintenanceBillsPage';
 
 /* current user roles */
 const getUserRoles = (): string[] => {
@@ -94,7 +130,7 @@ export const AppRoutes = () => {
         path="/*"
         element={
           <PrivateRoute>
-            <DashboardLayout />
+            <DashboardLayoutAntd />
           </PrivateRoute>
         }
       >
@@ -107,10 +143,43 @@ export const AppRoutes = () => {
         <Route path="buildings/:id" element={<BuildingDetailsPage />} />
 
         {/* Building Admin Routes */}
-        <Route path="dashboard" element={<BuildingSettingsPage />} />
-        <Route path="building/blocks" element={<BlocksPage />} />
-        <Route path="building/floors" element={<FloorsPage />} />
-        <Route path="building/units" element={<UnitsPage />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="building-settings" element={<BuildingSettingsPage />} />
+
+        {/* Building Settings - New */}
+        <Route path="building/blocks" element={<BlocksPageNew />} />
+        <Route path="building/floors" element={<FloorsPageNew />} />
+        <Route path="building/units" element={<UnitsPageNew />} />
+
+        {/* Parking */}
+        <Route path="parking-areas" element={<ParkingAreasPage />} />
+        <Route path="parking-spots" element={<ParkingSpotsPage />} />
+        <Route path="parking" element={<ParkingRequestsPage />} />
+
+        {/* Notices */}
+        <Route path="notices" element={<NoticesPage />} />
+
+        {/* Amenities */}
+        <Route path="amenities" element={<AmenitiesPage />} />
+        <Route path="amenities/:amenityId/slots" element={<AmenitySlotsPage />} />
+
+        {/* Committee */}
+        <Route path="committee-members" element={<CommitteeMembersPage />} />
+
+        {/* Employees */}
+        <Route path="employees" element={<EmployeesPage />} />
+
+        {/* Complaints */}
+        <Route path="complaints" element={<ComplaintsPage />} />
+
+        {/* Events */}
+        <Route path="events" element={<EventsPage />} />
+
+        {/* Visitors */}
+        <Route path="visitors" element={<VisitorsPage />} />
+
+        {/* Maintenance */}
+        <Route path="maintenance" element={<MaintenanceBillsPage />} />
 
         {/* Catch-all inside private area */}
         <Route path="*" element={<RedirectByRole />} />

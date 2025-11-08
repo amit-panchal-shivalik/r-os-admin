@@ -6,6 +6,15 @@ import buildingSlice from './slices/buildingSlice';
 import blockSlice from './slices/blockSlice';
 import floorSlice from './slices/floorSlice';
 import unitSlice from './slices/unitSlice';
+import noticeSlice from './slices/noticeSlice';
+import amenitySlice from './slices/amenitySlice';
+import complaintSlice from './slices/complaintSlice';
+import committeeSlice from './slices/committeeSlice';
+import employeeSlice from './slices/employeeSlice';
+import eventSlice from './slices/eventSlice';
+import visitorSlice from './slices/visitorSlice';
+import maintenanceSlice from './slices/maintenanceSlice';
+import parkingSlice from './slices/parkingSlice';
 import rootSaga from './sagas/rootSaga';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -18,6 +27,15 @@ export const store = configureStore({
     block: blockSlice,
     floor: floorSlice,
     unit: unitSlice,
+    notice: noticeSlice,
+    amenity: amenitySlice,
+    complaint: complaintSlice,
+    committee: committeeSlice,
+    employee: employeeSlice,
+    event: eventSlice,
+    visitor: visitorSlice,
+    maintenance: maintenanceSlice,
+    parking: parkingSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
