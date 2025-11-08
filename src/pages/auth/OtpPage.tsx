@@ -16,7 +16,7 @@ export const OtpPage = () => {
 
     const { user, error, status }: any = useSelector((state: any) => state.otp);
 
-    const [otpArray, setOtpArray] = useState(Array(6).fill(''));
+    const [otpArray, setOtpArray] = useState(Array(4).fill(''));
     const [phoneNumber, setPhoneNumber] = useState('');
     const [canResend, setCanResend] = useState(false);
     const [resendTimer, setResendTimer] = useState(30);
@@ -47,7 +47,9 @@ export const OtpPage = () => {
     }, [resendTimer]);
 
     useEffect(() => {
-        if (status === 'complete' && user?.result?.accessToken) {
+        
+        console.log('[DEBUG] phoneNumber', user?.message);
+        if (status === 'complete' && user?.message?.token) {
             // Prepare user data for login
             const userData = {
                 id: user.result.id || '',
@@ -57,16 +59,17 @@ export const OtpPage = () => {
                 role: user.result.userRoles?.join(',') || '',
                 avatar: user.result.avatar || ''
             };
-            login(userData, user.result.accessToken);
-            setToLocalStorage('userInfo', user.result);
-            setToLocalStorage('auth_token', user.result.accessToken);
+            login(userData, user.result.token);
+            setToLocalStorage('userInfo', user?.message);
+            setToLocalStorage('auth_token', user?.message?.token);
             dispatch(resetVerifyOTP());
 
             // Delay navigation to ensure context update propagates
             setTimeout(() => {
-                const roles: string[] = user?.result?.userRoles || [];
-                if (roles.includes('SuperAdmin')) {
-                    navigate('/users');
+                const roles: string[] = user?.result?.role || [];
+                console.log('[DEBUG] roles', roles, roles.includes('Admin'));
+                if (roles.includes('Admin')) {
+                    navigate('/dashboard');
                 }
                 showMessage('Login successful');
             }, 0);
@@ -85,8 +88,8 @@ export const OtpPage = () => {
         if (index !== 0) return;
         e.preventDefault();
         const pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
-        if (pastedData.length === 6) {
-            const newOtpArray = pastedData.split('').slice(0, 6);
+        if (pastedData.length === 4) {
+            const newOtpArray = pastedData.split('').slice(0, 4);
             setOtpArray(newOtpArray);
             inputRefs.current[5]?.focus();
         }
@@ -95,10 +98,10 @@ export const OtpPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const otp = otpArray.join('');
-        if (otp.length === 6) {
-            dispatch(verifyOTP({ otp, phoneNumber, countryCode: '+91' }));
+        if (otp.length === 4) {
+            dispatch(verifyOTP({otpcode: otp, phone: phoneNumber, countryCode: '+91' }));
         } else {
-            showMessage('Please enter a 6-digit OTP.', 'error');
+            showMessage('Please enter a 4-digit OTP.', 'error');
         }
     };
 
@@ -118,12 +121,12 @@ export const OtpPage = () => {
                 <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                     <div className="flex justify-center gap-3">
                         <InputOTP
-                            maxLength={6}
+                            maxLength={4}
                             value={otpArray.join('')}
                             onChange={(value) => {
                                 const newOtpArray = value.split('');
-                                while (newOtpArray.length < 6) newOtpArray.push('');
-                                setOtpArray(newOtpArray.slice(0, 6));
+                                while (newOtpArray.length < 4) newOtpArray.push('');
+                                setOtpArray(newOtpArray.slice(0, 4));
                             }}
                         >
                             <div
@@ -146,7 +149,7 @@ export const OtpPage = () => {
                     </div>
                     <Button
                         type="submit"
-                        disabled={status === 'loading' || otpArray.join('').length !== 6}
+                        disabled={status === 'loading' || otpArray.join('').length !== 4}
                         className="w-full h-12 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium flex items-center justify-center gap-2"
                     >
                         {status === 'loading' ? (
