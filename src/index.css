@@ -2,16 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-Primary colors: primary-white (#FDFFFC), primary-gray (#E9ECEF), primary-black (#001219)
-*/
+@import "tailwindcss";
+
+
 
 @layer base {
   :root {
     /* Primary Colors */
     --primary-white: #FDFFFC;
-    --primary-gray: #E9ECEF;
-    --primary-black: #001219;
+    --primary-gray:#dfdfdf;
+    --primary-black: #1B1B1B;
+    --primary-background-color:#fbfbfb;
   }
 }
 
@@ -23,9 +24,31 @@ Primary colors: primary-white (#FDFFFC), primary-gray (#E9ECEF), primary-black (
   overflow: hidden;
 }
 
+/* Hide scrollbar utility */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+
+
 @layer base {
   * {
     border-color: var(--primary-gray);
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
   }
 
   body {

@@ -1,19 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
-  AppShell,
-  Text,
-  Group,
-  Avatar,
-  Menu,
-  UnstyledButton,
-  Box,
-  Burger,
-  rem,
-  Divider,
-  Modal,
-} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import {
   IconUsers,
   IconMapPin,
   IconChartBar,
@@ -24,14 +10,20 @@ import {
   IconSpeakerphone,
   IconCalendar,
   IconMessageCircle2,
-  IconTrendingUp
+  IconTrendingUp,
+  IconHome,
+  IconChevronLeft,
+  IconChevronRight,
+  IconMenu2,
+  IconX
 } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
-import { User, Users2 } from 'lucide-react';
+import { Users2 } from 'lucide-react';
 import { useState, useEffect, useRef, useMemo } from 'react';
 
 // Navigation array
 const navigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: IconHome },
   { name: 'People', href: '/users', icon: IconUsers },
   {
     name: 'Territory',
@@ -95,29 +87,29 @@ const navigation = [
 // Mapping of roles allowed tabs
 const roleToTabs: Record<string, string[]> = {
   SuperAdmin: navigation.map((item) => item.name), // all
-  LandManager: ['Desk', 'Territory'],
-  LandExecutive: ['Desk', 'Territory'],
-  FundManager: ['Desk'],
-  FundExecutive: ['Desk'],
-  ProjectSalesManager: ['Desk'],
-  ProjectPreSales: ['Desk'],
-  ProjectSiteSales: ['Desk'],
-  EventAdmin: ['Event'],
-  KnowledgeAdmin: ['Knowledge'],
-  CPManager: ['Desk', 'Channel Sales'],
-  CPExecutive: ['Desk', 'Channel Sales'],
-  CampaignAdmin: ['Campaign'],
-  VendorAdmin: ['Territory'],
-  HRManager: ['Employee'],
-  HRExecutive: ['Employee'],
-  CSWebsiteAdmin: ['Desk'],
-  FurnitureManager: ['Desk', 'Territory'],
-  FurnitureSalesExecutive: ['Desk', 'Territory'],
-  FurnitureB2BAdmin: ['Desk', 'Territory'],
-  FurnitureDealerAdmin: ['Desk', 'Territory'],
-  GrowthPartnerAdmin: ['Growth Partner'],
-  InstituteManager: ['Desk'],
-  InstituteExecutive: ['Desk']
+  LandManager: ['Dashboard', 'Desk', 'Territory'],
+  LandExecutive: ['Dashboard', 'Desk', 'Territory'],
+  FundManager: ['Dashboard', 'Desk'],
+  FundExecutive: ['Dashboard', 'Desk'],
+  ProjectSalesManager: ['Dashboard', 'Desk'],
+  ProjectPreSales: ['Dashboard', 'Desk'],
+  ProjectSiteSales: ['Dashboard', 'Desk'],
+  EventAdmin: ['Dashboard', 'Event'],
+  KnowledgeAdmin: ['Dashboard', 'Knowledge'],
+  CPManager: ['Dashboard', 'Desk', 'Channel Sales'],
+  CPExecutive: ['Dashboard', 'Desk', 'Channel Sales'],
+  CampaignAdmin: ['Dashboard', 'Campaign'],
+  VendorAdmin: ['Dashboard', 'Territory'],
+  HRManager: ['Dashboard', 'Employee'],
+  HRExecutive: ['Dashboard', 'Employee'],
+  CSWebsiteAdmin: ['Dashboard', 'Desk'],
+  FurnitureManager: ['Dashboard', 'Desk', 'Territory'],
+  FurnitureSalesExecutive: ['Dashboard', 'Desk', 'Territory'],
+  FurnitureB2BAdmin: ['Dashboard', 'Desk', 'Territory'],
+  FurnitureDealerAdmin: ['Dashboard', 'Desk', 'Territory'],
+  GrowthPartnerAdmin: ['Dashboard', 'Growth Partner'],
+  InstituteManager: ['Dashboard', 'Desk'],
+  InstituteExecutive: ['Dashboard', 'Desk']
 };
 
 // Filter navigation based on user roles
@@ -146,8 +138,8 @@ const getFilteredNavigation = (roles: string[] = []) => {
 
   return navigation
     ?.filter((item) => {
-      // Allow Feedback section for all roles
-      if (item.name === 'Feedback') return true;
+      // Allow Dashboard and Feedback sections for all roles
+      if (item.name === 'Dashboard' || item.name === 'Feedback') return true;
       return allowed?.has(item.name);
     })
     ?.map((item) => {
@@ -193,13 +185,13 @@ const getFilteredNavigation = (roles: string[] = []) => {
 };
 
 export const DashboardLayout = () => {
-  const [opened, { toggle, close }] = useDisclosure();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout }: any = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [activePath, setActivePath] = useState(() => {
     const storedPath = localStorage.getItem('lastActivePath');
-    return storedPath || '/users'; // Default to '/users' if no stored path
+    return storedPath || '/dashboard'; // Default to '/dashboard' if no stored path
   });
   const [tabOpenStates, setTabOpenStates] = useState<{ [key: string]: boolean }>(() => {
     try {
@@ -209,7 +201,18 @@ export const DashboardLayout = () => {
     }
   });
   const [logoutModal, setLogoutModal] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('sidebarCollapsed') || 'false');
+    } catch {
+      return false;
+    }
+  });
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [sidebarHovered, setSidebarHovered] = useState(false);
   const isInitialMount = useRef(true);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Retrieve user roles from localStorage, fallback to user?.role
   const userInfo = useMemo(() => {
@@ -268,7 +271,7 @@ export const DashboardLayout = () => {
         navigate(storedPath, { replace: true });
       } else if (!isValidPath || !storedPath) {
         // If stored path is invalid or doesn't exist, navigate to default
-        const defaultPath = '/users';
+        const defaultPath = '/dashboard';
         localStorage.setItem('lastActivePath', defaultPath);
         if (currentPath !== defaultPath) {
           navigate(defaultPath, { replace: true });
@@ -314,8 +317,45 @@ export const DashboardLayout = () => {
     navigate('/login');
   };
 
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [userMenuOpen]);
+
+  // Reset hover state when window is resized to mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarHovered(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleTabClick = (item: typeof navigation[0]) => {
+    // If sidebar is collapsed and user clicks, expand it permanently
+    if (sidebarCollapsed) {
+      setSidebarCollapsed(false);
+      localStorage.setItem('sidebarCollapsed', 'false');
+      setSidebarHovered(false);
+    }
+
     if (item.subItems) {
+      // Normal behavior when sidebar is expanded
       setTabOpenStates((prev) => {
         const isCurrentlyOpen = !!prev[item.href];
         const newState = { ...prev, [item.href]: !isCurrentlyOpen };
@@ -336,11 +376,18 @@ export const DashboardLayout = () => {
       navigate(item.href);
       setActivePath(item.href);
       localStorage.setItem('lastActivePath', item.href);
-      close();
+      setMobileMenuOpen(false);
     }
   };
 
   const handleSubItemClick = (href: string) => {
+    // If sidebar is collapsed and user clicks, expand it permanently
+    if (sidebarCollapsed) {
+      setSidebarCollapsed(false);
+      localStorage.setItem('sidebarCollapsed', 'false');
+      setSidebarHovered(false);
+    }
+
     navigate(href);
     setActivePath(href);
     localStorage.setItem('lastActivePath', href);
@@ -355,7 +402,22 @@ export const DashboardLayout = () => {
         return newState;
       });
     }
-    close();
+    setMobileMenuOpen(false);
+  };
+
+  const toggleSidebar = () => {
+    const newState = !sidebarCollapsed;
+    setSidebarCollapsed(newState);
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
+    // Close all submenus when collapsing
+    if (newState) {
+      const closedStates = Object.keys(tabOpenStates).reduce((acc, key) => {
+        acc[key] = false;
+        return acc;
+      }, {} as { [key: string]: boolean });
+      setTabOpenStates(closedStates);
+      localStorage.setItem('tabOpenStates', JSON.stringify(closedStates));
+    }
   };
 
   const NavItem = ({ item }: { item: typeof navigation[0] }) => {
@@ -363,110 +425,64 @@ export const DashboardLayout = () => {
     const isActive =
       activePath === item.href ||
       (hasSubItems && (item.subItems?.some((sub) => activePath === sub.href) || tabOpenStates[item.href]));
+    
+    // Show expanded content when sidebar is not collapsed OR when hovered
+    const shouldShowText = !sidebarCollapsed || sidebarHovered;
 
     return (
       <li
-        style={{
-          display: 'block',
-          width: '100%',
-          padding: rem(12),
-          borderRadius: rem(8),
-          textDecoration: 'none',
-          color: isActive ? '#ffffff' : '#9ca3af',
-          backgroundColor: isActive ? '#2a4365' : 'transparent',
-          fontWeight: isActive ? 600 : 500,
-          fontSize: rem(14),
-          transition: 'all 0.3s ease-in-out',
-          listStyle: 'none',
-          position: 'relative',
-          boxShadow: hasSubItems && tabOpenStates[item.href] ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none',
-          borderLeft: isActive ? '4px solid #60a5fa' : 'none',
-          marginBottom: hasSubItems ? rem(4) : 0,
-          minHeight: hasSubItems ? rem(48) : 'auto',
-          cursor: 'pointer',
-        }}
-        onMouseEnter={(e) => {
-          if (!isActive && !hasSubItems) {
-            (e.target as HTMLElement).style.backgroundColor = 'transparent';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!isActive && !hasSubItems) {
-            (e.target as HTMLElement).style.backgroundColor = 'transparent';
-          }
-        }}
+        className={`
+          block w-full p-3 rounded-xl
+          mb-1
+          text-primary-black
+          ${isActive ? 'bg-primary-gray/80 font-semibold' : 'bg-transparent font-medium hover:bg-primary-gray/30'}
+          text-sm transition-all duration-300 ease-in-out
+          list-none relative
+          ${hasSubItems ? 'mb-1 min-h-[48px]' : 'mb-0'}
+          cursor-pointer
+        `}
         onClick={() => handleTabClick(item)}
+        title={!shouldShowText ? item.name : undefined}
       >
-        <Group gap="sm" style={{ position: 'relative', zIndex: 1 }}>
+        <div className={`flex items-center gap-3 relative z-10 ${shouldShowText ? 'justify-start' : 'justify-center'}`}>
           <item.icon size={20} />
-          <Text size="sm">{item.name}</Text>
-          {hasSubItems && (
-            <Box
-              style={{
-                transition: 'transform 0.3s ease',
-                transform: tabOpenStates[item.href] ? 'rotate(180deg)' : 'rotate(0deg)',
-                marginLeft: 'auto',
-              }}
-            >
-              <IconCaretDown size={16} />
-            </Box>
+          {shouldShowText && (
+            <>
+              <span className={`text-sm ${isActive ? 'font-medium' : 'font-normal'}`}>{item.name}</span>
+              {hasSubItems && (
+                <div
+                  className={`ml-auto transition-transform duration-300 ${
+                    tabOpenStates[item.href] ? 'rotate-180' : 'rotate-0'
+                  }`}
+                >
+                  <IconCaretDown size={16} />
+                </div>
+              )}
+            </>
           )}
-        </Group>
-        {hasSubItems && tabOpenStates[item.href] && (
-          <ul
-            style={{
-              marginTop: 20,
-              padding: 'rem(12) 0 0 rem(28)',
-              margin: 'rem(8) 0 0 0',
-              listStyle: 'none',
-              background: 'linear-gradient(135deg, #2a4365, #3b82f6)',
-              borderRadius: rem(6),
-              overflow: 'hidden',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-              animation: 'slideDown 0.3s ease-out',
-            }}
-            onAnimationEnd={(e) => (e.target as HTMLElement).style.animation = 'none'}
-          >
+        </div>
+        {hasSubItems && tabOpenStates[item.href] && shouldShowText && (
+          <ul className="mt-2 pt-3 pl-7 list-none animate-slideDown">
             {item.subItems.map((subItem) => (
               <li
                 key={subItem.name}
-                style={{
-                  padding: rem(10),
-                  color: activePath === subItem.href ? '#ffffff' : '#e0e7ff',
-                  backgroundColor: activePath === subItem.href ? '#1e40af' : 'transparent',
-                  fontSize: rem(13),
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  borderRadius: rem(4),
-                  marginBottom: rem(8),
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
+                className={`
+                  p-2.5 text-[var(--primary-black)]
+                  text-xs
+                  ${activePath === subItem.href ? 'font-medium' : 'font-normal'}
+                  cursor-pointer transition-all duration-300 rounded
+                  mb-2 flex items-center
+                  `}
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent parent click
+                  e.stopPropagation();
                   handleSubItemClick(subItem.href);
                 }}
-                onMouseEnter={(e) => {
-                  if (activePath !== subItem.href) {
-                    (e.target as HTMLElement).style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                    (e.target as HTMLElement).style.color = '#ffffff';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activePath !== subItem.href) {
-                    (e.target as HTMLElement).style.backgroundColor = 'transparent';
-                    (e.target as HTMLElement).style.color = '#e0e7ff';
-                  }
-                }}
               >
-                <Box
-                  style={{
-                    width: rem(4),
-                    height: rem(4),
-                    backgroundColor: activePath === subItem.href ? '#60a5fa' : 'transparent',
-                    borderRadius: '50%',
-                    marginRight: rem(10),
-                  }}
+                <div
+                  className={`
+                    w-1 h-1 rounded-full mr-2.5
+                    ${activePath === subItem.href ? 'bg-[var(--primary-black)]' : 'bg-transparent'}
+                  `}
                 />
                 {subItem.name}
               </li>
@@ -478,36 +494,22 @@ export const DashboardLayout = () => {
   };
 
   return (
-    <AppShell
-      header={{ height: { base: 60, sm: 70 } }}
-      navbar={{
-        width: { base: 280, sm: 300 },
-        breakpoint: 'sm',
-        collapsed: { mobile: !opened },
-      }}
-      padding={{ base: 'sm', sm: 'md', lg: 'lg' }}
-      styles={(theme) => ({
-        main: {
-          backgroundColor: '#f9fafb',
-          minHeight: 'calc(100vh - 70px)',
-          '@keyframes slideDown': {
-            '0%': { maxHeight: 0, opacity: 0 },
-            '100%': { maxHeight: '200px', opacity: 1 },
-          },
-        },
-      })}
-    >
-      <Modal
-        opened={logoutModal}
-        onClose={() => setLogoutModal(false)}
-        title={<h2 className="text-lg font-semibold text-gray-800">Confirm Logout</h2>}
-        centered
-      >
-        <div className="space-y-6">
-          <p className="text-gray-700 text-sm">
+    <div className="flex h-screen overflow-hidden bg-[#f9fafb]">
+      {/* Logout Modal */}
+      {logoutModal && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
+            onClick={() => setLogoutModal(false)}
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg w-full max-w-md mx-4 p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Confirm Logout</h2>
+              <p className="text-gray-700 text-sm mb-6">
             Are you sure you want to log out?
           </p>
-
           <div className="flex justify-end gap-3">
             <button
               type="button"
@@ -525,135 +527,156 @@ export const DashboardLayout = () => {
             </button>
           </div>
         </div>
-      </Modal>
+          </div>
+        </>
+      )}
 
-      <AppShell.Header
-        style={{
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #e5e7eb',
+      {/* Mobile Sidebar Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        ref={sidebarRef}
+        className={`
+          fixed lg:static
+          inset-y-0 left-0 z-40
+          transition-all duration-300 ease-in-out
+          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${sidebarCollapsed && !sidebarHovered ? 'w-20' : 'w-[280px] lg:w-[300px]'}
+          flex flex-col
+          border-r border-gray-200
+        `}
+        onMouseEnter={() => {
+          // Only enable hover expand on desktop (lg breakpoint and above)
+          if (window.innerWidth >= 1024 && sidebarCollapsed) {
+            setSidebarHovered(true);
+          }
+        }}
+        onMouseLeave={() => {
+          // Only reset hover state on desktop
+          if (window.innerWidth >= 1024) {
+            setSidebarHovered(false);
+          }
         }}
       >
-        <Group h="100%" px={{ base: 'md', sm: 'xl' }} justify="space-between">
-          <Group>
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" color="#6c757d" />
-            <Text
-              size="xl"
-              fw={700}
-              c="#111827"
-              hiddenFrom="base"
-              visibleFrom="xs"
-            >
-              Welcome back, {userInfo.firstName || 'User'} {userInfo.lastName || ''}
-            </Text>
-          </Group>
+        {/* Logo Section */}
+        <div className="p-4">
+          <div className={`flex items-center ${sidebarCollapsed && !sidebarHovered ? 'justify-center' : 'justify-start'} gap-3 mb-8 px-1`}>
+            <div className="w-10 h-10 bg-[var(--primary-background-color)] rounded-lg flex items-center justify-center">
+              <span className="text-lg font-bold text-[var(--primary-black)]">R</span>
+            </div>
+            {(!sidebarCollapsed || sidebarHovered) && (
+              <span className="text-lg font-bold text-[var(--primary-black)]">R-OS</span>
+            )}
+          </div>
+        </div>
 
-          <Group gap="md">
-            <Menu shadow="md" width={200}>
-              <Menu.Target>
-                <UnstyledButton>
-                  <Group gap="sm">
-                    <Avatar
-                      size={36}
-                      radius="xl"
-                      src={user?.avatar}
-                      style={{ backgroundColor: '#e5e7eb' }}
-                    />
-                    <Box visibleFrom="sm">
-                      <Text size="sm" fw={500} c="#111827">
-                        {userInfo.firstName || 'User'} {userInfo.lastName || ''}
-                      </Text>
-                      <Text size="xs" c="#6b7280">
-                        {effectiveRoles.join(', ') || 'No Role'}
-                      </Text>
-                    </Box>
-                  </Group>
-                </UnstyledButton>
-              </Menu.Target>
-
-              <Menu.Dropdown>
-                <Menu.Item
-                  leftSection={<IconLogout size={14} />}
-                  color="red"
-                  onClick={() => setLogoutModal(true)}
-                >
-                  Logout
-                </Menu.Item>
-              </Menu.Dropdown>
-            </Menu>
-          </Group>
-        </Group>
-      </AppShell.Header>
-
-      <AppShell.Navbar
-        p="md"
-        style={{
-          backgroundColor: '#1f2937',
-          border: 'none',
-        }}
-      >
-        <AppShell.Section>
-          <Group mb="xl" px="xs">
-            <Box
-              style={{
-                width: rem(40),
-                height: rem(40),
-                backgroundColor: '#ffffff',
-                borderRadius: rem(8),
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text size="lg" fw={700} c="#1f2937">
-                R
-              </Text>
-            </Box>
-            <Text size="lg" fw={700} c="#ffffff">
-              R-OS
-            </Text>
-          </Group>
-        </AppShell.Section>
-
-        <AppShell.Section grow>
-          <div
-            style={{
-              maxHeight: 'calc(100vh - 250px)',
-              overflowY: 'auto',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
-          >
-            <style>
-              {`
-                div::-webkit-scrollbar {
-                  display: none;
-                }
-              `}
-            </style>
-            <ul style={{ padding: 0, margin: 0 }}>
+        {/* Navigation Section */}
+        <div className="flex-1 overflow-y-auto scrollbar-hide px-2">
+          <ul className="p-0 m-0">
               {filteredNavigation.map((item) => (
                 <NavItem key={item.name} item={item} />
               ))}
             </ul>
           </div>
-        </AppShell.Section>
 
-        <AppShell.Section>
-          <Divider my="md" color="#374151" />
-          <Box px="xs">
-            <Text size="xs" c="#6b7280" mb={4}>
-              Version
-            </Text>
-            <Text size="sm" fw={500} c="#9ca3af">
-              v1.0.0
-            </Text>
-          </Box>
-        </AppShell.Section>
-      </AppShell.Navbar>
+        {/* Version Section */}
+        <div className="p-4 border-t border-gray-200/10">
+          {(!sidebarCollapsed || sidebarHovered) && (
+            <div className="px-1">
+              <p className="text-xs text-[var(--primary-black)] mb-1">Version</p>
+              <p className="text-sm font-medium text-[var(--primary-black)]">v1.0.0</p>
+            </div>
+          )}
+        </div>
+      </aside>
 
-      <AppShell.Main>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="h-[60px] sm:h-[70px] bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <IconX size={20} className="text-gray-600" /> : <IconMenu2 size={20} className="text-gray-600" />}
+            </button>
+
+            {/* Desktop Sidebar Toggle */}
+            <button
+              onClick={toggleSidebar}
+              className="hidden lg:flex items-center justify-center p-2 rounded hover:bg-gray-100 transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              {sidebarCollapsed ? (
+                <IconChevronRight size={20} className="text-gray-600" />
+              ) : (
+                <IconChevronLeft size={20} className="text-gray-600" />
+              )}
+            </button>
+
+            {/* Welcome Text */}
+            <h1 className="text-xl font-bold text-gray-900 hidden sm:block">
+              Welcome back, {userInfo.firstName || 'User'} {userInfo.lastName || ''}
+            </h1>
+          </div>
+
+          {/* User Menu */}
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-2 sm:gap-3 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-sm font-medium text-gray-600">
+                    {(userInfo.firstName?.[0] || 'U').toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="hidden sm:block text-left">
+                <p className="text-sm font-medium text-gray-900">
+                  {userInfo.firstName || 'User'} {userInfo.lastName || ''}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {effectiveRoles.join(', ') || 'No Role'}
+                </p>
+              </div>
+            </button>
+
+            {/* User Dropdown Menu */}
+            {userMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                <button
+                  onClick={() => {
+                    setLogoutModal(true);
+                    setUserMenuOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                >
+                  <IconLogout size={14} />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-[#f9fafb] min-h-0">
         <Outlet />
-      </AppShell.Main>
-    </AppShell>
+        </main>
+      </div>
+    </div>
   );
 };
