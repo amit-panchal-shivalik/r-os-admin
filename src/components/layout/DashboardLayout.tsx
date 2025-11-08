@@ -28,7 +28,7 @@ import {
 } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { User, Users2 } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 // Navigation array
 const navigation = [
@@ -211,38 +211,74 @@ export const DashboardLayout = () => {
   const [logoutModal, setLogoutModal] = useState(false);
   const isInitialMount = useRef(true);
 
-  let userInfo;
   // Retrieve user roles from localStorage, fallback to user?.role
-  let userRoles: string[] = [];
-  try {
-    userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-    userRoles = Array.isArray(userInfo.userRoles) ? userInfo.userRoles : [];
-  } catch (error) {
-    console.error('Error parsing userInfo from localStorage:', error);
-  }
-  const effectiveRoles = userRoles.length > 0 ? userRoles : (user?.role ? [user?.role] : []);
+  const userInfo = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('userInfo') || '{}');
+    } catch (error) {
+      console.error('Error parsing userInfo from localStorage:', error);
+      return {};
+    }
+  }, []);
+
+  const userRoles = useMemo(() => {
+    return Array.isArray(userInfo.userRoles) ? userInfo.userRoles : [];
+  }, [userInfo.userRoles]);
+
+  const effectiveRoles = useMemo(() => {
+    return userRoles.length > 0 ? userRoles : (user?.role ? [user?.role] : []);
+  }, [userRoles, user?.role]);
 
   // Apply filtered navigation based on roles
-  const filteredNavigation = getFilteredNavigation(effectiveRoles);
+  const filteredNavigation = useMemo(() => {
+    return getFilteredNavigation(effectiveRoles);
+  }, [effectiveRoles]);
 
+  // Handle initial navigation - only run once on mount
   useEffect(() => {
-    if (isInitialMount.current) {
+    if (!isInitialMount.current) return;
+    
+    // Defer navigation to next tick to avoid updating router during render
+    const timeoutId = setTimeout(() => {
+      if (!isInitialMount.current) return;
+      
+      isInitialMount.current = false;
       const storedPath = localStorage.getItem('lastActivePath');
-      const isValidPath = filteredNavigation.some(
+      const currentPath = location.pathname;
+      
+      // Only navigate if we're not already on a valid path
+      const isCurrentPathValid = filteredNavigation.some(
+        (item) =>
+          item.href === currentPath ||
+          (item.subItems && item.subItems.some((sub) => sub.href === currentPath))
+      );
+      
+      if (isCurrentPathValid && currentPath !== '/') {
+        // Already on a valid path, no need to navigate
+        return;
+      }
+      
+      const isValidPath = storedPath && filteredNavigation.some(
         (item) =>
           item.href === storedPath ||
           (item.subItems && item.subItems.some((sub) => sub.href === storedPath))
       );
-      if (storedPath && isValidPath && storedPath !== location.pathname) {
+      
+      if (storedPath && isValidPath && storedPath !== currentPath) {
         navigate(storedPath, { replace: true });
-      } else if (!isValidPath && storedPath) {
-        // If stored path is invalid, clear it and navigate to default
-        localStorage.setItem('lastActivePath', '/users');
-        navigate('/users', { replace: true });
+      } else if (!isValidPath || !storedPath) {
+        // If stored path is invalid or doesn't exist, navigate to default
+        const defaultPath = '/users';
+        localStorage.setItem('lastActivePath', defaultPath);
+        if (currentPath !== defaultPath) {
+          navigate(defaultPath, { replace: true });
+        }
       }
-      isInitialMount.current = false;
-    }
-  }, [navigate, filteredNavigation]);
+    }, 0);
+    
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   useEffect(() => {
     if (activePath !== location.pathname) {

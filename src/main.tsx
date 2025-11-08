@@ -12,37 +12,10 @@ import '@mantine/dates/styles.css';
 import '@mantine/charts/styles.css';
 
 const theme = createTheme({
-  primaryColor: 'gray',
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  fontFamily: 'Bricolage Grotesque, sans-serif',
   headings: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+    fontFamily: 'Bricolage Grotesque, sans-serif',
     fontWeight: '700',
-  },
-  colors: {
-    gray: [
-      '#f8f9fa',
-      '#e9ecef',
-      '#dee2e6',
-      '#ced4da',
-      '#adb5bd',
-      '#6c757d',
-      '#495057',
-      '#343a40',
-      '#212529',
-      '#000000'
-    ],
-    dark: [
-      '#f8f9fa',
-      '#e9ecef',
-      '#dee2e6',
-      '#ced4da',
-      '#adb5bd',
-      '#6c757d',
-      '#495057',
-      '#343a40',
-      '#212529',
-      '#000000'
-    ],
   },
   components: {
     Paper: {
@@ -50,8 +23,8 @@ const theme = createTheme({
         shadow: 'none',
         radius: '12',
         style: {
-          border: '1px solid #e5e7eb',
-          backgroundColor: '#ffffff',
+          border: '1px solid #E9ECEF',
+          backgroundColor: '#FDFFFC',
         }
       },
     },
@@ -60,7 +33,8 @@ const theme = createTheme({
         shadow: 'none',
         radius: '12',
         style: {
-          border: '1px solid #e5e7eb',
+          border: '1px solid #E9ECEF',
+          backgroundColor: '#FDFFFC',
         }
       },
     },
