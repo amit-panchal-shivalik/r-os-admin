@@ -28,6 +28,12 @@ const MODULE_SYNONYMS: Record<string, string> = {
   contractordirectory: 'ContractorDirectory',
   sitedirectory: 'SiteDirectory',
   firstaidtreatmentregister: 'FirstAidTreatmentRegister',
+  equipmenttestingmonitoring: 'EquipmentMonitoring',
+  equipmentmonitoring: 'EquipmentMonitoring',
+  excavatorchecklist: 'ExcavatorChecklist',
+  jcbchecklist: 'JcbChecklist',
+  weldingmachinechecklist: 'WeldingChecklist',
+  weldingchecklist: 'WeldingChecklist',
 };
 
 const normaliseAction = (action: string): PermissionAction => {

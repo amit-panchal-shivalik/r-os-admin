@@ -6,7 +6,6 @@ import {
   Card,
   Group,
   Modal,
-  NumberInput,
   ScrollArea,
   Select,
   SimpleGrid,
@@ -15,15 +14,18 @@ import {
   Text,
   TextInput,
   Textarea,
+  ActionIcon,
+  Loader,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconPlus, IconUserCheck } from '@tabler/icons-react';
+import { IconPlus, IconPrinter, IconUserCheck, IconEye, IconPencil } from '@tabler/icons-react';
 import { showMessage } from '@/utils/Constant';
 import EhsPageLayout from '@/components/ehs/EhsPageLayout';
 import { useSites } from '@/hooks/useSites';
 import { useContractors } from '@/hooks/useContractors';
-import { fetchWorkerProfile } from '@/apis/ehs';
+import { fetchWorkerProfile, ToolBoxTalkPayload } from '@/apis/ehs';
 import SignaturePadField from '@/components/ehs/SignaturePadField';
+import { useToolBoxTalks } from '@/hooks/useToolBoxTalks';
 
 type ToolBoxTalkAttendee = {
   govIdType?: string;
@@ -60,17 +62,6 @@ type ToolBoxTalkFormValues = {
   attendees: ToolBoxTalkAttendee[];
 };
 
-type ToolBoxTalkRecord = {
-  id: string;
-  projectName: string;
-  projectLocation: string;
-  contractorName: string;
-  discussionPoint: string;
-  talkDate: string;
-  talkTime?: string;
-  attendees: ToolBoxTalkAttendee[];
-};
-
 const defaultAttendee = (index: number): ToolBoxTalkAttendee => ({
   govIdType: 'AADHAR',
   govIdNumber: '',
@@ -89,11 +80,14 @@ const formatDate = (value?: string | Date | null) => {
 };
 
 const ToolBoxTalkPage = () => {
-  const [records, setRecords] = useState<ToolBoxTalkRecord[]>([]);
   const [contractorModalOpened, setContractorModalOpened] = useState(false);
   const { sites, loading: sitesLoading } = useSites();
   const { contractors, loading: contractorsLoading, createNewContractor } = useContractors();
   const [modalOpened, setModalOpened] = useState(false);
+  const { records, loading, fetchTalks, createTalk, updateTalk } = useToolBoxTalks({ limit: 50 });
+  const [viewModalOpened, setViewModalOpened] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
+  const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
 
   const defaultValues: ToolBoxTalkFormValues = {
     formNo: 'EHS-F-03',
@@ -234,34 +228,189 @@ const ToolBoxTalkPage = () => {
   const openForm = useCallback(() => {
     reset({ ...defaultValues });
     setModalOpened(true);
+    setEditingRecordId(null);
   }, [reset]);
 
   const closeForm = useCallback(() => {
     setModalOpened(false);
+    setEditingRecordId(null);
+  }, []);
+
+  const handlePrintRecord = useCallback((record: any) => {
+    const MAX_ROWS = 20;
+    const attendees = record.attendees || [];
+
+    const filledRows = Array.from({ length: MAX_ROWS }, (_, index) => {
+      const attendee = attendees[index];
+      if (!attendee) {
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        `;
+      }
+
+      return `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${attendee.name || ''}</td>
+          <td>${attendee.designation || ''}</td>
+          <td>${attendee.subContractorName || ''}</td>
+          <td style="text-align:center;">
+            ${attendee.signature ? `<img src="${attendee.signature}" alt="Signature" style="height:48px;" />` : ''}
+          </td>
+          <td>${attendee.remarks || ''}</td>
+        </tr>
+      `;
+    }).join('');
+
+    const html = `
+      <html>
+        <head>
+          <title>Daily Tool Box Talk Meeting Attendance Record</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; }
+            h1 { font-size: 20px; margin: 0; text-align: center; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 6px; font-size: 12px; }
+            th { background: #f2f2f2; }
+            .header-table td { border: 1px solid #000; padding: 6px; font-size: 12px; }
+            .header-table { margin-top: 12px; margin-bottom: 12px; }
+            .meta-table td { border: 1px solid #000; padding: 6px; font-size: 12px; }
+            .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+            .footer { margin-top: 24px; font-size: 12px; display: flex; justify-content: space-between; }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td colspan="4" style="text-align:center;"><h1>Daily TOOL BOX TALK Meeting Attendance Record</h1></td>
+              <td>Format No: <strong>EHS-F-03</strong></td>
+              <td>Rev. No: <strong>00</strong></td>
+            </tr>
+          </table>
+          <table class="meta-table">
+            <tr>
+              <td colspan="4"><strong>Name of project:</strong> ${record.site?.name || record.projectName || ''}</td>
+              <td><strong>Date:</strong> ${formatDate(record.talkDate)}</td>
+              <td><strong>Time:</strong> ${record.talkTime || ''}</td>
+            </tr>
+            <tr>
+              <td colspan="6"><strong>Project Location:</strong> ${record.site?.location || record.projectLocation || ''}</td>
+            </tr>
+            <tr>
+              <td colspan="6"><strong>Name of Contractor:</strong> ${record.contractor?.name || record.contractorName || ''}</td>
+            </tr>
+            <tr>
+              <td colspan="6"><strong>Point Discussed in Tool Box Talk:</strong> ${record.discussionPoint || ''}</td>
+            </tr>
+          </table>
+          <table>
+            <thead>
+              <tr>
+                <th>Sr. no</th>
+                <th>Name of Person</th>
+                <th>Designation</th>
+                <th>Sub Contractor name</th>
+                <th style="width:120px;">Signature</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filledRows}
+            </tbody>
+          </table>
+          <div class="footer">
+            <div>Conducted by: ${record.conductedBy || '_________________'}</div>
+            <div>Conducted Signature: ___________________</div>
+          </div>
+          <div class="footer">
+            <div>Project In Charge: ${record.projectInCharge || '_________________'}</div>
+            <div></div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.print();
+      printWindow.close();
+    }
+  }, [records]);
+
+  const handleEditRecord = useCallback(
+    (record: any) => {
+      setEditingRecordId(record._id);
+      reset({
+        formNo: record.formNo || 'EHS-F-03',
+        revisionNo: record.revisionNo || '00',
+        projectName: record.site?.name || record.projectName || '',
+        projectLocation: record.site?.location || record.projectLocation || '',
+        contractorName: record.contractor?.name || record.contractorName || '',
+        contractorId: record.contractor?.id,
+        siteId: record.site?.id,
+        discussionPoint: record.discussionPoint || '',
+        talkDate: record.talkDate ? new Date(record.talkDate) : new Date(),
+        talkTime: record.talkTime || '',
+        conductedBy: record.conductedBy || '',
+        projectInCharge: record.projectInCharge || '',
+        attendees:
+          record.attendees && record.attendees.length > 0
+            ? record.attendees
+            : [defaultAttendee(0)],
+      });
+      setModalOpened(true);
+    },
+    [reset]
+  );
+
+  const handleViewRecord = useCallback((record: any) => {
+    setSelectedRecord(record);
+    setViewModalOpened(true);
   }, []);
 
   const onSubmit = useCallback(
-    (values: ToolBoxTalkFormValues) => {
-      const talkDateValue =
-        values.talkDate instanceof Date ? values.talkDate.toISOString() : new Date().toISOString();
+    async (values: ToolBoxTalkFormValues) => {
+      try {
+        const payload: ToolBoxTalkPayload = {
+          formNo: values.formNo,
+          revisionNo: values.revisionNo,
+          siteId: values.siteId,
+          contractorId: values.contractorId,
+          discussionPoint: values.discussionPoint,
+          talkDate:
+            values.talkDate instanceof Date ? values.talkDate.toISOString() : new Date(values.talkDate ?? new Date()).toISOString(),
+          talkTime: values.talkTime,
+          conductedBy: values.conductedBy,
+          projectInCharge: values.projectInCharge,
+          attendees: values.attendees,
+        };
 
-      const record: ToolBoxTalkRecord = {
-        id: crypto.randomUUID(),
-        projectName: values.projectName,
-        projectLocation: values.projectLocation,
-        contractorName: values.contractorName,
-        discussionPoint: values.discussionPoint,
-        talkDate: talkDateValue,
-        talkTime: values.talkTime,
-        attendees: values.attendees,
-      };
+        if (editingRecordId) {
+          await updateTalk(editingRecordId, payload);
+        } else {
+          await createTalk(payload);
+        }
 
-      setRecords((prev) => [record, ...prev]);
-      showMessage('Tool box talk saved locally');
-      setModalOpened(false);
-      reset({ ...defaultValues });
+        await fetchTalks();
+        showMessage('Tool box talk saved');
+        setModalOpened(false);
+        reset({ ...defaultValues });
+        setEditingRecordId(null);
+      } catch (error: any) {
+        showMessage(error?.message ?? 'Unable to save tool box talk', 'error');
+      }
     },
-    [reset]
+    [createTalk, fetchTalks, reset, updateTalk, editingRecordId]
   );
 
   const onCreateContractor = useCallback(
@@ -342,7 +491,15 @@ const ToolBoxTalkPage = () => {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {records.length === 0 ? (
+                {loading ? (
+                  <Table.Tr>
+                    <Table.Td colSpan={6}>
+                      <Group justify="center" py="md">
+                        <Loader size="sm" />
+                      </Group>
+                    </Table.Td>
+                  </Table.Tr>
+                ) : records.length === 0 ? (
                   <Table.Tr>
                     <Table.Td colSpan={6}>
                       <Text size="sm" c="dimmed" ta="center">
@@ -352,16 +509,42 @@ const ToolBoxTalkPage = () => {
                   </Table.Tr>
                 ) : (
                   records.map((record) => (
-                    <Table.Tr key={record.id}>
+                    <Table.Tr key={record._id}>
                       <Table.Td>{formatDate(record.talkDate)}</Table.Td>
                       <Table.Td>{record.talkTime || '—'}</Table.Td>
-                      <Table.Td>{record.projectName}</Table.Td>
-                      <Table.Td>{record.contractorName}</Table.Td>
+                      <Table.Td>{record.site?.name || record.projectName}</Table.Td>
+                      <Table.Td>{record.contractor?.name || record.contractorName}</Table.Td>
                       <Table.Td>{record.discussionPoint}</Table.Td>
                       <Table.Td align="right">
-                        <Badge color="blue" variant="light">
-                          {record.attendees.length}
-                        </Badge>
+                        <Group gap="xs" justify="flex-end">
+                          <Badge color="blue" variant="light">
+                            {record.attendees?.length ?? 0}
+                          </Badge>
+                          <ActionIcon
+                            variant="light"
+                            color="gray"
+                            aria-label="Print talk"
+                            onClick={() => handlePrintRecord(record)}
+                          >
+                            <IconPrinter size={16} />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant="light"
+                            color="blue"
+                            aria-label="View talk"
+                            onClick={() => handleViewRecord(record)}
+                          >
+                            <IconEye size={16} />
+                          </ActionIcon>
+                          <ActionIcon
+                            variant="light"
+                            color="orange"
+                            aria-label="Edit talk"
+                            onClick={() => handleEditRecord(record)}
+                          >
+                            <IconPencil size={16} />
+                          </ActionIcon>
+                        </Group>
                       </Table.Td>
                     </Table.Tr>
                   ))
@@ -735,6 +918,78 @@ const ToolBoxTalkPage = () => {
             </Button>
           </Stack>
         </form>
+      </Modal>
+
+      <Modal
+        opened={viewModalOpened && !!selectedRecord}
+        onClose={() => {
+          setViewModalOpened(false);
+          setSelectedRecord(null);
+        }}
+        title="Tool Box Talk"
+        size="lg"
+        centered
+      >
+        {selectedRecord ? (
+          <Stack gap="md">
+            <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+              <Card withBorder radius="md" padding="md" shadow="xs">
+                <Text size="sm" c="dimmed">
+                  Site
+                </Text>
+                <Text fw={600}>{selectedRecord.site?.name || selectedRecord.projectName || '—'}</Text>
+              </Card>
+              <Card withBorder radius="md" padding="md" shadow="xs">
+                <Text size="sm" c="dimmed">
+                  Contractor
+                </Text>
+                <Text fw={600}>{selectedRecord.contractor?.name || selectedRecord.contractorName || '—'}</Text>
+              </Card>
+              <Card withBorder radius="md" padding="md" shadow="xs">
+                <Text size="sm" c="dimmed">
+                  Date
+                </Text>
+                <Text fw={600}>{formatDate(selectedRecord.talkDate)}</Text>
+              </Card>
+              <Card withBorder radius="md" padding="md" shadow="xs">
+                <Text size="sm" c="dimmed">
+                  Time
+                </Text>
+                <Text fw={600}>{selectedRecord.talkTime || '—'}</Text>
+              </Card>
+            </SimpleGrid>
+
+            <Card withBorder radius="md" padding="md" shadow="xs">
+              <Text size="sm" c="dimmed">
+                Discussion Point
+              </Text>
+              <Text size="sm">{selectedRecord.discussionPoint || '—'}</Text>
+            </Card>
+
+            <Table striped withTableBorder>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>Sr. No.</Table.Th>
+                  <Table.Th>Name</Table.Th>
+                  <Table.Th>Designation</Table.Th>
+                  <Table.Th>Sub Contractor</Table.Th>
+                  <Table.Th>Remarks</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {(selectedRecord.attendees || []).map((attendee: any, idx: number) => (
+                  <Table.Tr key={`${attendee.govIdNumber}-${idx}`}>
+                    <Table.Td>{idx + 1}</Table.Td>
+                    <Table.Td>{attendee.name}</Table.Td>
+                    <Table.Td>{attendee.designation || '—'}</Table.Td>
+                    <Table.Td>{attendee.subContractorName || '—'}</Table.Td>
+                    <Table.Td>{attendee.remarks || '—'}</Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </Stack>
+        ) : null}
       </Modal>
     </EhsPageLayout>
   );

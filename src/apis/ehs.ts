@@ -215,3 +215,317 @@ export const fetchCurrentPermissions = async () =>
     method: 'GET',
     url: 'permissions/me',
   });
+
+export type EquipmentPayload = {
+  name: string;
+  equipmentId: string;
+  category?: string;
+  siteId?: string;
+  location?: string;
+  make?: string;
+  capacity?: string;
+  lastTestDate?: string | null;
+  testDueDate?: string | null;
+  testedByAgency?: string;
+  reportCheckedBy?: string;
+  remarks?: string;
+  isActive?: boolean;
+};
+
+export const createEquipment = async (payload: EquipmentPayload) =>
+  apiRequest({
+    method: 'POST',
+    url: 'ehs/equipments',
+    data: payload,
+  });
+
+export const updateEquipment = async (id: string, payload: Partial<EquipmentPayload>) =>
+  apiRequest({
+    method: 'PATCH',
+    url: `ehs/equipments/${id}`,
+    data: payload,
+  });
+
+export const listEquipments = async (params?: Record<string, unknown>) =>
+  apiRequest({
+    method: 'GET',
+    url: 'ehs/equipments',
+    params,
+  });
+
+export const fetchEquipment = async (id: string) =>
+  apiRequest({
+    method: 'GET',
+    url: `ehs/equipments/${id}`,
+  });
+
+export type FirstAidPayload = {
+  siteId?: string;
+  month: string;
+  incidentDate: string;
+  incidentTime?: string;
+  contractorId?: string;
+  injuredPerson: string;
+  inductionNumber?: string;
+  injuryDetails: string;
+  treatmentProvided: string;
+  treatmentGivenBy: string;
+  facInvestigation?: string;
+  investigatedBy?: string;
+  remarks?: string;
+};
+
+export const createFirstAidCase = async (payload: FirstAidPayload) =>
+  apiRequest({
+    method: 'POST',
+    url: 'ehs/first-aid',
+    data: payload,
+  });
+
+export const updateFirstAidCase = async (id: string, payload: Partial<FirstAidPayload>) =>
+  apiRequest({
+    method: 'PATCH',
+    url: `ehs/first-aid/${id}`,
+    data: payload,
+  });
+
+export const listFirstAidCases = async (params?: Record<string, unknown>) =>
+  apiRequest({
+    method: 'GET',
+    url: 'ehs/first-aid',
+    params,
+  });
+
+export const fetchFirstAidCase = async (id: string) =>
+  apiRequest({
+    method: 'GET',
+    url: `ehs/first-aid/${id}`,
+  });
+
+export type ToolBoxTalkAttendeePayload = {
+  govIdType?: string;
+  govIdNumber?: string;
+  name: string;
+  designation?: string;
+  subContractorName?: string;
+  remarks?: string;
+  signature?: string;
+};
+
+export type ToolBoxTalkPayload = {
+  formNo?: string;
+  revisionNo?: string;
+  siteId?: string;
+  contractorId?: string;
+  projectName?: string;
+  projectLocation?: string;
+  contractorName?: string;
+  discussionPoint: string;
+  talkDate: string;
+  talkTime?: string;
+  conductedBy?: string;
+  projectInCharge?: string;
+  attendees: ToolBoxTalkAttendeePayload[];
+};
+
+export const createToolBoxTalk = async (payload: ToolBoxTalkPayload) =>
+  apiRequest({
+    method: 'POST',
+    url: 'ehs/toolbox-talks',
+    data: payload,
+  });
+
+export const updateToolBoxTalk = async (id: string, payload: Partial<ToolBoxTalkPayload>) =>
+  apiRequest({
+    method: 'PATCH',
+    url: `ehs/toolbox-talks/${id}`,
+    data: payload,
+  });
+
+export const listToolBoxTalks = async (params?: Record<string, unknown>) =>
+  apiRequest({
+    method: 'GET',
+    url: 'ehs/toolbox-talks',
+    params,
+  });
+
+export const fetchToolBoxTalk = async (id: string) =>
+  apiRequest({
+    method: 'GET',
+    url: `ehs/toolbox-talks/${id}`,
+  });
+
+export type ExcavatorChecklistItemPayload = {
+  description: string;
+  status?: 'OK' | 'NOT OK' | 'NA';
+  needRepairs?: boolean;
+  remark?: string;
+};
+
+export type ExcavatorChecklistPayload = {
+  equipmentId: string;
+  siteId?: string;
+  inspectionDate: string;
+  dueDate?: string;
+  items: ExcavatorChecklistItemPayload[];
+  checkedBySiteEngineer?: {
+    name?: string;
+    designation?: string;
+    signature?: string;
+  };
+  checkedBySafetyOfficer?: {
+    name?: string;
+    designation?: string;
+    signature?: string;
+  };
+  projectInChargeSignature?: string;
+};
+
+export const createExcavatorChecklist = async (payload: ExcavatorChecklistPayload) =>
+  apiRequest({
+    method: 'POST',
+    url: 'ehs/excavator-checklists',
+    data: payload,
+  });
+
+export const updateExcavatorChecklist = async (id: string, payload: Partial<ExcavatorChecklistPayload>) =>
+  apiRequest({
+    method: 'PATCH',
+    url: `ehs/excavator-checklists/${id}`,
+    data: payload,
+  });
+
+export const listExcavatorChecklists = async (params?: Record<string, unknown>) =>
+  apiRequest({
+    method: 'GET',
+    url: 'ehs/excavator-checklists',
+    params,
+  });
+
+export const fetchExcavatorChecklist = async (id: string) =>
+  apiRequest({
+    method: 'GET',
+    url: `ehs/excavator-checklists/${id}`,
+  });
+
+export type WeldingChecklistItemPayload = {
+  description: string;
+  status?: 'OK' | 'NOT OK' | 'NA';
+  comment?: string;
+};
+
+export type WeldingChecklistPayload = {
+  projectName?: string;
+  contractorName?: string;
+  equipmentNumber: string;
+  make?: string;
+  siteId?: string;
+  inspectionDate: string;
+  dueDate?: string;
+  checklistNumber?: string;
+  frequency?: string;
+  items: WeldingChecklistItemPayload[];
+  accepted?: boolean;
+  comments?: string;
+  inspectedBySafety?: {
+    name?: string;
+    signature?: string;
+    date?: string;
+  };
+  areaEngineer?: {
+    name?: string;
+    signature?: string;
+    date?: string;
+  };
+  projectInCharge?: {
+    name?: string;
+    signature?: string;
+    date?: string;
+  };
+};
+
+export const createWeldingChecklist = async (payload: WeldingChecklistPayload) =>
+  apiRequest({
+    method: 'POST',
+    url: 'ehs/welding-checklists',
+    data: payload,
+  });
+
+export const updateWeldingChecklist = async (id: string, payload: Partial<WeldingChecklistPayload>) =>
+  apiRequest({
+    method: 'PATCH',
+    url: `ehs/welding-checklists/${id}`,
+    data: payload,
+  });
+
+export const listWeldingChecklists = async (params?: Record<string, unknown>) =>
+  apiRequest({
+    method: 'GET',
+    url: 'ehs/welding-checklists',
+    params,
+  });
+
+export const fetchWeldingChecklist = async (id: string) =>
+  apiRequest({
+    method: 'GET',
+    url: `ehs/welding-checklists/${id}`,
+  });
+
+export type JcbChecklistItemPayload = {
+  description: string;
+  status?: 'YES' | 'NO' | 'NA';
+  remark?: string;
+};
+
+export type ChecklistSignaturePayload = {
+  name?: string;
+  designation?: string;
+  signature?: string;
+  signedAt?: string | null;
+};
+
+export type JcbChecklistPayload = {
+  siteId?: string;
+  site?: {
+    name?: string;
+    location?: string;
+  };
+  equipmentSerialNumber: string;
+  makeModel: string;
+  vehicleNumber?: string;
+  inspectionDate: string;
+  items: JcbChecklistItemPayload[];
+  equipmentFitForUse?: 'YES' | 'NO' | 'NA';
+  generalRemarks?: string;
+  inspectedBy?: ChecklistSignaturePayload;
+  reviewedBy?: ChecklistSignaturePayload;
+  projectInCharge?: ChecklistSignaturePayload;
+  attachments?: string[];
+};
+
+export const createJcbChecklist = async (payload: JcbChecklistPayload) =>
+  apiRequest({
+    method: 'POST',
+    url: 'ehs/jcb-checklists',
+    data: payload,
+  });
+
+export const updateJcbChecklist = async (id: string, payload: Partial<JcbChecklistPayload>) =>
+  apiRequest({
+    method: 'PATCH',
+    url: `ehs/jcb-checklists/${id}`,
+    data: payload,
+  });
+
+export const listJcbChecklists = async (params?: Record<string, unknown>) =>
+  apiRequest({
+    method: 'GET',
+    url: 'ehs/jcb-checklists',
+    params,
+  });
+
+export const fetchJcbChecklist = async (id: string) =>
+  apiRequest({
+    method: 'GET',
+    url: `ehs/jcb-checklists/${id}`,
+  });

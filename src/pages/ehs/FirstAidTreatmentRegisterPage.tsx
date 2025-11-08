@@ -19,12 +19,14 @@ import {
   Textarea,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconAlertCircle, IconEye, IconPencil, IconPlus, IconRefresh } from '@tabler/icons-react';
+import { IconAlertCircle, IconEye, IconPencil, IconPlus, IconPrinter, IconRefresh } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import EhsPageLayout from '@/components/ehs/EhsPageLayout';
 import { useSites } from '@/hooks/useSites';
 import { useContractors } from '@/hooks/useContractors';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useFirstAidCases, FirstAidCaseRecord } from '@/hooks/useFirstAidCases';
+import { FirstAidPayload } from '@/apis/ehs';
 import { showMessage } from '@/utils/Constant';
 
 type FirstAidFormValues = {
@@ -34,23 +36,6 @@ type FirstAidFormValues = {
   incidentDate: Date | null;
   incidentTime?: string;
   contractorId?: string;
-  contractorName: string;
-  injuredPerson: string;
-  inductionNumber?: string;
-  injuryDetails: string;
-  treatmentProvided: string;
-  treatmentGivenBy: string;
-  facInvestigation?: string;
-  investigatedBy?: string;
-  remarks?: string;
-};
-
-type FirstAidRecord = {
-  id: string;
-  siteName: string;
-  month: string;
-  incidentDate: string;
-  incidentTime?: string;
   contractorName: string;
   injuredPerson: string;
   inductionNumber?: string;
@@ -88,18 +73,23 @@ const formatDate = (value?: string | Date | null) => {
 };
 
 const FirstAidTreatmentRegisterPage = () => {
-  const [records, setRecords] = useState<FirstAidRecord[]>([]);
   const [modalOpened, setModalOpened] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<FirstAidRecord | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<FirstAidCaseRecord | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [loadingRecords, setLoadingRecords] = useState(false);
 
   const { sites, loading: sitesLoading } = useSites();
   const { contractors, loading: contractorsLoading } = useContractors();
   const { can, loading: permissionsLoading, roles } = usePermissions();
+  const {
+    records,
+    loading: recordsLoading,
+    fetchCases,
+    createCase,
+    updateCase,
+  } = useFirstAidCases({ limit: 50 });
 
   const isSuperAdmin = roles.includes('SuperAdmin');
   const canView = isSuperAdmin || can('FirstAidTreatmentRegister', 'view') || roles.length === 0;
@@ -164,16 +154,11 @@ const FirstAidTreatmentRegisterPage = () => {
     [contractors]
   );
 
-  const fetchRecords = useCallback(async () => {
-    // TODO: connect to backend API when available
-    setLoadingRecords(false);
-  }, []);
-
   useEffect(() => {
-    if (!permissionsLoading && canView && !records.length) {
-      fetchRecords();
+    if (!permissionsLoading && canView) {
+      fetchCases().catch(() => undefined);
     }
-  }, [permissionsLoading, canView, fetchRecords, records.length]);
+  }, [permissionsLoading, canView, fetchCases]);
 
   const openCreateModal = () => {
     if (!canCreate) {
@@ -186,28 +171,28 @@ const FirstAidTreatmentRegisterPage = () => {
     setModalOpened(true);
   };
 
-  const handleViewRecord = useCallback((record: FirstAidRecord) => {
+  const handleViewRecord = useCallback((record: any) => {
     setSelectedRecord(record);
     setViewModalOpen(true);
   }, []);
 
   const handleEditRecord = useCallback(
-    (record: FirstAidRecord) => {
+    (record: any) => {
       if (!isSuperAdmin && !can('FirstAidTreatmentRegister', 'edit')) {
         showMessage('You do not have permission to edit first aid entries', 'error');
         return;
       }
 
       setIsEditMode(true);
-      setEditingRecordId(record.id);
+      setEditingRecordId(record._id);
       reset({
-        siteId: sites.find((site) => site.name === record.siteName)?._id,
-        siteName: record.siteName,
-        month: record.month,
+        siteId: record.site?.id ?? undefined,
+        siteName: record.site?.name ?? '',
+        month: record.month ?? dayjs(record.incidentDate).format('MMMM YYYY'),
         incidentDate: record.incidentDate ? new Date(record.incidentDate) : new Date(),
         incidentTime: record.incidentTime ?? '',
-        contractorId: contractors.find((contractor) => contractor.name === record.contractorName)?._id,
-        contractorName: record.contractorName,
+        contractorId: record.contractor?.id ?? undefined,
+        contractorName: record.contractor?.name ?? '',
         injuredPerson: record.injuredPerson,
         inductionNumber: record.inductionNumber ?? '',
         injuryDetails: record.injuryDetails,
@@ -219,7 +204,7 @@ const FirstAidTreatmentRegisterPage = () => {
       });
       setModalOpened(true);
     },
-    [can, contractors, isSuperAdmin, reset, sites]
+    [can, isSuperAdmin, reset]
   );
 
   const closeFormModal = () => {
@@ -233,6 +218,184 @@ const FirstAidTreatmentRegisterPage = () => {
     setViewModalOpen(false);
   };
 
+  const handlePrintRecord = useCallback((record: any) => {
+    const MAX_ROWS = 10;
+    const rows = Array.from({ length: MAX_ROWS }, (_, index) => {
+      if (index === 0) {
+        return `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${formatDate(record.incidentDate)}</td>
+            <td>${record.incidentTime || ''}</td>
+            <td>${record.contractor?.name || record.contractorName || ''} PATIENT: ${record.injuredPerson || ''}${
+          record.inductionNumber ? ` (${record.inductionNumber})` : ''
+        }</td>
+            <td>${record.injuryDetails || ''}</td>
+            <td>${record.treatmentProvided || ''}</td>
+            <td>${record.treatmentGivenBy || ''}</td>
+            <td>${record.facInvestigation || ''}</td>
+            <td>${record.investigatedBy || ''}</td>
+          </tr>
+        `;
+      }
+      return `
+        <tr>
+          <td>${index + 1}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      `;
+    }).join('');
+
+    const html = `
+      <html>
+        <head>
+          <title>First Aid Treatment Register</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 6px; font-size: 12px; vertical-align: top; }
+            th { background: #f2f2f2; }
+            .header-table td { border: 1px solid #000; padding: 6px; font-size: 12px; }
+            .header-table { margin-bottom: 12px; width: 100%; }
+            .notes { margin-top: 16px; font-size: 11px; }
+            .footer { margin-top: 24px; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <table class="header-table">
+            <tr>
+              <td rowspan="2" style="width:20%; text-align:center; font-weight:bold;">SHIVALIK</td>
+              <td rowspan="2" style="text-align:center; font-size:18px; font-weight:bold;">First Aid Treatment Register</td>
+              <td style="width:20%;">Format No.: <strong>EHS-F-04</strong></td>
+            </tr>
+            <tr>
+              <td>Rev. No.: <strong>00</strong></td>
+            </tr>
+          </table>
+          <table class="header-table">
+            <tr>
+              <td colspan="6" style="font-size:12px;">
+                Important Note: (1) All first aid box responsible person should ensure entry of each first aid case in this register. (2) First aid should be provided by trained first aider. (3) Ensure availability of trained first aider in each shift. (4) All first aid cases occurred during the month should be discussed in the monthly safety committee meeting.
+              </td>
+            </tr>
+            <tr>
+              <td style="width:15%;">Site Name:</td>
+              <td colspan="2">${record.site?.name || ''}</td>
+              <td style="width:15%;">Month/YY:</td>
+              <td colspan="2">${record.month || dayjs(record.incidentDate).format('MMMM YYYY')}</td>
+            </tr>
+          </table>
+          <table>
+            <thead>
+              <tr>
+                <th>Sr. No.</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Contractor Name, Name of Injured Person and Induction Number</th>
+                <th>Details of Injury and Illness</th>
+                <th>Treatment Given</th>
+                <th>Treatment Given by</th>
+                <th>FAC Investigation</th>
+                <th>Investigated by</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+          <div class="footer">Project In Charge Sign: _______________________________</div>
+        </body>
+      </html>
+    `;
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.print();
+      printWindow.close();
+    }
+  }, []);
+
+  const handlePrintRegister = useCallback(() => {
+    const rows = records
+      .map(
+        (record, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${formatDate(record.incidentDate)}</td>
+            <td>${record.incidentTime || ''}</td>
+            <td>
+              <div><strong>${record.contractor?.name || ''}</strong></div>
+              <div>${record.injuredPerson || ''}${record.inductionNumber ? ` (${record.inductionNumber})` : ''}</div>
+            </td>
+            <td>${record.injuryDetails || ''}</td>
+            <td>${record.treatmentProvided || ''}</td>
+            <td>${record.treatmentGivenBy || ''}</td>
+            <td>${record.facInvestigation || ''}</td>
+            <td>${record.investigatedBy || ''}</td>
+          </tr>
+        `
+      )
+      .join('');
+
+    const html = `
+      <html>
+        <head>
+          <title>First Aid Treatment Register</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; }
+            h1 { font-size: 20px; margin-bottom: 4px; }
+            .meta { margin-bottom: 16px; font-size: 12px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 6px; font-size: 12px; vertical-align: top; }
+            th { background: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h1>First Aid Treatment Register</h1>
+          <div class="meta">
+            <div><strong>Generated On:</strong> ${dayjs().format('DD.MM.YYYY')}</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Sr. No.</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Contractor / Injured Person</th>
+                <th>Details of Injury / Illness</th>
+                <th>Treatment Given</th>
+                <th>Treatment Given By</th>
+                <th>FAC Investigation</th>
+                <th>Investigated By</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.print();
+      printWindow.close();
+    }
+  }, [records]);
+
   const onSubmit = async (values: FirstAidFormValues) => {
     setSubmitting(true);
     try {
@@ -241,13 +404,12 @@ const FirstAidTreatmentRegisterPage = () => {
         return;
       }
 
-      const record: FirstAidRecord = {
-        id: editingRecordId ?? crypto.randomUUID(),
-        siteName: values.siteName,
+      const payload: FirstAidPayload = {
+        siteId: values.siteId,
         month: values.month,
         incidentDate: values.incidentDate.toISOString(),
         incidentTime: values.incidentTime,
-        contractorName: values.contractorName,
+        contractorId: values.contractorId,
         injuredPerson: values.injuredPerson,
         inductionNumber: values.inductionNumber,
         injuryDetails: values.injuryDetails,
@@ -259,13 +421,12 @@ const FirstAidTreatmentRegisterPage = () => {
       };
 
       if (isEditMode && editingRecordId) {
-        setRecords((prev) => prev.map((item) => (item.id === editingRecordId ? record : item)));
-        showMessage('First aid entry updated');
+        await updateCase(editingRecordId, payload);
       } else {
-        setRecords((prev) => [record, ...prev]);
-        showMessage('First aid entry added');
+        await createCase(payload);
       }
 
+      await fetchCases();
       closeFormModal();
     } catch (error: any) {
       showMessage(error?.message ?? 'Unable to save record', 'error');
@@ -315,15 +476,26 @@ const FirstAidTreatmentRegisterPage = () => {
                 <Text size="sm" fw={600}>
                   Recorded entries: {records.length}
                 </Text>
-                <Button
-                  variant="light"
-                  color="gray"
-                  leftSection={<IconRefresh size={16} />}
-                  onClick={fetchRecords}
-                  disabled={loadingRecords}
-                >
-                  Refresh
-                </Button>
+                <Group gap="sm">
+                  <Button
+                    variant="light"
+                    color="gray"
+                    leftSection={<IconPrinter size={16} />}
+                    onClick={handlePrintRegister}
+                    disabled={!records.length}
+                  >
+                    Print Register
+                  </Button>
+                  <Button
+                    variant="light"
+                    color="gray"
+                    leftSection={<IconRefresh size={16} />}
+                    onClick={() => fetchCases()}
+                    loading={recordsLoading}
+                  >
+                    Refresh
+                  </Button>
+                </Group>
               </Group>
             </Stack>
           </Card>
@@ -356,13 +528,13 @@ const FirstAidTreatmentRegisterPage = () => {
                     </Table.Tr>
                   ) : (
                     records.map((record, index) => (
-                      <Table.Tr key={record.id}>
+                      <Table.Tr key={record._id}>
                         <Table.Td>{records.length - index}</Table.Td>
                         <Table.Td>{formatDate(record.incidentDate)}</Table.Td>
                         <Table.Td>{record.incidentTime || '—'}</Table.Td>
                         <Table.Td>
                           <Stack gap={2}>
-                            <Text fw={600}>{record.contractorName || '—'}</Text>
+                            <Text fw={600}>{record.contractor?.name || '—'}</Text>
                             <Text size="sm" c="dimmed">
                               {record.injuredPerson}
                               {record.inductionNumber ? ` (${record.inductionNumber})` : ''}
@@ -376,6 +548,14 @@ const FirstAidTreatmentRegisterPage = () => {
                         <Table.Td>{record.investigatedBy || '—'}</Table.Td>
                         <Table.Td align="right">
                           <Group gap="xs" justify="flex-end">
+                            <ActionIcon
+                              variant="light"
+                              color="gray"
+                              aria-label="Print record"
+                              onClick={() => handlePrintRecord(record)}
+                            >
+                              <IconPrinter size={16} />
+                            </ActionIcon>
                             <ActionIcon
                               variant="light"
                               color="blue"
@@ -640,7 +820,7 @@ const FirstAidTreatmentRegisterPage = () => {
                 <Text size="sm" c="dimmed">
                   Site
                 </Text>
-                <Text fw={600}>{selectedRecord.siteName || '—'}</Text>
+                <Text fw={600}>{selectedRecord.site?.name || selectedRecord.siteName || '—'}</Text>
               </Card>
               <Card withBorder radius="md" padding="md" shadow="xs">
                 <Text size="sm" c="dimmed">
@@ -667,7 +847,7 @@ const FirstAidTreatmentRegisterPage = () => {
                 <Text size="sm" c="dimmed">
                   Contractor / Injured Person
                 </Text>
-                <Text fw={600}>{selectedRecord.contractorName || '—'}</Text>
+                <Text fw={600}>{selectedRecord.contractor?.name || selectedRecord.contractorName || '—'}</Text>
                 <Text size="sm" c="dimmed">
                   {selectedRecord.injuredPerson}
                   {selectedRecord.inductionNumber ? ` (${selectedRecord.inductionNumber})` : ''}
