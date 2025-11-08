@@ -11,7 +11,7 @@ export interface SelectInputProps {
     label: string;
     register?: UseFormRegister<any>;
     errors?: FieldErrors<FieldValues>;
-    setValue: UseFormSetValue<any>;
+    setValue?: UseFormSetValue<any>;
     required?: boolean;
     options?: Option[];
     disabled?: boolean;
@@ -19,6 +19,8 @@ export interface SelectInputProps {
     validate?: (value: string) => true | string;
     value?: string;
     mode?: 'create' | 'edit';
+    placeholder?: string;
+    errorMessage?: string;
 }
 
 export interface FileUploadProps {

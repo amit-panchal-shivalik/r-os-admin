@@ -1,23 +1,24 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { PrivateRoute } from './PrivateRoute';
-import { PublicRoute } from './PublicRoute';
-import { LoginPage } from '../pages/auth/LoginPage';
-import { OtpPage } from '../pages/auth/OtpPage';
-import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { PrivateRoute } from "./PrivateRoute";
+import { PublicRoute } from "./PublicRoute";
+import { LoginPage } from "../pages/auth/LoginPage";
+import { OtpPage } from "../pages/auth/OtpPage";
+import { RegisterPage } from "@/pages/auth/RegisterPage";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
 
 /* current user roles */
 const getUserRoles = (): string[] => {
   try {
-    const info = JSON.parse(localStorage.getItem('userInfo') ?? '{}');
-    return Array.isArray(info.userRoles) ? info.userRoles : ['Guest'];
+    const info = JSON.parse(localStorage.getItem("userInfo") ?? "{}");
+    return Array.isArray(info.userRoles) ? info.userRoles : ["Guest"];
   } catch {
-    return ['Guest'];
+    return ["Guest"];
   }
 };
 
 /* Role default route mapping */
 const ROLE_DEFAULTS: Record<string, string> = {
-  SuperAdmin: '/users',
+  SuperAdmin: "/users",
 };
 
 /* Component that decides where to redirect  */
@@ -26,7 +27,7 @@ const RedirectByRole = () => {
   const roles = getUserRoles();
 
   // If we are already on a page that belongs to the user – stay there
-  if (location.pathname !== '/' && location.pathname !== '') {
+  if (location.pathname !== "/" && location.pathname !== "") {
     return null; // let the child route render
   }
 
@@ -51,6 +52,14 @@ export const AppRoutes = () => {
         element={
           <PublicRoute>
             <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
           </PublicRoute>
         }
       />
