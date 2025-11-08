@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { buildingDetailsSchema } from '../utils/validationSchemas/buildingDetailsSchema';
+import { CustomSelect } from '../components/ui/CustomSelect';
 
 type BuildingDetailsFormData = Yup.InferType<typeof buildingDetailsSchema>;
 
@@ -23,6 +24,7 @@ export const BuildingDetailsPage = () => {
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
     reset,
   } = useForm<BuildingDetailsFormData>({
     resolver: yupResolver(buildingDetailsSchema),
@@ -172,27 +174,22 @@ export const BuildingDetailsPage = () => {
                 <label htmlFor="buildingType" className="block text-sm font-medium text-gray-700 mb-1">
                   Building Type <span className="text-red-500">*</span>
                 </label>
-                <select
+                <CustomSelect
                   id="buildingType"
-                  {...register('buildingType')}
-                  className="w-full px-0 py-2 border-0 border-b border-gray-300 focus:outline-none focus:border-gray-900 focus:ring-0 bg-transparent appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23000' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 0 center',
-                    backgroundSize: '12px 12px',
-                    paddingRight: '20px',
-                  }}
-                >
-                  <option value="">Select building type</option>
-                  <option value="Residential">Residential</option>
-                  <option value="Commercial">Commercial</option>
-                  <option value="Mixed">Mixed</option>
-                  <option value="Industrial">Industrial</option>
-                </select>
-                {errors.buildingType && (
-                  <p className="mt-1 text-sm text-red-500">{errors.buildingType.message as string}</p>
-                )}
+                  name="buildingType"
+                  value={watch('buildingType') || ''}
+                  onChange={(value) => setValue('buildingType', value, { shouldValidate: true })}
+                  options={[
+                    { value: 'Residential', label: 'Residential' },
+                    { value: 'Commercial', label: 'Commercial' },
+                    { value: 'Mixed', label: 'Mixed' },
+                    { value: 'Industrial', label: 'Industrial' },
+                  ]}
+                  placeholder="Select building type"
+                  error={errors.buildingType?.message as string}
+                  disabled={false}
+                  required
+                />
               </div>
 
               {/* Total Blocks */}

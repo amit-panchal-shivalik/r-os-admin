@@ -30,16 +30,16 @@ const navigation = [
   },
   {
     name:'Building Settings',
-    // href: '/buildings',
+    href: '/building-settings',
     icon: IconBuilding,
     subItems: [
-      { name: 'Building Details', href: '/building-details' },
-      { name: 'Floors', href: '/floors' },
-      { name: 'Blocks', href: '/blocks' },
-      { name: 'Units', href: '/units' },
-      { name: 'Parking', href: '/parking' },
-      { name: 'Notice Board', href: '/notice-board' },
-      { name: 'Amenities', href: '/amenities' },
+      { name: 'Building Details', href: '/building-settings/building-details' },
+      { name: 'Floors', href: '/building-settings/floors' },
+      { name: 'Blocks', href: '/building-settings/blocks' },
+      { name: 'Units', href: '/building-settings/units' },
+      { name: 'Parking', href: '/building-settings/parking' },
+      { name: 'Notice Board', href: '/building-settings/notice-board' },
+      { name: 'Amenities', href: '/building-settings/amenities' },
     ],
   },
   {
@@ -47,9 +47,9 @@ const navigation = [
     href: '/users',
     icon: IconUser,
     subItems: [
-      { name: 'Members', href: '/members' },
-      { name: 'Society Employee', href: '/society-employee' },
-      { name: 'Committee Member', href: '/committee-member' },
+      { name: 'Members', href: '/users/members' },
+      { name: 'Society Employee', href: '/users/society-employee' },
+      { name: 'Committee Member', href: '/users/committee-member' },
     ],
   },
   {
@@ -246,22 +246,26 @@ export const DashboardLayout = () => {
     }
 
     if (item.subItems) {
-      // Normal behavior when sidebar is expanded
+      // For items with subItems, only expand the menu if it's closed
+      // Don't toggle - just ensure it's open
       setTabOpenStates((prev) => {
         const isCurrentlyOpen = !!prev[item.href];
-        const newState = { ...prev, [item.href]: !isCurrentlyOpen };
-        localStorage.setItem('tabOpenStates', JSON.stringify(newState));
-        // When opening a menu with sub-items, navigate to its first sub-item
-        if (!isCurrentlyOpen && item.subItems) {
-          const targetPath = item.subItems[0].href;
-          if (location.pathname !== targetPath) {
+        // Only open if currently closed, don't close if already open
+        if (!isCurrentlyOpen) {
+          const newState = { ...prev, [item.href]: true };
+          localStorage.setItem('tabOpenStates', JSON.stringify(newState));
+          // Navigate to first sub-item only if no sub-item is currently active
+          const isSubItemActive = item.subItems?.some((sub) => location.pathname === sub.href);
+          if (!isSubItemActive && item.subItems && item.subItems.length > 0) {
+            const targetPath = item.subItems[0].href;
             navigate(targetPath);
             setActivePath(targetPath);
             localStorage.setItem('lastActivePath', targetPath);
           }
+          return newState;
         }
-        // When closing, do not navigate away; simply collapse the menu
-        return newState;
+        // If already open, do nothing - don't toggle
+        return prev;
       });
     } else {
       navigate(item.href);
@@ -315,7 +319,8 @@ export const DashboardLayout = () => {
     const hasSubItems = !!item.subItems;
     const isActive =
       activePath === item.href ||
-      (hasSubItems && (item.subItems?.some((sub) => activePath === sub.href) || tabOpenStates[item.href]));
+      activePath.startsWith(item.href + '/') ||
+      (hasSubItems && (item.subItems?.some((sub) => activePath === sub.href || activePath.startsWith(sub.href + '/')) || tabOpenStates[item.href]));
     
     // Show expanded content when sidebar is not collapsed OR when hovered
     const shouldShowText = !sidebarCollapsed || sidebarHovered;
@@ -330,7 +335,7 @@ export const DashboardLayout = () => {
           text-sm
           list-none relative
           ${hasSubItems ? 'mb-1 min-h-[48px]' : 'mb-0'}
-          cursor-pointer
+          ${hasSubItems ? 'cursor-default' : 'cursor-pointer'}
         `}
         onClick={() => handleTabClick(item)}
         title={!shouldShowText ? item.name : undefined}
@@ -360,10 +365,11 @@ export const DashboardLayout = () => {
                 className={`
                   p-2.5 text-[var(--primary-black)]
                   text-xs
-                  ${activePath === subItem.href ? 'font-medium' : 'font-normal'}
+                  ${activePath === subItem.href || activePath.startsWith(subItem.href + '/') ? 'font-medium' : 'font-normal'}
                   cursor-pointer rounded
                   mb-2 flex items-center
-                  `}
+                  hover:bg-primary-gray/20
+                `}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleSubItemClick(subItem.href);
@@ -372,7 +378,7 @@ export const DashboardLayout = () => {
                 <div
                   className={`
                     w-1 h-1 rounded-full mr-2.5
-                    ${activePath === subItem.href ? 'bg-[var(--primary-black)]' : 'bg-transparent'}
+                    ${activePath === subItem.href || activePath.startsWith(subItem.href + '/') ? 'bg-[var(--primary-black)]' : 'bg-transparent'}
                   `}
                 />
                 {subItem.name}

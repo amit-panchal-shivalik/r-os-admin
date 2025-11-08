@@ -1,13 +1,15 @@
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { PrivateRoute } from "./PrivateRoute";
-import { PublicRoute } from "./PublicRoute";
-import { LoginPage } from "../pages/auth/LoginPage";
-import { OtpPage } from "../pages/auth/OtpPage";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { DashboardPage } from "../pages/DashboardPage";
-import { BuildingDetailsPage } from "../pages/BuildingDetailsPage";
-import SocietyManagement from "@/pages/society-management/SocietyManagement";
-import { ROLE_DEFAULTS } from "./route.config";
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { PrivateRoute } from './PrivateRoute';
+import { PublicRoute } from './PublicRoute';
+import { LoginPage } from '../pages/auth/LoginPage';
+import { OtpPage } from '../pages/auth/OtpPage';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { DashboardPage } from '../pages/DashboardPage';
+import { BuildingDetailsPage } from '../pages/BuildingDetailsPage';
+import { FloorsPage } from '../pages/building-details/FloorsPage';
+import { BlocksPage } from '../pages/building-details/BlocksPage';
+import { UnitsPage } from '../pages/building-details/UnitsPage';
+import { NoticeBoardPage } from '../pages/building-details/NoticeBoardPage';
 
 /* current user roles */
 const getUserRoles = (): string => {
@@ -74,8 +76,21 @@ export const AppRoutes = () => {
 
         {/* All private pages  */}
         <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="society-management" element={<SocietyManagement />} />
-        <Route path="building-details" element={<BuildingDetailsPage />} />
+        
+        {/* Building Settings Routes */}
+        <Route path="building-settings/building-details" element={<BuildingDetailsPage />} />
+        <Route path="building-settings/floors" element={<FloorsPage />} />
+        <Route path="building-settings/blocks" element={<BlocksPage />} />
+        <Route path="building-settings/units" element={<UnitsPage />} />
+        <Route path="building-settings/notice-board" element={<NoticeBoardPage />} />
+        
+        {/* Legacy routes for backward compatibility - redirect to new paths */}
+        <Route path="building-details" element={<Navigate to="/building-settings/building-details" replace />} />
+        <Route path="floors" element={<Navigate to="/building-settings/floors" replace />} />
+        <Route path="blocks" element={<Navigate to="/building-settings/blocks" replace />} />
+        <Route path="units" element={<Navigate to="/building-settings/units" replace />} />
+        <Route path="notice-board" element={<Navigate to="/building-settings/notice-board" replace />} />
+        
         {/* <Route path="users" element={<PeoplePage />} /> */}
 
         {/* Catch-all inside private area (keeps the layout) */}
