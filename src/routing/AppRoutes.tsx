@@ -4,6 +4,7 @@ import { PublicRoute } from './PublicRoute';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { OtpPage } from '../pages/auth/OtpPage';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { DashboardPage } from '../pages/DashboardPage';
 
 /* current user roles */
 const getUserRoles = (): string[] => {
@@ -39,7 +40,7 @@ const RedirectByRole = () => {
   }
 
   // Fallback for unknown / Guest
-  return <Navigate to="/users" replace />;
+  return <Navigate to="/dashboard" replace />;
 };
 
 /* ────── Main router ────── */
@@ -77,10 +78,11 @@ export const AppRoutes = () => {
         <Route index element={<RedirectByRole />} />
 
         {/* All private pages  */}
+        <Route path="dashboard" element={<DashboardPage />} />
         {/* <Route path="users" element={<PeoplePage />} /> */}
 
         {/* Catch-all inside private area (keeps the layout) */}
-        <Route path="*" element={<RedirectByRole />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
 
       {/* Global catch-all (outside private area) */}
