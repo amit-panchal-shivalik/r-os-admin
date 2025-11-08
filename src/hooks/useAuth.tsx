@@ -8,6 +8,7 @@ interface User {
   role: string; // Keep as string for PrivateRoute compatibility
   userRoles?: string[]; // Optional array for flexibility
   avatar?: string;
+  buildingId?: string; // Building ID for building admin
 }
 
 interface AuthContextType {
@@ -38,7 +39,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           email: parsedUser.email || '',
           phone: parsedUser.phone || '',
           role: parsedUser.userRoles?.join(',') || '',
-          avatar: parsedUser.avatar || ''
+          avatar: parsedUser.avatar || '',
+          buildingId: parsedUser.buildingId || ''
         };
         setUser(transformedUser);
         setIsAuthenticated(true);

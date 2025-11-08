@@ -4,7 +4,7 @@ const initialState = {
     // Verify OTP Data
     user: null,
     error: null,
-    status: 'idle',
+    status: 'idle', // idle, pending, complete, failed
 };
 
 const otpSlice = createSlice({
@@ -27,6 +27,7 @@ const otpSlice = createSlice({
         },
         resetVerifyOTP(state) {
             state.status = 'idle';
+            state.error = null;
         },
     },
 });

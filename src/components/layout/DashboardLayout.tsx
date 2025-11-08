@@ -24,7 +24,8 @@ import {
   IconSpeakerphone,
   IconCalendar,
   IconMessageCircle2,
-  IconTrendingUp
+  IconTrendingUp,
+  IconHome
 } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { User, Users2 } from 'lucide-react';
@@ -32,64 +33,19 @@ import { useState, useEffect, useRef } from 'react';
 
 // Navigation array
 const navigation = [
-  { name: 'People', href: '/users', icon: IconUsers },
-  {
-    name: 'Territory',
-    href: '/territory',
-    icon: IconMapPin,
+  { name: 'Buildings', href: '/buildings', icon: IconUsers, roles: ['SuperAdmin'] },
+  { 
+    name: 'Dashboard', 
+    href: '/dashboard', 
+    icon: IconHome, 
+    roles: ['BuildingAdmin'],
     subItems: [
-      { name: 'Dashboard', href: '/territory/dashboard' },
-      { name: 'Projects', href: '/territory/project' },
-      { name: 'Land', href: '/territory/land/dashboard' },
-      { name: 'Vendors', href: '/territory/vendor/dashboard' },
-      { name: 'Store', href: '/territory/store/dashboard' },
-      { name: 'Institute', href: '/territory/institute/dashboard' },
-    ],
-  },
-  { name: 'Desk', href: '/follow-up', icon: IconDeviceDesktop },
-  { name: 'Event', href: '/event', icon: IconCalendar },
-  { name: 'Knowledge', href: '/article-listing', icon: IconBook },
-  { name: 'Channel Sales', href: '/channel-sales', icon: IconChartBar },
-  {
-    name: 'Campaign',
-    href: '/campaign-list',
-    icon: IconSpeakerphone,
-    subItems: [
-      { name: 'Campaign', href: '/campaign-list' },
-      { name: 'Add Campaign', href: '/campaign-add' },
-    ],
-  },
-  {
-    name: 'Employee',
-    href: '/employee/dashboard',
-    icon: Users2,
-    subItems: [
-      { name: 'Dashboard', href: '/employee/dashboard' },
-      { name: 'Employee List', href: '/employee/employee-list' },
-      // { name: 'Attendance', href: '/employee/attendance' },
-      { name: 'Designation', href: '/employee/designation' },
-      { name: 'Department', href: '/employee/department' },
-      { name: 'Branch', href: '/employee/branch' },
-      { name: 'Seating Office', href: '/employee/seating-office' },
-      { name: 'Shift Management', href: '/employee/shift-management' },
-      { name: 'Jobs', href: '/employee/jobs' },
-      { name: 'Report', href: '/employee/report' },
-    ],
-  },
-  {
-    name: 'Feedback',
-    href: '/feedback-list',
-    icon: IconMessageCircle2,
-    subItems: [
-      { name: 'Feedback Modules', href: '/feedback-modules-list' },
-      { name: 'Feedback List', href: '/feedback-list' },
-    ],
-  },
-  {
-    name: 'Growth Partner',
-    href: '/growth-partner-list',
-    icon: IconTrendingUp,
-  },
+      { name: 'Building Settings', href: '/dashboard' },
+      { name: 'Blocks', href: '/building/blocks' },
+      { name: 'Floors', href: '/building/floors' },
+      { name: 'Units', href: '/building/units' },
+    ]
+  }
 ];
 
 // Mapping of roles allowed tabs
@@ -123,73 +79,17 @@ const roleToTabs: Record<string, string[]> = {
 // Filter navigation based on user roles
 const getFilteredNavigation = (roles: string[] = []) => {
   if (roles.includes('SuperAdmin')) {
-    return navigation; // full access
+    return navigation.filter(item => !item.roles || item.roles.includes('SuperAdmin'));
+  }
+  
+  if (roles.includes('BuildingAdmin')) {
+    return navigation.filter(item => !item.roles || item.roles.includes('BuildingAdmin'));
   }
 
-  const allowed = new Set<string>();
-  const landRestricted = roles?.some((r) =>
-    ['LandManager', 'LandExecutive']?.includes(r)
-  );
-
-  const furnitureRestricted = roles?.some((role) =>
-    ['FurnitureManager', 'FurnitureSalesExecutive', 'FurnitureB2BAdmin', 'FurnitureDealerAdmin']?.includes(role)
-  );
-
-  const vendorRestricted = roles.includes('VendorAdmin');
-
-  roles?.forEach((role) => {
-    const tabs = roleToTabs[role];
-    if (tabs) {
-      tabs?.forEach((tab) => allowed.add(tab));
-    }
+  return navigation.filter((item) => {
+    if (item.name === 'Feedback') return true;
+    return false;
   });
-
-  return navigation
-    ?.filter((item) => {
-      // Allow Feedback section for all roles
-      if (item.name === 'Feedback') return true;
-      return allowed?.has(item.name);
-    })
-    ?.map((item) => {
-      if (item?.name === 'Territory') {
-        const subItems: { name: string; href: string }[] = [];
-
-        // Add Land tab if land-related role
-        if (landRestricted) {
-          subItems?.push({ name: 'Land', href: '/territory/land/dashboard' });
-        }
-
-        // Add Store tab if furniture-related role
-        if (furnitureRestricted) {
-          subItems?.push({ name: 'Store', href: '/territory/store/dashboard' });
-        }
-
-        // Add Vendor tabs if vendor role
-        if (vendorRestricted) {
-          subItems?.push(
-            { name: 'Dashboard', href: '/territory/dashboard' },
-            { name: 'Vendors', href: '/territory/vendor/dashboard' }
-          );
-        }
-
-        // Only return if we actually have subItems
-        if (subItems?.length > 0) {
-          return { ...item, subItems };
-        }
-      }
-
-      // Alllow Feedback Modules section only for SuperAdmin role
-      if (item?.name === 'Feedback') {
-        return {
-          ...item,
-          subItems: item?.subItems?.filter(
-            (sub) => sub?.name !== 'Feedback Modules'
-          ),
-        };
-      }
-
-      return item;
-    });
 };
 
 export const DashboardLayout = () => {

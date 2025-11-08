@@ -4,6 +4,13 @@ import { PublicRoute } from './PublicRoute';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { OtpPage } from '../pages/auth/OtpPage';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { BuildingsListPage } from '../pages/buildings/BuildingsListPage';
+import { CreateBuildingPage } from '../pages/buildings/CreateBuildingPage';
+import { BuildingDetailsPage } from '../pages/buildings/BuildingDetailsPage';
+import { BuildingSettingsPage } from '../pages/buildings/BuildingSettingsPage';
+import { BlocksPage } from '../pages/buildings/BlocksPage';
+import { FloorsPage } from '../pages/buildings/FloorsPage';
+import { UnitsPage } from '../pages/buildings/UnitsPage';
 
 /* current user roles */
 const getUserRoles = (): string[] => {
@@ -17,7 +24,8 @@ const getUserRoles = (): string[] => {
 
 /* Role default route mapping */
 const ROLE_DEFAULTS: Record<string, string> = {
-  SuperAdmin: '/users',
+  SuperAdmin: '/buildings',
+  BuildingAdmin: '/dashboard',
 };
 
 /* Component that decides where to redirect  */
@@ -27,7 +35,7 @@ const RedirectByRole = () => {
 
   // If we are already on a page that belongs to the user – stay there
   if (location.pathname !== '/' && location.pathname !== '') {
-    return null; // let the child route render
+    return null;
   }
 
   // Find the first matching default route
@@ -37,15 +45,15 @@ const RedirectByRole = () => {
     }
   }
 
-  // Fallback for unknown / Guest
-  return <Navigate to="/users" replace />;
+  // Fallback
+  return <Navigate to="/buildings" replace />;
 };
 
 /* ────── Main router ────── */
 export const AppRoutes = () => {
   return (
     <Routes>
-      {/* PUBLIC */}
+      {/* PUBLIC - Super Admin */}
       <Route
         path="/login"
         element={
@@ -63,6 +71,24 @@ export const AppRoutes = () => {
         }
       />
 
+      {/* PUBLIC - Building Admin */}
+      <Route
+        path="/:buildingId/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/:buildingId/otp"
+        element={
+          <PublicRoute>
+            <OtpPage />
+          </PublicRoute>
+        }
+      />
+
       {/* Private Route */}
       <Route
         path="/*"
@@ -72,17 +98,25 @@ export const AppRoutes = () => {
           </PrivateRoute>
         }
       >
-        {/* Default entry point – decides where to go based on current role */}
+        {/* Default entry point */}
         <Route index element={<RedirectByRole />} />
 
-        {/* All private pages  */}
-        {/* <Route path="users" element={<PeoplePage />} /> */}
+        {/* Super Admin Routes */}
+        <Route path="buildings" element={<BuildingsListPage />} />
+        <Route path="buildings/create" element={<CreateBuildingPage />} />
+        <Route path="buildings/:id" element={<BuildingDetailsPage />} />
 
-        {/* Catch-all inside private area (keeps the layout) */}
+        {/* Building Admin Routes */}
+        <Route path="dashboard" element={<BuildingSettingsPage />} />
+        <Route path="building/blocks" element={<BlocksPage />} />
+        <Route path="building/floors" element={<FloorsPage />} />
+        <Route path="building/units" element={<UnitsPage />} />
+
+        {/* Catch-all inside private area */}
         <Route path="*" element={<RedirectByRole />} />
       </Route>
 
-      {/* Global catch-all (outside private area) */}
+      {/* Global catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

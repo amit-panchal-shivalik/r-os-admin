@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, resetLoginUser } from '@/store/slices/authSlice';
+import { superAdminLogin, buildingAdminLogin, resetAuth } from '@/store/slices/authSlice';
 import { setToLocalStorage } from '@/utils/localstorage';
 import { showMessage } from '@/utils/Constant';
 import { Shield } from 'lucide-react';
@@ -10,23 +10,33 @@ import { Button } from '@/components/ui/button';
 export const LoginPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { buildingId } = useParams(); // Check if building ID is in URL
 
-    const { status, error }: any = useSelector((state: any) => state.auth);
+    const { status, error, userType }: any = useSelector((state: any) => state.auth);
 
     const [phoneNumber, setPhoneNumber] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    
+    const isBuildingAdmin = !!buildingId;
 
     useEffect(() => {
         if (status === 'complete') {
             showMessage('OTP sent successfully');
             setSubmitting(false);
-            navigate('/otp');
-            dispatch(resetLoginUser());
+            
+            // Store phone number and building ID if applicable
+            setToLocalStorage('user_mobile', phoneNumber);
+            if (isBuildingAdmin) {
+                setToLocalStorage('building_id', buildingId);
+            }
+            
+            navigate(isBuildingAdmin ? `/${buildingId}/otp` : '/otp');
+            dispatch(resetAuth());
         } else if (status === 'failed') {
             showMessage(error, 'error');
             setSubmitting(false);
         }
-    }, [status, navigate, dispatch, submitting]);
+    }, [status, navigate, dispatch, phoneNumber, isBuildingAdmin, buildingId]);
 
     const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/[^0-9]/g, '');
@@ -36,19 +46,34 @@ export const LoginPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
+        
         if (!phoneNumber) {
             showMessage('Please enter your mobile number.', 'error');
+            setSubmitting(false);
             return;
         }
 
         const phoneNumberPattern = /^[0-9]{10}$/;
         if (!phoneNumberPattern.test(phoneNumber)) {
             showMessage('Please enter a valid 10-digit mobile number.', 'error');
+            setSubmitting(false);
             return;
         }
 
-        await setToLocalStorage('user_mobile', phoneNumber);
-        dispatch(loginUser({ countryCode: '+91', phoneNumber }));
+        if (isBuildingAdmin) {
+            // Building Admin Login
+            dispatch(buildingAdminLogin({
+                countryCode: '+91',
+                phoneNumber,
+                buildingId: buildingId!
+            }));
+        } else {
+            // Super Admin Login
+            dispatch(superAdminLogin({
+                countryCode: '+91',
+                phoneNumber
+            }));
+        }
     };
 
     return (
@@ -62,7 +87,7 @@ export const LoginPage = () => {
                 </div>
                 <h1 className="my-4 text-2xl font-bold text-[#2E2E2E]">R-OS</h1>
                 <p className="inline-block px-[14px] py-[6px] h-[36px] rounded-full bg-[#EDEDED] text-[#757575] text-[14px] leading-[24px] font-semibold text-center">
-                    Admin Login
+                    {isBuildingAdmin ? 'Building Admin Login' : 'Super Admin Login'}
                 </p>
                 <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                     <div className="relative">
@@ -90,10 +115,10 @@ export const LoginPage = () => {
                     )}
                     <Button
                         type="submit"
-                        disabled={status === 'loading' || !(phoneNumber?.trim()?.length === 10)}
+                        disabled={status === 'pending' || !(phoneNumber?.trim()?.length === 10)}
                         className="w-full h-12 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium flex items-center justify-center gap-2"
                     >
-                        {status === 'loading' || submitting ? (
+                        {status === 'pending' || submitting ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                                 Sending OTP...
@@ -103,7 +128,6 @@ export const LoginPage = () => {
                         )}
                     </Button>
                 </form>
-                {/* Version Info */}
                 <p className="mt-6 text-xs text-gray-400">R-OS Admin v1.0.0</p>
             </div>
         </div>
