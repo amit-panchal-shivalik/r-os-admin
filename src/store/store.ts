@@ -4,6 +4,7 @@ import createSagaMiddleware from 'redux-saga';
 import authSlice from './slices/authSlice';
 import otpSlice from './slices/otpSlice';
 import rootSaga from './sagas/rootSaga';
+import mapSlice from './slices/mapSlice';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -11,6 +12,8 @@ export const store = configureStore({
   reducer: {
     auth: authSlice,
     otp: otpSlice,
+    map: mapSlice
+    ,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
