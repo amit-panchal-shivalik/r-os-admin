@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Layers, Search, ZoomIn, ZoomOut, Maximize2, Sidebar } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Latlng, Territory, getMapLocations, getTerritoryByLatLng } from '../../apis/apiService';
+import apiClient, { Latlng, Territory, getMapLocations, getTerritoryByLatLng, searchTerritory } from '../../apis/apiService';
 import {
   setCenter,
   setZoom,
@@ -252,34 +252,13 @@ const BaseMap = () => {
     if (!query.trim()) return;
 
     try {
-      // Example: Using OpenCage Geocoder (replace with your geocoding service)
-      const response = await fetch(
-        `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
-          query
-        )}&key=YOUR_API_KEY`
-      );
-      const data = await response.json();
+      const response = await searchTerritory(query);
+      console.log(response);
 
-      if (data.results && data.results.length > 0) {
-        const { lat, lng } = data.results[0].geometry;
+      if (response.results && response.results.length > 0) {
+        
 
-        // Pan the map to the searched location
-        map.current?.flyTo({ center: [lng, lat], zoom: 14 });
-
-        // Update Redux state
-        dispatch(setCenter([lng, lat]));
-      } else {
-        map.current?.flyTo({
-          center: [72.6049247, 23.013302], // Target coordinates
-          zoom: 14, // Target zoom level
-          speed: 0.8, // Animation speed (default is 1.2, lower is slower)
-          curve: 1.5, // Path curvature (default is 1.42, higher is more curved)
-          easing: (t) => t, // Easing function (default is linear)
-          essential: true, // If true, animation is considered essential for accessibility
-        });
-        // alert('Location not found. Please try again.');
-      }
-    } catch (error) {
+      }     } catch (error) {
       console.error('Error during geocoding:', error);
       alert('Failed to fetch location. Please try again.');
     }

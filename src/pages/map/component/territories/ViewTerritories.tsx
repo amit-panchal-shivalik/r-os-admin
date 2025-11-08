@@ -10,6 +10,7 @@ import EventsTab from "./tabs/events-tab"
 import { Building2, Users, Home, Lightbulb, TrendingUp, Shield, Calendar } from "lucide-react"
 import { Territory } from "@/apis/apiService"
 import ViewPulses from "../pulses/ViewPulses"
+import TPTab from "./tabs/tp-tab"
 
 const tabs = [
   { id: "overview", label: "Overview", icon: Building2 },
@@ -19,6 +20,7 @@ const tabs = [
   { id: "pulses", label: "Pulses", icon: TrendingUp },
   { id: "governance", label: "Governance", icon: Shield },
   { id: "events", label: "Events", icon: Calendar },
+  { id: "tp", label: "Town Plans", icon: Home }
 ]
 
 export function ViewTerritories({ territory }: any) {
@@ -41,6 +43,8 @@ export function ViewTerritories({ territory }: any) {
         return <GovernanceTab />
       case "events":
         return <EventsTab />
+      case "tp":
+        return <TPTab territory={territory} />
       default:
         return <OverviewTab />
     }
@@ -105,8 +109,8 @@ export function ViewTerritories({ territory }: any) {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1 px-3 py-3 text-xs font-medium whitespace-nowrap border-b-2 transition-all ${isActive
-                  ? "border-primary text-primary bg-secondary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "border-primary text-primary bg-secondary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
             >
               <Icon size={16} />

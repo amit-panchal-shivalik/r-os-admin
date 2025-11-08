@@ -75,4 +75,20 @@ export const getTerritoryByLatLng = async (
   }
 };
 
+export const searchTerritory = async (
+  query: string
+): Promise<any> => {
+  try {
+    const response = await apiClient.get(
+      `/api/v1/geodata/territory/search?q=${encodeURIComponent(query)}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching territory by name:", error);
+    return null;
+  }
+};
+
+
+
 export default apiClient;
