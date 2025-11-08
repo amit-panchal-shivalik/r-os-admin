@@ -1,9 +1,13 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { buildingDetailsSchema } from '../utils/validationSchemas/buildingDetailsSchema';
 import { CustomSelect } from '../components/ui/CustomSelect';
+import { updateBuilding, resetUpdateBuilding } from '../store/slices/buildingSlice';
+import { showMessage } from '../utils/Constant';
+import { UpdateBuildingPayload } from '../apis/building';
 
 type BuildingDetailsFormData = Yup.InferType<typeof buildingDetailsSchema>;
 
@@ -15,9 +19,27 @@ const buildingTypeOptions = [
 ];
 
 export const BuildingDetailsPage = () => {
+  const dispatch = useDispatch();
+  const {
+    building,
+    error,
+    status,
+  }: any = useSelector((state: any) => state.building);
+
   useEffect(() => {
     document.title = 'Building Details - Smart Society';
   }, []);
+
+  // Handle success and error messages
+  useEffect(() => {
+    if (status === 'complete' && building) {
+      showMessage('Building details updated successfully!', 'success');
+      dispatch(resetUpdateBuilding());
+    } else if (status === 'failed' && error) {
+      showMessage(error || 'Failed to update building details', 'error');
+      dispatch(resetUpdateBuilding());
+    }
+  }, [status, building, error, dispatch]);
 
   const {
     register,
@@ -42,9 +64,25 @@ export const BuildingDetailsPage = () => {
   });
 
   const onSubmit = (data: BuildingDetailsFormData) => {
-    console.log('Form submitted:', data);
-    // TODO: Handle form submission (API call, etc.)
-    alert('Building details saved successfully!');
+    // Map form data to API payload structure
+    const payload: UpdateBuildingPayload = {
+      society: {
+        name: data.societyName,
+        // logo and ref can be added later if needed
+      },
+      buildingName: data.buildingName,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      pinCode: data.pincode,
+      totalBlocks: data.totalBlocks,
+      totalUnits: data.totalUnits,
+      buildingType: data.buildingType,
+      // territory and createdBy can be added if needed
+    };
+
+    // Dispatch the update building action
+    dispatch(updateBuilding(payload));
   };
 
   return (
@@ -253,9 +291,17 @@ export const BuildingDetailsPage = () => {
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
+              disabled={status === 'loading'}
+              className="px-6 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Changes
+              {status === 'loading' ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2"></span>
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
             </button>
           </div>
         </form>
