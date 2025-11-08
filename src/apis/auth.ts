@@ -2,10 +2,10 @@ import { LoginPayload } from '@/types/LoginTypes';
 import { apiRequest } from './apiRequest';
 
 // API function to authenticate user
-export const authenticateUserApi = async (data: LoginPayload): Promise<LoginPayload> => {
-    return await apiRequest<LoginPayload>({
+export const authenticateUserApi = async (data: LoginPayload): Promise<any> => {
+    return await apiRequest<any>({
         method: 'POST',
-        url: 'users/admin/send-phone-otp',
+        url: 'users/admin/login',
         data: data,
     });
 };

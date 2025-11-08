@@ -5,6 +5,8 @@ import { LoginPage } from '../pages/auth/LoginPage';
 import { OtpPage } from '../pages/auth/OtpPage';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { DashboardPage } from '../pages/DashboardPage';
+import { BuildingDetailsPage } from '../pages/BuildingDetailsPage';
+import { PlaceholderPage } from '../pages/PlaceholderPage';
 
 /* current user roles */
 const getUserRoles = (): string[] => {
@@ -79,6 +81,7 @@ export const AppRoutes = () => {
 
         {/* All private pages  */}
         <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="building-details" element={<BuildingDetailsPage />} />
         {/* <Route path="users" element={<PeoplePage />} /> */}
 
         {/* Catch-all inside private area (keeps the layout) */}

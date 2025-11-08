@@ -22,15 +22,9 @@ export default {
 				'primary-gray': 'rgb(223, 223, 223)',
 				'primary-black': 'rgb(27, 27, 27)',
 				'primary-background-color': 'rgb(251, 251, 251)',
-
 			},
 			fontFamily: {
 				sans: ['Bricolage Grotesque', 'sans-serif'],
-			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
 				'accordion-down': {

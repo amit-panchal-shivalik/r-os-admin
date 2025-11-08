@@ -67,6 +67,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
+    "formik": "^2.4.8",
     "html2pdf.js": "^0.12.1",
     "input-otp": "^1.2.4",
     "libphonenumber-js": "^1.12.23",
@@ -115,7 +116,7 @@
     "i18next": "^23.13.0",
     "lovable-tagger": "^1.1.7",
     "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.11",
+    "tailwindcss": "^3.4.14",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"

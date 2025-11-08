@@ -13,7 +13,7 @@ const authSlice = createSlice({
     reducers: {
         // Login User Actions
         loginUser(state, action) {
-            state.status = 'pending';
+            state.status = 'loading';
         },
         loginUserSuccess(state, action) {
             state.user = action.payload;

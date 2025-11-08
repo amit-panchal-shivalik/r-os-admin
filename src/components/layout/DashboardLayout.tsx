@@ -1,187 +1,115 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
-  IconUsers,
-  IconMapPin,
-  IconChartBar,
-  IconBook,
   IconLogout,
   IconCaretDown,
-  IconDeviceDesktop,
-  IconSpeakerphone,
   IconCalendar,
   IconMessageCircle2,
-  IconTrendingUp,
-  IconHome,
   IconChevronLeft,
   IconChevronRight,
   IconMenu2,
-  IconX
+  IconX,
+  IconTool,
+  IconCar,
+  IconBuilding,
+  IconPhoto,
+  IconCalendarEvent,
+  IconAlertCircle,
+  IconHome,
+  IconUser,
+  IconSearch,
 } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
-import { Users2 } from 'lucide-react';
 import { useState, useEffect, useRef, useMemo } from 'react';
 
 // Navigation array
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: IconHome },
-  { name: 'People', href: '/users', icon: IconUsers },
   {
-    name: 'Territory',
-    href: '/territory',
-    icon: IconMapPin,
-    subItems: [
-      { name: 'Dashboard', href: '/territory/dashboard' },
-      { name: 'Projects', href: '/territory/project' },
-      { name: 'Land', href: '/territory/land/dashboard' },
-      { name: 'Vendors', href: '/territory/vendor/dashboard' },
-      { name: 'Store', href: '/territory/store/dashboard' },
-      { name: 'Institute', href: '/territory/institute/dashboard' },
-    ],
+    name: 'Dashboard',
+    href: '/dashboard',
+    icon: IconHome,
   },
-  { name: 'Desk', href: '/follow-up', icon: IconDeviceDesktop },
-  { name: 'Event', href: '/event', icon: IconCalendar },
-  { name: 'Knowledge', href: '/article-listing', icon: IconBook },
-  { name: 'Channel Sales', href: '/channel-sales', icon: IconChartBar },
   {
-    name: 'Campaign',
-    href: '/campaign-list',
-    icon: IconSpeakerphone,
+    name:'Building Settings',
+    // href: '/buildings',
+    icon: IconBuilding,
     subItems: [
-      { name: 'Campaign', href: '/campaign-list' },
-      { name: 'Add Campaign', href: '/campaign-add' },
+      { name: 'Building Details', href: '/building-details' },
+      { name: 'Floors', href: '/floors' },
+      { name: 'Blocks', href: '/blocks' },
+      { name: 'Units', href: '/units' },
+      { name: 'Parking', href: '/parking' },
+      { name: 'Notice Board', href: '/notice-board' },
+      { name: 'Amenities', href: '/amenities' },
     ],
   },
   {
-    name: 'Employee',
-    href: '/employee/dashboard',
-    icon: Users2,
+    name: 'Users',
+    href: '/users',
+    icon: IconUser,
     subItems: [
-      { name: 'Dashboard', href: '/employee/dashboard' },
-      { name: 'Employee List', href: '/employee/employee-list' },
-      // { name: 'Attendance', href: '/employee/attendance' },
-      { name: 'Designation', href: '/employee/designation' },
-      { name: 'Department', href: '/employee/department' },
-      { name: 'Branch', href: '/employee/branch' },
-      { name: 'Seating Office', href: '/employee/seating-office' },
-      { name: 'Shift Management', href: '/employee/shift-management' },
-      { name: 'Jobs', href: '/employee/jobs' },
-      { name: 'Report', href: '/employee/report' },
+      { name: 'Members', href: '/members' },
+      { name: 'Society Employee', href: '/society-employee' },
+      { name: 'Committee Member', href: '/committee-member' },
     ],
   },
   {
-    name: 'Feedback',
-    href: '/feedback-list',
+    name: 'Maintenance & Bill',
+    href: '/maintenance-bill',
+    icon: IconTool,
+    subItems: [
+      { name: 'Add Bill', href: '/maintenance-bill/add-bill' },
+      { name: 'Add Maintenance', href: '/maintenance-bill/add-maintenance' },
+      { name: 'View Maintenance & Bill', href: '/maintenance-bill/view' },
+    ],
+  },
+  {
+    name: 'Complaints',
+    href: '/complaints',
     icon: IconMessageCircle2,
+  },
+  {
+    name: 'Parking',
+    href: '/parking',
+    icon: IconCar,
     subItems: [
-      { name: 'Feedback Modules', href: '/feedback-modules-list' },
-      { name: 'Feedback List', href: '/feedback-list' },
+      { name: 'Members Vehicles', href: '/parking/members-vehicles' },
+      { name: 'Vehicle In/Out', href: '/parking/vehicle-in-out' },
+      { name: 'Parking Settings', href: '/parking/settings' },
+      { name: 'Tag Reader Report', href: '/parking/tag-reader-report' },
+      { name: 'RFID Report', href: '/parking/rfid-report' },
     ],
   },
   {
-    name: 'Growth Partner',
-    href: '/growth-partner-list',
-    icon: IconTrendingUp,
+    name: 'Events',
+    href: '/events',
+    icon: IconCalendar,
+    subItems: [
+      { name: 'Add Event', href: '/events/add' },
+      { name: 'View Events', href: '/events/view' },
+    ],
+  },
+  {
+    name: 'Building Gallery',
+    href: '/building-gallery',
+    icon: IconPhoto,
+  },
+  {
+    name: 'Book Amenity',
+    href: '/book-amenity',
+    icon: IconCalendarEvent,
+  },
+  {
+    name: 'Penalty',
+    href: '/penalty',
+    icon: IconAlertCircle,
   },
 ];
 
-// Mapping of roles allowed tabs
-const roleToTabs: Record<string, string[]> = {
-  SuperAdmin: navigation.map((item) => item.name), // all
-  LandManager: ['Dashboard', 'Desk', 'Territory'],
-  LandExecutive: ['Dashboard', 'Desk', 'Territory'],
-  FundManager: ['Dashboard', 'Desk'],
-  FundExecutive: ['Dashboard', 'Desk'],
-  ProjectSalesManager: ['Dashboard', 'Desk'],
-  ProjectPreSales: ['Dashboard', 'Desk'],
-  ProjectSiteSales: ['Dashboard', 'Desk'],
-  EventAdmin: ['Dashboard', 'Event'],
-  KnowledgeAdmin: ['Dashboard', 'Knowledge'],
-  CPManager: ['Dashboard', 'Desk', 'Channel Sales'],
-  CPExecutive: ['Dashboard', 'Desk', 'Channel Sales'],
-  CampaignAdmin: ['Dashboard', 'Campaign'],
-  VendorAdmin: ['Dashboard', 'Territory'],
-  HRManager: ['Dashboard', 'Employee'],
-  HRExecutive: ['Dashboard', 'Employee'],
-  CSWebsiteAdmin: ['Dashboard', 'Desk'],
-  FurnitureManager: ['Dashboard', 'Desk', 'Territory'],
-  FurnitureSalesExecutive: ['Dashboard', 'Desk', 'Territory'],
-  FurnitureB2BAdmin: ['Dashboard', 'Desk', 'Territory'],
-  FurnitureDealerAdmin: ['Dashboard', 'Desk', 'Territory'],
-  GrowthPartnerAdmin: ['Dashboard', 'Growth Partner'],
-  InstituteManager: ['Dashboard', 'Desk'],
-  InstituteExecutive: ['Dashboard', 'Desk']
-};
-
-// Filter navigation based on user roles
+// Filter navigation based on user roles - simplified for Smart Society Management
 const getFilteredNavigation = (roles: string[] = []) => {
-  if (roles.includes('SuperAdmin')) {
-    return navigation; // full access
-  }
-
-  const allowed = new Set<string>();
-  const landRestricted = roles?.some((r) =>
-    ['LandManager', 'LandExecutive']?.includes(r)
-  );
-
-  const furnitureRestricted = roles?.some((role) =>
-    ['FurnitureManager', 'FurnitureSalesExecutive', 'FurnitureB2BAdmin', 'FurnitureDealerAdmin']?.includes(role)
-  );
-
-  const vendorRestricted = roles.includes('VendorAdmin');
-
-  roles?.forEach((role) => {
-    const tabs = roleToTabs[role];
-    if (tabs) {
-      tabs?.forEach((tab) => allowed.add(tab));
-    }
-  });
-
-  return navigation
-    ?.filter((item) => {
-      // Allow Dashboard and Feedback sections for all roles
-      if (item.name === 'Dashboard' || item.name === 'Feedback') return true;
-      return allowed?.has(item.name);
-    })
-    ?.map((item) => {
-      if (item?.name === 'Territory') {
-        const subItems: { name: string; href: string }[] = [];
-
-        // Add Land tab if land-related role
-        if (landRestricted) {
-          subItems?.push({ name: 'Land', href: '/territory/land/dashboard' });
-        }
-
-        // Add Store tab if furniture-related role
-        if (furnitureRestricted) {
-          subItems?.push({ name: 'Store', href: '/territory/store/dashboard' });
-        }
-
-        // Add Vendor tabs if vendor role
-        if (vendorRestricted) {
-          subItems?.push(
-            { name: 'Dashboard', href: '/territory/dashboard' },
-            { name: 'Vendors', href: '/territory/vendor/dashboard' }
-          );
-        }
-
-        // Only return if we actually have subItems
-        if (subItems?.length > 0) {
-          return { ...item, subItems };
-        }
-      }
-
-      // Alllow Feedback Modules section only for SuperAdmin role
-      if (item?.name === 'Feedback') {
-        return {
-          ...item,
-          subItems: item?.subItems?.filter(
-            (sub) => sub?.name !== 'Feedback Modules'
-          ),
-        };
-      }
-
-      return item;
-    });
+  // For now, return all navigation items
+  // You can add role-based filtering here if needed
+  return navigation;
 };
 
 export const DashboardLayout = () => {
@@ -210,7 +138,7 @@ export const DashboardLayout = () => {
   });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
-  const isInitialMount = useRef(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const userMenuRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -237,59 +165,20 @@ export const DashboardLayout = () => {
     return getFilteredNavigation(effectiveRoles);
   }, [effectiveRoles]);
 
-  // Handle initial navigation - only run once on mount
+  // Sync active path and tab states with current location
   useEffect(() => {
-    if (!isInitialMount.current) return;
-    
-    // Defer navigation to next tick to avoid updating router during render
-    const timeoutId = setTimeout(() => {
-      if (!isInitialMount.current) return;
-      
-      isInitialMount.current = false;
-      const storedPath = localStorage.getItem('lastActivePath');
-      const currentPath = location.pathname;
-      
-      // Only navigate if we're not already on a valid path
-      const isCurrentPathValid = filteredNavigation.some(
-        (item) =>
-          item.href === currentPath ||
-          (item.subItems && item.subItems.some((sub) => sub.href === currentPath))
-      );
-      
-      if (isCurrentPathValid && currentPath !== '/') {
-        // Already on a valid path, no need to navigate
-        return;
+    // Update active path when location changes
+    setActivePath((prevActivePath) => {
+      if (prevActivePath !== location.pathname) {
+        localStorage.setItem('lastActivePath', location.pathname);
+        return location.pathname;
       }
-      
-      const isValidPath = storedPath && filteredNavigation.some(
-        (item) =>
-          item.href === storedPath ||
-          (item.subItems && item.subItems.some((sub) => sub.href === storedPath))
-      );
-      
-      if (storedPath && isValidPath && storedPath !== currentPath) {
-        navigate(storedPath, { replace: true });
-      } else if (!isValidPath || !storedPath) {
-        // If stored path is invalid or doesn't exist, navigate to default
-        const defaultPath = '/dashboard';
-        localStorage.setItem('lastActivePath', defaultPath);
-        if (currentPath !== defaultPath) {
-          navigate(defaultPath, { replace: true });
-        }
-      }
-    }, 0);
-    
-    return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+      return prevActivePath;
+    });
 
-  useEffect(() => {
-    if (activePath !== location.pathname) {
-      setActivePath(location.pathname);
-      localStorage.setItem('lastActivePath', location.pathname);
-    }
-
-    const updatedTabOpenStates = { ...tabOpenStates };
+    // Update tab open states based on current path
+    setTabOpenStates((prevTabOpenStates) => {
+      const updatedTabOpenStates = { ...prevTabOpenStates };
     let hasChanges = false;
 
     filteredNavigation.forEach((item) => {
@@ -305,10 +194,12 @@ export const DashboardLayout = () => {
     });
 
     if (hasChanges) {
-      setTabOpenStates(updatedTabOpenStates);
       localStorage.setItem('tabOpenStates', JSON.stringify(updatedTabOpenStates));
+        return updatedTabOpenStates;
     }
-  }, [location.pathname, activePath, filteredNavigation]);
+      return prevTabOpenStates;
+    });
+  }, [location.pathname, filteredNavigation]);
 
   const handleLogout = () => {
     logout();
@@ -436,7 +327,7 @@ export const DashboardLayout = () => {
           mb-1
           text-primary-black
           ${isActive ? 'bg-primary-gray/80 font-semibold' : 'bg-transparent font-medium hover:bg-primary-gray/30'}
-          text-sm transition-all duration-300 ease-in-out
+          text-sm
           list-none relative
           ${hasSubItems ? 'mb-1 min-h-[48px]' : 'mb-0'}
           cursor-pointer
@@ -451,7 +342,7 @@ export const DashboardLayout = () => {
               <span className={`text-sm ${isActive ? 'font-medium' : 'font-normal'}`}>{item.name}</span>
               {hasSubItems && (
                 <div
-                  className={`ml-auto transition-transform duration-300 ${
+                  className={`ml-auto ${
                     tabOpenStates[item.href] ? 'rotate-180' : 'rotate-0'
                   }`}
                 >
@@ -462,7 +353,7 @@ export const DashboardLayout = () => {
           )}
         </div>
         {hasSubItems && tabOpenStates[item.href] && shouldShowText && (
-          <ul className="mt-2 pt-3 pl-7 list-none animate-slideDown">
+          <ul className="mt-2 pt-3 pl-7 list-none">
             {item.subItems.map((subItem) => (
               <li
                 key={subItem.name}
@@ -470,7 +361,7 @@ export const DashboardLayout = () => {
                   p-2.5 text-[var(--primary-black)]
                   text-xs
                   ${activePath === subItem.href ? 'font-medium' : 'font-normal'}
-                  cursor-pointer transition-all duration-300 rounded
+                  cursor-pointer rounded
                   mb-2 flex items-center
                   `}
                 onClick={(e) => {
@@ -545,11 +436,11 @@ export const DashboardLayout = () => {
         className={`
           fixed lg:static
           inset-y-0 left-0 z-40
-          transition-all duration-300 ease-in-out
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           ${sidebarCollapsed && !sidebarHovered ? 'w-20' : 'w-[280px] lg:w-[300px]'}
           flex flex-col
           border-r border-gray-200
+          bg-primary-white
         `}
         onMouseEnter={() => {
           // Only enable hover expand on desktop (lg breakpoint and above)
@@ -597,7 +488,7 @@ export const DashboardLayout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col  overflow-hidden">
         {/* Header */}
         <header className="h-[60px] sm:h-[70px] bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
@@ -623,10 +514,22 @@ export const DashboardLayout = () => {
               )}
             </button>
 
-            {/* Welcome Text */}
-            <h1 className="text-xl font-bold text-gray-900 hidden sm:block">
-              Welcome back, {userInfo.firstName || 'User'} {userInfo.lastName || ''}
-            </h1>
+            {/* Search Bar */}
+            <div className="hidden md:flex items-center relative ml-4">
+              <div className="relative">
+                <IconSearch 
+                  size={18} 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+                />
+                <input
+                  type="text"
+                  placeholder="Search by Lead, Inquiry, Follow-Up, etc..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-64 lg:w-80 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                />
+              </div>
+            </div>
           </div>
 
           {/* User Menu */}
