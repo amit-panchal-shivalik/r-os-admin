@@ -3,7 +3,19 @@ import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { OtpPage } from '../pages/auth/OtpPage';
-import { DashboardLayout } from '../components/layout/DashboardLayout';
+
+import DashboardPage from '@/pages/auth/DashboardPage';
+import Dashboard from '@/pages/Dashboard';
+import LeaveTypes from '@/pages/leave/LeaveTypes';
+import LeaveGroups from '@/pages/leave/LeaveGroups';
+import BulkLeaveAssignment from '@/pages/leave/BulkLeaveAssignment';
+import LeaveBalance from '@/pages/leave/LeaveBalance';
+import LeaveRequests from '@/pages/leave/LeaveRequests';
+import HolidayList from '@/pages/holidays/HolidayList';
+import HolidayGroups from '@/pages/holidays/HolidayGroups';
+import AssignHolidayGroups from '@/pages/holidays/AssignHolidayGroups';
+import Employees from '@/pages/Employees';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 /* current user roles */
 const getUserRoles = (): string[] => {
@@ -45,7 +57,27 @@ const RedirectByRole = () => {
 export const AppRoutes = () => {
   return (
     <Routes>
+      {/* Ensure root dashboard route renders the same layout */}
+      <Route path="/" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+      <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+          <Route path="/leave/types" element={<DashboardLayout><LeaveTypes /></DashboardLayout>} />
+          <Route path="/leave/groups" element={<DashboardLayout><LeaveGroups /></DashboardLayout>} />
+          <Route path="/leave/bulk-assign" element={<DashboardLayout><BulkLeaveAssignment /></DashboardLayout>} />
+          <Route path="/leave/balance" element={<DashboardLayout><LeaveBalance /></DashboardLayout>} />
+          <Route path="/leave/requests" element={<DashboardLayout><LeaveRequests /></DashboardLayout>} />
+          <Route path="/holidays/list" element={<DashboardLayout><HolidayList /></DashboardLayout>} />
+          <Route path="/holidays/groups" element={<DashboardLayout><HolidayGroups /></DashboardLayout>} />
+          <Route path="/holidays/assign" element={<DashboardLayout><AssignHolidayGroups /></DashboardLayout>} />
+          <Route path="/employees" element={<DashboardLayout><Employees /></DashboardLayout>} />
       {/* PUBLIC */}
+      {/* <Route
+        path="/dashboard"
+        element={
+          <PublicRoute>
+            <DashboardPage />
+          </PublicRoute>
+        }
+      /> */}
       <Route
         path="/login"
         element={
