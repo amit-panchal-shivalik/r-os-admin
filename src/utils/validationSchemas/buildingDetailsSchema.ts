@@ -48,5 +48,15 @@ export const buildingDetailsSchema = Yup.object().shape({
   buildingType: Yup.string()
     .required('Building Type is required')
     .oneOf(['Residential', 'Commercial', 'Mixed', 'Industrial'], 'Please select a valid building type'),
+  logo: Yup.mixed<File>()
+    .nullable()
+    .test('fileSize', 'Logo size must be less than 5MB', (value) => {
+      if (!value) return true;
+      return value.size <= 5 * 1024 * 1024;
+    })
+    .test('fileType', 'Logo must be an image (JPEG, PNG, JPG)', (value) => {
+      if (!value) return true;
+      return ['image/jpeg', 'image/jpg', 'image/png'].includes(value.type);
+    }),
 });
 

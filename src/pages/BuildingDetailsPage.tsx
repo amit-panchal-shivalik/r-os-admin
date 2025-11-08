@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,6 +25,9 @@ export const BuildingDetailsPage = () => {
     error,
     status,
   }: any = useSelector((state: any) => state.building);
+
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     document.title = 'Building Details - Smart Society';
@@ -60,15 +63,52 @@ export const BuildingDetailsPage = () => {
       totalBlocks: 0,
       totalUnits: 0,
       buildingType: '',
+      logo: null,
     },
   });
 
-  const onSubmit = (data: BuildingDetailsFormData) => {
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        showMessage('Please upload a valid image file (JPEG, PNG, or GIF)', 'error');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showMessage('Logo size must be less than 5MB', 'error');
+        return;
+      }
+      setValue('logo', file, { shouldValidate: true });
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const onSubmit = async (data: BuildingDetailsFormData) => {
+    let logoBase64: string | undefined;
+    if (data.logo && data.logo instanceof File) {
+      try {
+        logoBase64 = await fileToBase64(data.logo);
+      } catch (error) {
+        showMessage('Failed to process logo file', 'error');
+        return;
+      }
+    }
+
     // Map form data to API payload structure
     const payload: UpdateBuildingPayload = {
       society: {
         name: data.societyName,
-        // logo and ref can be added later if needed
+        logo: logoBase64, // Send base64 string or undefined
       },
       buildingName: data.buildingName,
       address: data.address,
@@ -132,6 +172,58 @@ export const BuildingDetailsPage = () => {
                 {errors.societyName && (
                   <p className="mt-1 text-sm text-red-500">{errors.societyName.message as string}</p>
                 )}
+              </div>
+
+              <div className="md:col-span-2">
+                <label htmlFor="logo" className="block text-sm font-medium text-gray-700 mb-1">
+                  Society Logo
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      id="logo"
+                      ref={logoInputRef}
+                      accept="image/jpeg,image/jpg,image/png,image/gif"
+                      onChange={handleLogoChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      {logoPreview ? 'Change Logo' : 'Upload Logo'}
+                    </button>
+                  </div>
+                  {logoPreview && (
+                    <div className="relative">
+                      <img
+                        src={logoPreview}
+                        alt="Logo preview"
+                        className="w-16 h-16 object-cover rounded-lg border border-gray-300"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLogoPreview(null);
+                          setValue('logo', null);
+                          if (logoInputRef.current) {
+                            logoInputRef.current.value = '';
+                          }
+                        }}
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                        title="Remove logo"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {errors.logo && (
+                  <p className="mt-1 text-sm text-red-500">{errors.logo.message as string}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">Accepted formats: JPEG, PNG, GIF (Max 5MB)</p>
               </div>
 
               {/* Address - Full width */}
@@ -283,7 +375,12 @@ export const BuildingDetailsPage = () => {
                   totalBlocks: 0,
                   totalUnits: 0,
                   buildingType: '',
+                  logo: null,
                 });
+                setLogoPreview(null);
+                if (logoInputRef.current) {
+                  logoInputRef.current.value = '';
+                }
               }}
               className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
