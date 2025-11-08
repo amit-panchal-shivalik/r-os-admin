@@ -1,60 +1,36 @@
-# R-OS Admin Dashboard  
-**Real Estate Management System**
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.5.3-3178C6?logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-5.4.1-646CFF?logo=vite&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.11-38BDF8?logo=tailwind-css&logoColor=white)
-![Mantine v8](https://img.shields.io/badge/Mantine-8.1.3-339AF0?logo=mantine&logoColor=white)
-![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2.8.2-764ABC?logo=redux&logoColor=white)
-![Axios](https://img.shields.io/badge/Axios-1.10.0-5A29E4?logo=axios&logoColor=white)
+## Getting Started
 
----
-
-## R-OS Admin – A **Powerful, Scalable & Modern** Real Estate Management Dashboard
-
-Built with **React 18 + TypeScript + Vite**, this admin panel empowers property managers, agents, and enterprises with **real-time analytics, intuitive UI, and seamless backend integration**.
-
-Powered by:
-- **Mantine UI v8**
-- **Tailwind CSS**
-- **Redux Toolkit**
-- **Axios**
-- **React Router**
-- **React Hook Form**
-
----
-
-## Project Structure
+First, run the development server:
 
 ```bash
-src/
-├── apis/           # Axios instances & API services
-├── assets/         # Images, icons, fonts
-├── components/     # Reusable UI components
-├── hooks/          # Custom hooks (useForm, useAuth, etc.)
-├── lib/            # Utilities, formatters, helpers
-├── pages/          # Route-level page components
-├── routing/        # React Router config & guards
-├── store/          # Redux Toolkit slices, RTK Query
-├── types/          # Shared TypeScript interfaces
-├── utils/          # General helper functions
-├── App.tsx         # Root layout & providers
-├── main.tsx        # Entry point with ReactDOM
-└── vite-env.d.ts   # Vite + TS environment types
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-**BRANCH PROTECTION ACTIVE**
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-Protected Branches:
-- `main`
-- `production`
-- `staging`
-- `development`
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-Rules:
-- No direct push
-- No force push
-- No deletion
+## Learn More
 
-All changes via Pull Request only.
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

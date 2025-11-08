@@ -1,0 +1,335 @@
+[00:00:02.215] Server  LOG      ✓ Ready in 1886ms
+[00:00:02.249] Server  WARN     ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:00:05.278] Server  WARN     ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:00:06.264] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:09.003] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:18.882] Server  LOG      ○ Compiling /auth/register ...
+[00:00:28.525] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:04:53.889] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:46:31.402] Server  WARN     ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[00:46:33.552] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:57:56.953] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:02:52.293] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:03:05.078] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:03:07.506] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:09:11.633] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[01:09:11.633] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:09:11.633] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[01:09:11.633] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:10:04.734] Server  LOG      ○ Compiling /community/[id] ...
+[01:10:36.693] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:10:39.138] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:22:04.149] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:23:21.645] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:29:08.542] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[01:29:08.542] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:29:08.542] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[01:29:08.542] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:29:10.811] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[01:29:10.811] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:29:10.811] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[01:29:10.811] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:30:07.184] Browser ERROR   uncaughtError: TypeError: Cannot read properties of undefined (reading 'image')
+[01:30:12.952] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:35:44.786] Server  LOG      ○ Compiling /community/[id]/marketplace ...
+[01:49:44.487] Server  LOG      ○ Compiling /dashboard ...
+[01:49:56.339] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:52:51.819] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[01:52:51.819] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[01:52:51.819] Browser ERROR   `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+[01:52:51.819] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[02:00:11.160] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:03:43.153] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:14:29.839] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:14:30.342] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <RegisterPage params={Promise} searchParams={Promise}>
+      <div className="flex min-h...">
+        <div>
+        <Card className="w-full max...">
+          <div data-slot="card" className="bg-card te...">
+            <CardHeader>
+            <form onSubmit={function}>
+              <CardContent className="space-y-4">
+                <div data-slot="card-content" className="px-6 space...">
+                  <div>
+                  <div>
+                  <div>
+                  <div className="space-y-2 ...">
+                    <Label>
+                    <Select ref={null} isMulti={true} styles={{...}} options={[...]} placeholder="Select loc..." ...>
+                      <SelectContainer clearValue={function} cx={function} getStyles={function} getClassNames={function} ...>
+                        <EmotionCssPropInternal css={{label:"con...", ...}} className="" id={undefined} ...>
+                          <Insertion>
+                          <div className="css-b62m3t..." id={undefined} onKeyDown={function}>
+                            <LiveRegion clearValue={function} cx={function} getStyles={function} getClassNames={function} ...>
+                              <A11yText id="react-sele...">
+                                <EmotionCssPropInternal css={{name:"1f43...", ...}} id="react-sele..." ...>
+                                  <Insertion>
+                                  <span
++                                   id="react-select-3-live-region"
+-                                   id="react-select-2-live-region"
+                                    className="css-1f43avz-a11yText-A11yText"
+                                  >
+                              ...
+                            <Control clearValue={function} cx={function} getStyles={function} getClassNames={function} ...>
+                              <EmotionCssPropInternal ref={function} css={{label:"con...", ...}} className="" ...>
+                                <Insertion>
+                                <div
++                                 className="css-1c090uv-control"
+-                                 className="css-10ln6ui-control"
+                                  onMouseDown={function}
+                                  onTouchEnd={function}
+                                  aria-disabled={undefined}
+                                  ref={function}
+                                >
+                                  ...
+                                    <div className="css-hlgwow">
+                                      <Placeholder clearValue={function} cx={function} getStyles={function} ...>
+                                        <EmotionCssPropInternal css={{label:"pla...", ...}} className="" ...>
+                                          <Insertion>
+                                          <div
++                                           className="css-5o29mi-placeholder"
+-                                           className="css-1raop2h-placeholder"
++                                           id="react-select-3-placeholder"
+-                                           id="react-select-2-placeholder"
+                                          >
++                                           Select localities
+                                      <Input clearValue={function} cx={function} getStyles={function} ...>
+                                        <EmotionCssPropInternal css={{...}} className="" data-value="" ...>
+                                          <Insertion>
+                                          <div
++                                           className="css-1egk63w"
+-                                           className="css-1fotykt"
+                                            data-value=""
+                                          >
+                                            <input
+                                              className=""
+                                              ref={function}
+                                              style={{label:"input",color:"inherit",background:0,opacity:1,width:"100%",gridArea:"1 / 2",font:"...", ...}}
+                                              disabled={false}
+                                              autoCapitalize="none"
+                                              autoComplete="off"
+                                              autoCorrect="off"
++                                             id="react-select-3-input"
+-                                             id="react-select-2-input"
+                                              onBlur={function}
+                                              onChange={function}
+                                              onFocus={function}
+                                              spellCheck="false"
+                                              tabIndex={0}
+                                              form={undefined}
+                                              type="text"
+                                              value=""
+                                              aria-autocomplete="list"
+                                              aria-expanded={false}
+                                              aria-haspopup={true}
+                                              aria-errormessage={undefined}
+                                              aria-invalid={undefined}
+                                              aria-label={undefined}
+                                              aria-labelledby={undefined}
+                                              aria-required={undefined}
+                                              role="combobox"
+                                              aria-activedescendant=""
++                                             aria-describedby="react-select-3-placeholder"
+-                                             aria-describedby="react-select-2-placeholder"
+                                            >
+                                  ...
+                  <div className="space-y-2 ...">
+                    <Label>
+                    <Select ref={null} isMulti={true} styles={{...}} options={[...]} placeholder="Select cat..." ...>
+                      <SelectContainer clearValue={function} cx={function} getStyles={function} getClassNames={function} ...>
+                        <EmotionCssPropInternal css={{label:"con...", ...}} className="" id={undefined} ...>
+                          <Insertion>
+                          <div className="css-b62m3t..." id={undefined} onKeyDown={function}>
+                            <LiveRegion clearValue={function} cx={function} getStyles={function} getClassNames={function} ...>
+                              <A11yText id="react-sele...">
+                                <EmotionCssPropInternal css={{name:"1f43...", ...}} id="react-sele..." ...>
+                                  <Insertion>
+                                  <span
++                                   id="react-select-5-live-region"
+-                                   id="react-select-3-live-region"
+                                    className="css-1f43avz-a11yText-A11yText"
+                                  >
+                              ...
+                            <Control clearValue={function} cx={function} getStyles={function} getClassNames={function} ...>
+                              <EmotionCssPropInternal ref={function} css={{label:"con...", ...}} className="" ...>
+                                <Insertion>
+                                <div
++                                 className="css-1c090uv-control"
+-                                 className="css-10ln6ui-control"
+                                  onMouseDown={function}
+                                  onTouchEnd={function}
+                                  aria-disabled={undefined}
+                                  ref={function}
+                                >
+                                  ...
+                                    <div className="css-hlgwow">
+                                      <Placeholder clearValue={function} cx={function} getStyles={function} ...>
+                                        <EmotionCssPropInternal css={{label:"pla...", ...}} className="" ...>
+                                          <Insertion>
+                                          <div
++                                           className="css-5o29mi-placeholder"
+-                                           className="css-1raop2h-placeholder"
++                                           id="react-select-5-placeholder"
+-                                           id="react-select-3-placeholder"
+                                          >
++                                           Select categories
+                                      <Input clearValue={function} cx={function} getStyles={function} ...>
+                                        <EmotionCssPropInternal css={{...}} className="" data-value="" ...>
+                                          <Insertion>
+                                          <div
++                                           className="css-1egk63w"
+-                                           className="css-1fotykt"
+                                            data-value=""
+                                          >
+                                            <input
+                                              className=""
+                                              ref={function}
+                                              style={{label:"input",color:"inherit",background:0,opacity:1,width:"100%",gridArea:"1 / 2",font:"...", ...}}
+                                              disabled={false}
+                                              autoCapitalize="none"
+                                              autoComplete="off"
+                                              autoCorrect="off"
++                                             id="react-select-5-input"
+-                                             id="react-select-3-input"
+                                              onBlur={function}
+                                              onChange={function}
+                                              onFocus={function}
+                                              spellCheck="false"
+                                              tabIndex={0}
+                                              form={undefined}
+                                              type="text"
+                                              value=""
+                                              aria-autocomplete="list"
+                                              aria-expanded={false}
+                                              aria-haspopup={true}
+                                              aria-errormessage={undefined}
+                                              aria-invalid={undefined}
+                                              aria-label={undefined}
+                                              aria-labelledby={undefined}
+                                              aria-required={undefined}
+                                              role="combobox"
+                                              aria-activedescendant=""
++                                             aria-describedby="react-select-5-placeholder"
+-                                             aria-describedby="react-select-3-placeholder"
+                                            >
+                                  ...
+              ...
+
+[02:15:32.936] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:16:56.346] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:17:01.370] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:17:40.602] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:30:13.348] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:30:18.021] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:31:23.989] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:31:58.352] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:34:09.985] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:35:11.669] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:49:54.597] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:54:27.274] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:55:13.136] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:56:33.485] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:03:26.667] Server  LOG      ○ Compiling /community/[id]/pulses ...
+[03:03:33.083] Server  LOG      ○ Compiling /community/[id]/marketplace ...
+[03:03:45.384] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:05:58.056] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[05:05:58.056] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[05:06:06.038] Server  LOG      ○ Compiling /_not-found ...
+[05:06:06.724] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[05:06:06.724] Browser WARN    Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+[05:06:06.724] Browser ERROR   {"code":"ERR_NETWORK","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"https://atom.com","data":"{\"type\":\"want\",\"title\":\"\",\"description\":\"\",\"communityId\":\"art-collective\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/api/marketplace","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Network Error","name":"AxiosError","stack":"AxiosError: Network Error\n    at XMLHttpRequest.handleError (webpack-internal:///(app-pages-browser)/./node_modules/axios/lib/adapters/xhr.js:126:20)\n    at Axios.request (webpack-internal:///(app-pages-browser)/./node_modules/axios/lib/core/Axios.js:57:41)\n    at async createListing (webpack-internal:///(app-pages-browser)/./store/marketplaceStore.ts:115:34)\n    at async handleSubmit (webpack-internal:///(app-pages-browser)/./components/community/MarketplaceSection.tsx:58:13)"}
+[05:06:24.374] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:07:40.224] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:15:22.050] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:16:51.981] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:43:17.823] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[05:46:07.735] Server  LOG        Reload env: .env.local
+[06:12:22.489] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[06:17:30.104] Browser WARN    ./app/auth/register/page.tsx
+Attempted import error: 'fetchJobTitles' is not exported from '@/lib/api' (imported as 'fetchJobTitles').
+
+Import trace for requested module:
+./app/auth/register/page.tsx
+[06:17:30.104] Browser WARN    ./app/auth/register/page.tsx
+Attempted import error: 'fetchLocalities' is not exported from '@/lib/api' (imported as 'fetchLocalities').
+
+Import trace for requested module:
+./app/auth/register/page.tsx
+[06:17:30.104] Browser WARN    ./app/auth/register/page.tsx
+Attempted import error: 'fetchCategories' is not exported from '@/lib/api' (imported as 'fetchCategories').
+
+Import trace for requested module:
+./app/auth/register/page.tsx
+[06:27:49.591] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[06:28:05.578] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[06:47:49.254] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[07:07:53.327] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.338] Server  ERROR    ⨯ "unhandledRejection:" Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.342] Server  ERROR    ⨯ "unhandledRejection: " Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.396] Server  LOG        Reload env: .env
+[07:07:53.412] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.420] Server  ERROR    ⨯ "unhandledRejection:" Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.421] Server  ERROR    ⨯ "unhandledRejection: " Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.429] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.432] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.487] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.490] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.540] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.542] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.622] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.624] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.677] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.679] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.726] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.730] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.760] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.763] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.837] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:07:53.839] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:16:09.500] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
+[07:16:09.504] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Users\Gateway\Documents\i-hub\community-frontend\app'
