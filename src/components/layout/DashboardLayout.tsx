@@ -12,7 +12,7 @@ import {
   Divider,
   Modal,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import {
   IconUsers,
   IconMapPin,
@@ -193,14 +193,23 @@ const getFilteredNavigation = (roles: string[] = []) => {
 };
 
 export const DashboardLayout = () => {
-  const [opened, { toggle, close }] = useDisclosure();
+  const [opened, { toggle, close }] = useDisclosure(false);
   const { user, logout }: any = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  
+  console.log('DashboardLayout - isMobile:', isMobile, 'opened:', opened);
+  
+  useEffect(() => {
+    console.log('DashboardLayout - useEffect - isMobile:', isMobile, 'opened:', opened);
+  }, [isMobile, opened]);
+  
   const [activePath, setActivePath] = useState(() => {
     const storedPath = localStorage.getItem('lastActivePath');
     return storedPath || '/users'; // Default to '/users' if no stored path
   });
+  
   const [tabOpenStates, setTabOpenStates] = useState<{ [key: string]: boolean }>(() => {
     try {
       return JSON.parse(localStorage.getItem('tabOpenStates') || '{}');
@@ -336,22 +345,22 @@ export const DashboardLayout = () => {
           padding: rem(12),
           borderRadius: rem(8),
           textDecoration: 'none',
-          color: isActive ? '#ffffff' : '#9ca3af',
-          backgroundColor: isActive ? '#2a4365' : 'transparent',
+          color: isActive ? '#1f2937' : '#6b7280',
+          backgroundColor: isActive ? '#f3f4f6' : 'transparent',
           fontWeight: isActive ? 600 : 500,
           fontSize: rem(14),
           transition: 'all 0.3s ease-in-out',
           listStyle: 'none',
           position: 'relative',
           boxShadow: hasSubItems && tabOpenStates[item.href] ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none',
-          borderLeft: isActive ? '4px solid #60a5fa' : 'none',
+          borderLeft: isActive ? '4px solid #3b82f6' : 'none',
           marginBottom: hasSubItems ? rem(4) : 0,
           minHeight: hasSubItems ? rem(48) : 'auto',
           cursor: 'pointer',
         }}
         onMouseEnter={(e) => {
           if (!isActive && !hasSubItems) {
-            (e.target as HTMLElement).style.backgroundColor = 'transparent';
+            (e.target as HTMLElement).style.backgroundColor = '#f9fafb';
           }
         }}
         onMouseLeave={(e) => {
@@ -362,8 +371,8 @@ export const DashboardLayout = () => {
         onClick={() => handleTabClick(item)}
       >
         <Group gap="sm" style={{ position: 'relative', zIndex: 1 }}>
-          <item.icon size={20} />
-          <Text size="sm">{item.name}</Text>
+          <item.icon size={20} color={isActive ? '#1f2937' : '#9ca3af'} />
+          <Text size="sm" c={isActive ? '#1f2937' : '#6b7280'}>{item.name}</Text>
           {hasSubItems && (
             <Box
               style={{
@@ -372,7 +381,7 @@ export const DashboardLayout = () => {
                 marginLeft: 'auto',
               }}
             >
-              <IconCaretDown size={16} />
+              <IconCaretDown size={16} color={isActive ? '#1f2937' : '#9ca3af'} />
             </Box>
           )}
         </Group>
@@ -383,11 +392,12 @@ export const DashboardLayout = () => {
               padding: 'rem(12) 0 0 rem(28)',
               margin: 'rem(8) 0 0 0',
               listStyle: 'none',
-              background: 'linear-gradient(135deg, #2a4365, #3b82f6)',
+              background: '#f9fafb',
               borderRadius: rem(6),
               overflow: 'hidden',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
               animation: 'slideDown 0.3s ease-out',
+              border: '1px solid #e5e7eb',
             }}
             onAnimationEnd={(e) => (e.target as HTMLElement).style.animation = 'none'}
           >
@@ -396,8 +406,8 @@ export const DashboardLayout = () => {
                 key={subItem.name}
                 style={{
                   padding: rem(10),
-                  color: activePath === subItem.href ? '#ffffff' : '#e0e7ff',
-                  backgroundColor: activePath === subItem.href ? '#1e40af' : 'transparent',
+                  color: activePath === subItem.href ? '#1f2937' : '#6b7280',
+                  backgroundColor: activePath === subItem.href ? '#e5e7eb' : 'transparent',
                   fontSize: rem(13),
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
@@ -412,14 +422,14 @@ export const DashboardLayout = () => {
                 }}
                 onMouseEnter={(e) => {
                   if (activePath !== subItem.href) {
-                    (e.target as HTMLElement).style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                    (e.target as HTMLElement).style.color = '#ffffff';
+                    (e.target as HTMLElement).style.backgroundColor = '#f3f4f6';
+                    (e.target as HTMLElement).style.color = '#1f2937';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (activePath !== subItem.href) {
                     (e.target as HTMLElement).style.backgroundColor = 'transparent';
-                    (e.target as HTMLElement).style.color = '#e0e7ff';
+                    (e.target as HTMLElement).style.color = '#6b7280';
                   }
                 }}
               >
@@ -427,7 +437,7 @@ export const DashboardLayout = () => {
                   style={{
                     width: rem(4),
                     height: rem(4),
-                    backgroundColor: activePath === subItem.href ? '#60a5fa' : 'transparent',
+                    backgroundColor: activePath === subItem.href ? '#3b82f6' : 'transparent',
                     borderRadius: '50%',
                     marginRight: rem(10),
                   }}
@@ -443,23 +453,28 @@ export const DashboardLayout = () => {
 
   return (
     <AppShell
-      header={{ height: { base: 60, sm: 70 } }}
+      header={{ height: 60 }}
       navbar={{
-        width: { base: 280, sm: 300 },
+        width: 250,
         breakpoint: 'sm',
-        collapsed: { mobile: !opened },
+        collapsed: { mobile: !opened, desktop: false }
       }}
-      padding={{ base: 'sm', sm: 'md', lg: 'lg' }}
-      styles={(theme) => ({
+      padding="md"
+      styles={{
         main: {
           backgroundColor: '#f9fafb',
-          minHeight: 'calc(100vh - 70px)',
+          minHeight: 'calc(100vh - 60px)',
           '@keyframes slideDown': {
             '0%': { maxHeight: 0, opacity: 0 },
             '100%': { maxHeight: '200px', opacity: 1 },
           },
         },
-      })}
+        navbar: {
+          '@media (max-width: 768px)': {
+            display: opened ? 'block' : 'none',
+          },
+        },
+      }}
     >
       <Modal
         opened={logoutModal}
@@ -497,21 +512,34 @@ export const DashboardLayout = () => {
           borderBottom: '1px solid #e5e7eb',
         }}
       >
-        <Group h="100%" px={{ base: 'md', sm: 'xl' }} justify="space-between">
-          <Group>
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" color="#6c757d" />
+        <Group h="100%" px="sm" justify="space-between">
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Burger 
+              opened={opened} 
+              onClick={() => {
+                console.log('Burger clicked, current opened state:', opened);
+                toggle();
+              }} 
+              size="sm" 
+              color="#6c757d" 
+              style={{ 
+                zIndex: 1000,
+                visibility: 'visible',
+                display: 'block'
+              }}
+            />
             <Text
-              size="xl"
+              size="lg"
               fw={700}
               c="#111827"
-              hiddenFrom="base"
+              style={{ display: 'none' }}
               visibleFrom="xs"
             >
               Welcome back, {userInfo.firstName || 'User'} {userInfo.lastName || ''}
             </Text>
-          </Group>
-
-          <Group gap="md">
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <Menu shadow="md" width={200}>
               <Menu.Target>
                 <UnstyledButton>
@@ -522,12 +550,9 @@ export const DashboardLayout = () => {
                       src={user?.avatar}
                       style={{ backgroundColor: '#e5e7eb' }}
                     />
-                    <Box visibleFrom="sm">
+                    <Box style={{ display: 'none' }} visibleFrom="sm">
                       <Text size="sm" fw={500} c="#111827">
                         {userInfo.firstName || 'User'} {userInfo.lastName || ''}
-                      </Text>
-                      <Text size="xs" c="#6b7280">
-                        {effectiveRoles.join(', ') || 'No Role'}
                       </Text>
                     </Box>
                   </Group>
@@ -535,24 +560,18 @@ export const DashboardLayout = () => {
               </Menu.Target>
 
               <Menu.Dropdown>
-                <Menu.Item
-                  leftSection={<IconLogout size={14} />}
-                  color="red"
-                  onClick={() => setLogoutModal(true)}
-                >
-                  Logout
-                </Menu.Item>
               </Menu.Dropdown>
             </Menu>
-          </Group>
+          </div>
         </Group>
       </AppShell.Header>
 
       <AppShell.Navbar
         p="md"
         style={{
-          backgroundColor: '#1f2937',
+          backgroundColor: '#ffffff',
           border: 'none',
+          borderRight: '1px solid #e5e7eb',
         }}
       >
         <AppShell.Section>
@@ -572,7 +591,7 @@ export const DashboardLayout = () => {
                 R
               </Text>
             </Box>
-            <Text size="lg" fw={700} c="#ffffff">
+            <Text size="lg" fw={700} c="#111827">
               R-OS
             </Text>
           </Group>
@@ -595,15 +614,17 @@ export const DashboardLayout = () => {
               `}
             </style>
             <ul style={{ padding: 0, margin: 0 }}>
-              {filteredNavigation.map((item) => (
-                <NavItem key={item.name} item={item} />
-              ))}
+              {filteredNavigation
+                .filter(item => item.name !== 'Admin User' && item.name !== 'Administrator')
+                .map((item) => (
+                  <NavItem key={item.name} item={item} />
+                ))}
             </ul>
           </div>
         </AppShell.Section>
 
         <AppShell.Section>
-          <Divider my="md" color="#374151" />
+          <Divider my="md" color="#e5e7eb" />
           <Box px="xs">
             <Text size="xs" c="#6b7280" mb={4}>
               Version
