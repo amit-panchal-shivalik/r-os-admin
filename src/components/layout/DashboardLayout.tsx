@@ -56,7 +56,6 @@ export const DashboardLayout = () => {
           padding={{ base: "sm", sm: "md", lg: "lg" }}
           styles={(theme) => ({
             main: {
-              backgroundColor: "#f9fafb",
               minHeight: "calc(100vh - 70px)",
               flex: 1,
             },
@@ -147,7 +146,7 @@ export const DashboardLayout = () => {
                     </Menu.Item>
                     <Menu.Item
                       leftSection={<IconLogout size={14} />}
-                      color="red"
+                      color="primary"
                       onClick={() => setLogoutModal(true)}
                     >
                       Logout
@@ -188,7 +187,7 @@ export const DashboardLayout = () => {
               </button>
               <button
                 type="button"
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded hover:bg-red-700 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-primary border-primary rounded hover:bg-primary transition-colors"
                 onClick={handleLogout}
               >
                 Logout

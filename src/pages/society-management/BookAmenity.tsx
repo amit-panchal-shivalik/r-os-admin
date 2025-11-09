@@ -16,6 +16,7 @@ import { ArrowLeft, Building2, Clock, DollarSign, CheckCircle, Download, Eye } f
 import { toast } from 'sonner';
 import { createAmenity, type Amenity } from '../../apis/amenityApi';
 import { getAllSocieties, Society } from '../../apis/societyApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface CreateAmenityFormValues {
   society: string;
@@ -24,6 +25,8 @@ interface CreateAmenityFormValues {
   endTime: string;   // HH:MM format only (no date)
   isPaid: boolean;
   amount: string;
+  image: string;
+  bigImage: string;
 }
 
 const validationSchema = Yup.object({
@@ -54,38 +57,52 @@ const validationSchema = Yup.object({
         }),
     otherwise: (schema) => schema.optional(),
   }),
+  image: Yup.string().optional(),
+  bigImage: Yup.string().optional(),
 });
 
-const getInitialValues = (): CreateAmenityFormValues => ({
-  society: '',
+const getInitialValues = (societyId: string = ''): CreateAmenityFormValues => ({
+  society: societyId,
   name: '',
   startTime: '',
   endTime: '',
   isPaid: false,
   amount: '',
+  image: '',
+  bigImage: '',
 });
 
 // Predefined amenity options for convenience
 const amenityOptions = [
-  { value: 'Swimming Pool', label: 'Swimming Pool' },
+  { value: 'Clubhouse', label: 'Clubhouse' },
+  { value: 'Pilates Studio', label: 'Pilates Studio' },
+  { value: 'Yoga Studio', label: 'Yoga Studio' },
   { value: 'Gym', label: 'Gym' },
+  { value: 'Conference Room', label: 'Conference Room' },
+  { value: 'TT (Table Tennis)', label: 'TT (Table Tennis)' },
+  { value: 'Box Cricket', label: 'Box Cricket' },
+  { value: 'Swimming Pool', label: 'Swimming Pool' },
   { value: 'Tennis Court', label: 'Tennis Court' },
   { value: 'Basketball Court', label: 'Basketball Court' },
-  { value: 'Club House', label: 'Club House' },
-  { value: 'Garden Area', label: 'Garden Area' },
   { value: 'Party Hall', label: 'Party Hall' },
   { value: 'Community Hall', label: 'Community Hall' },
+  { value: 'Garden Area', label: 'Garden Area' },
   { value: 'Playground', label: 'Playground' },
   { value: 'Parking Area', label: 'Parking Area' },
 ];
 
 export const BookAmenity: React.FC = () => {
   const navigate = useNavigate();
+  const { admin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [societies, setSocieties] = useState<Society[]>([]);
   const [loadingSocieties, setLoadingSocieties] = useState(true);
   const [createdAmenity, setCreatedAmenity] = useState<Amenity | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  
+  // Check if current user is society admin
+  const isSocietyAdmin = admin?.roleKey === 'society_admin';
+  const assignedSocietyId = admin?.society?.id;
 
   // Fetch all societies on component mount
   useEffect(() => {
@@ -117,14 +134,22 @@ export const BookAmenity: React.FC = () => {
     try {
       setLoading(true);
 
+      // Convert time strings (HH:MM) to timestamps
+      // Using today's date with the specified time
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const startDateTime = new Date(`${today}T${values.startTime}:00`);
+      const endDateTime = new Date(`${today}T${values.endTime}:00`);
+
       // Transform form data to match API requirements
       const payload = {
         society: values.society,
         name: values.name,
-        startTime: values.startTime,
-        endTime: values.endTime,
+        startTime: startDateTime.toISOString(),
+        endTime: endDateTime.toISOString(),
         isPaid: values.isPaid,
         amount: values.isPaid ? parseFloat(values.amount) : null,
+        image: values.image || null,
+        bigImage: values.bigImage || null,
       };
 
       console.log('Creating amenity with payload:', payload);
@@ -141,7 +166,7 @@ export const BookAmenity: React.FC = () => {
       toast.success(
         `Amenity "${createdAmenity.name}" created successfully!`,
         {
-          description: `Operating hours: ${createdAmenity.startTime} - ${createdAmenity.endTime}`,
+          description: `Operating hours: ${values.startTime} - ${values.endTime}`,
         }
       );
 
@@ -202,8 +227,8 @@ export const BookAmenity: React.FC = () => {
 
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 bg-design-description rounded-lg flex items-center justify-center">
-          <Building2 className="w-6 h-6 text-design-primary" />
+        <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+          <Building2 className="w-6 h-6 text-white" />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-design-primary">Create Amenity</h1>
@@ -234,44 +259,51 @@ export const BookAmenity: React.FC = () => {
         /* Amenity Form */
         <Card className="p-6">
           <Formik
-            initialValues={getInitialValues()}
+            initialValues={getInitialValues(isSocietyAdmin ? assignedSocietyId : '')}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
             {({ values, isSubmitting }) => (
               <Form className="space-y-6">
-                {/* Society Selection - FIRST & PROMINENT */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="w-5 h-5 text-blue-600" />
-                    <label htmlFor="society" className="text-base font-semibold text-gray-800">
-                      Step 1: Select Society *
-                    </label>
-                  </div>
-                  <Field
-                    as="select"
-                    id="society"
-                    name="society"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Choose the society for this amenity</option>
-                    {societyOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </Field>
-                  <ErrorMessage name="society" component="div" className="text-red-500 text-sm font-medium" />
-                  <p className="text-xs text-blue-700">
-                    First, select which society this amenity belongs to
-                  </p>
+                {/* Society Selection - FIRST & PROMINENT (Hidden for Society Admin) */}
+                {!isSocietyAdmin && (
+                  <div className="bg-background border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Building2 className="w-5 h-5 text-gray-700" />
+                        <label htmlFor="society" className="text-base font-semibold text-gray-800">
+                          Step 1: Select Society *
+                        </label>
+                      </div>
+                      <Field
+                        as="select"
+                        id="society"
+                        name="society"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Choose the society for this amenity</option>
+                        {societyOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage name="society" component="div" className="text-red-500 text-sm font-medium" />
+                      <p className="text-xs text-blue-700">
+                        First, select which society this amenity belongs to
+                      </p>
                 </div>
+                )}
+                
+                {/* Hidden field for society admin to include society ID in form */}
+                {isSocietyAdmin && (
+                  <Field type="hidden" name="society" value={assignedSocietyId} />
+                )}
 
                 {/* Amenity Details Section */}
-                <div className="border-t pt-6">
+                <div className={isSocietyAdmin ? '' : 'border-t pt-6'}>
                   <h3 className="text-lg font-semibold text-design-primary flex items-center gap-2 mb-4">
                     <CheckCircle className="w-5 h-5" />
-                    Step 2: Amenity Details
+                    {isSocietyAdmin ? 'Step 1: Amenity Details' : 'Step 2: Amenity Details'}
                   </h3>
 
                   {/* Amenity Name */}
@@ -303,7 +335,7 @@ export const BookAmenity: React.FC = () => {
                 <div className="border-t pt-6">
                   <h3 className="text-lg font-semibold text-design-primary flex items-center gap-2 mb-4">
                     <Clock className="w-5 h-5" />
-                    Step 3: Operating Hours
+                    {isSocietyAdmin ? 'Step 2: Operating Hours' : 'Step 3: Operating Hours'}
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -336,7 +368,7 @@ export const BookAmenity: React.FC = () => {
                 <div className="border-t pt-6">
                   <h3 className="text-lg font-semibold text-design-primary flex items-center gap-2 mb-4">
                     <DollarSign className="w-5 h-5" />
-                    Step 4: Payment Details
+                    {isSocietyAdmin ? 'Step 3: Payment Details' : 'Step 4: Payment Details'}
                   </h3>
 
                   {/* Is Paid Checkbox */}
@@ -367,6 +399,44 @@ export const BookAmenity: React.FC = () => {
                       <p className="text-xs text-gray-500">A QR code will be automatically generated for payment</p>
                     </div>
                   )}
+                </div>
+
+                {/* Image Section */}
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-design-primary flex items-center gap-2 mb-4">
+                    <Eye className="w-5 h-5" />
+                    {isSocietyAdmin ? 'Step 4: Amenity Images (Optional)' : 'Step 5: Amenity Images (Optional)'}
+                  </h3>
+
+                  {/* Image URL */}
+                  <div className="space-y-2 mb-4">
+                    <label className="text-sm font-medium text-gray-700">Image URL</label>
+                    <Field
+                      name="image"
+                      type="text"
+                      placeholder="Enter image URL for amenity thumbnail"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <ErrorMessage name="image" component="div" className="text-red-500 text-sm" />
+                    <p className="text-xs text-gray-500">
+                      Provide a URL for the amenity thumbnail image (e.g., https://example.com/image.jpg)
+                    </p>
+                  </div>
+
+                  {/* Big Image URL */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">Large Image URL</label>
+                    <Field
+                      name="bigImage"
+                      type="text"
+                      placeholder="Enter large image URL for amenity detail view"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <ErrorMessage name="bigImage" component="div" className="text-red-500 text-sm" />
+                    <p className="text-xs text-gray-500">
+                      Provide a URL for the large/detail image (e.g., https://example.com/large-image.jpg)
+                    </p>
+                  </div>
                 </div>
 
                 {/* Submit Buttons */}

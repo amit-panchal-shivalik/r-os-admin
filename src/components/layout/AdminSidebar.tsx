@@ -9,7 +9,8 @@ import {
   AlertTriangle,
   Building,
   CreditCard,
-  ShieldAlert
+  ShieldAlert,
+  Users
 } from 'lucide-react';
 
 interface MenuItem {
@@ -43,9 +44,14 @@ const allMenuItems: MenuItem[] = [
     icon: Building,
     subItems: [
       { name: 'All Societies', href: '/societies' },
-      { name: 'Pending Enquiries', href: '/societies/enquiries' },
     ],
     allowedRoles: ['super_admin', 'society_admin'],
+  },
+  {
+    name: 'Society Admins',
+    href: '/society-admins',
+    icon: Users,
+    allowedRoles: ['super_admin'],
   },
   {
     name: 'Amenities',
@@ -76,7 +82,6 @@ const allMenuItems: MenuItem[] = [
     icon: MessageSquare,
     subItems: [
       { name: 'All Complaints', href: '/complaints' },
-      { name: 'Add Complaint', href: '/complaints/add' },
     ],
     allowedRoles: ['super_admin', 'society_admin', 'helpdesk_operator'],
   },
@@ -99,12 +104,6 @@ const allMenuItems: MenuItem[] = [
     href: '/sos-report',
     icon: ShieldAlert,
     allowedRoles: ['super_admin', 'society_admin', 'security_manager'],
-  },
-  {
-    name: 'Input Demo',
-    href: '/input-demo',
-    icon: Home,
-    allowedRoles: ['super_admin'], // Demo page only for super admin
   },
 ];
 

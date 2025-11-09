@@ -18,6 +18,8 @@ interface EditAmenityFormValues {
   isPaid: boolean;
   amount: string;
   status: 'ACTIVE' | 'INACTIVE' | 'DELETED';
+  image: string;
+  bigImage: string;
 }
 
 const validationSchema = Yup.object({
@@ -49,6 +51,8 @@ const validationSchema = Yup.object({
     otherwise: (schema) => schema.optional(),
   }),
   status: Yup.string().oneOf(['ACTIVE', 'INACTIVE', 'DELETED']).required('Status is required'),
+  image: Yup.string().optional(),
+  bigImage: Yup.string().optional(),
 });
 
 export const EditAmenity: React.FC = () => {
@@ -110,6 +114,8 @@ export const EditAmenity: React.FC = () => {
         endTime: values.endTime,
         isPaid: values.isPaid,
         amount: values.isPaid ? parseFloat(values.amount) : null,
+        image: values.image || null,
+        bigImage: values.bigImage || null,
       };
 
       console.log('Updating amenity with payload:', payload);
@@ -166,6 +172,8 @@ export const EditAmenity: React.FC = () => {
         isPaid: false,
         amount: '',
         status: 'ACTIVE',
+        image: '',
+        bigImage: '',
       };
     }
 
@@ -177,6 +185,8 @@ export const EditAmenity: React.FC = () => {
       isPaid: amenity.isPaid,
       amount: amenity.amount ? amenity.amount.toString() : '',
       status: amenity.status,
+      image: amenity.image || '',
+      bigImage: amenity.bigImage || '',
     };
   };
 
@@ -409,6 +419,46 @@ export const EditAmenity: React.FC = () => {
                         </p>
                       </div>
                     )}
+                  </div>
+
+                  {/* Image Section */}
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-design-primary flex items-center gap-2 mb-4">
+                      <Eye className="w-5 h-5" />
+                      Amenity Images (Optional)
+                    </h3>
+
+                    {/* Image URL */}
+                    <div className="space-y-2 mb-4">
+                      <label htmlFor="image" className="text-sm font-medium text-gray-700">Image URL</label>
+                      <Field
+                        id="image"
+                        name="image"
+                        type="text"
+                        placeholder="Enter image URL for amenity thumbnail"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <ErrorMessage name="image" component="div" className="text-red-500 text-sm" />
+                      <p className="text-xs text-gray-500">
+                        Provide a URL for the amenity thumbnail image (e.g., https://example.com/image.jpg)
+                      </p>
+                    </div>
+
+                    {/* Big Image URL */}
+                    <div className="space-y-2">
+                      <label htmlFor="bigImage" className="text-sm font-medium text-gray-700">Large Image URL</label>
+                      <Field
+                        id="bigImage"
+                        name="bigImage"
+                        type="text"
+                        placeholder="Enter large image URL for amenity detail view"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <ErrorMessage name="bigImage" component="div" className="text-red-500 text-sm" />
+                      <p className="text-xs text-gray-500">
+                        Provide a URL for the large/detail image (e.g., https://example.com/large-image.jpg)
+                      </p>
+                    </div>
                   </div>
 
                   {/* Submit Buttons */}

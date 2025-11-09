@@ -13,9 +13,7 @@ interface ParkingSlot {
   id: string;
   slotNumber: string;
   isOccupied: boolean;
-  vehicleNumber?: string;
-  ownerName?: string;
-  contactNumber?: string;
+  unitNumber?: string;
   isReserved?: boolean;
 }
 
@@ -37,9 +35,7 @@ const ParkingSettings: React.FC = () => {
           id: `${level}-L${row}-${slot}`,
           slotNumber: `${level.toUpperCase()}-L${row}-${slot}`,
           isOccupied,
-          vehicleNumber: isOccupied ? `MH-${Math.floor(Math.random() * 10000)}` : undefined,
-          ownerName: isOccupied ? `Owner ${Math.floor(Math.random() * 100)}` : undefined,
-          contactNumber: isOccupied ? `987654${Math.floor(Math.random() * 10000)}` : undefined,
+          unitNumber: isOccupied ? `Unit ${Math.floor(Math.random() * 200) + 1}` : undefined,
           isReserved: Math.random() > 0.9, // Some slots reserved
         });
       }
@@ -51,9 +47,7 @@ const ParkingSettings: React.FC = () => {
           id: `${level}-R${row}-${slot}`,
           slotNumber: `${level.toUpperCase()}-R${row}-${slot}`,
           isOccupied,
-          vehicleNumber: isOccupied ? `MH-${Math.floor(Math.random() * 10000)}` : undefined,
-          ownerName: isOccupied ? `Owner ${Math.floor(Math.random() * 100)}` : undefined,
-          contactNumber: isOccupied ? `987654${Math.floor(Math.random() * 10000)}` : undefined,
+          unitNumber: isOccupied ? `Unit ${Math.floor(Math.random() * 200) + 1}` : undefined,
           isReserved: Math.random() > 0.9, // Some slots reserved
         });
       }
@@ -77,13 +71,13 @@ const ParkingSettings: React.FC = () => {
   const getSlotColor = (slot: ParkingSlot) => {
     if (slot.isReserved) return 'bg-design-secondary';
     if (slot.isOccupied) return 'bg-design-primary';
-    return 'bg-green-500';
+    return 'bg-background text-design-primary';
   };
 
   const getSlotText = (slot: ParkingSlot) => {
     if (slot.isReserved) return 'RESERVED';
-    if (slot.isOccupied) return slot.vehicleNumber?.slice(-4) || 'OCCUPIED';
-    return 'EMPTY';
+    if (slot.isOccupied) return slot.unitNumber || 'OCCUPIED';
+    return 'AVAILABLE';
   };
 
   const handleSlotClick = (slot: ParkingSlot) => {
@@ -129,7 +123,7 @@ const ParkingSettings: React.FC = () => {
           {/* Legend - Moved to top */}
           <div className="mb-6 flex flex-wrap justify-center gap-6 p-4 bg-white border border-gray-200 rounded-lg">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 bg-green-500 rounded border"></div>
+              <div className="w-5 h-5 bg-white border-2 border-gray-300 rounded"></div>
               <span className="text-sm text-gray-600 font-medium">Available</span>
             </div>
             <div className="flex items-center gap-2">
@@ -165,12 +159,12 @@ const ParkingSettings: React.FC = () => {
                                   {/* Parking slot */}
                                   <div
                                     className={`
-                                      w-full h-24 ${getSlotColor(slot)} text-white text-xs sm:text-sm font-bold
+                                      w-full h-24 ${getSlotColor(slot)} ${slot.isOccupied || slot.isReserved ? 'text-white' : ''} text-xs sm:text-sm font-bold
                                       rounded-lg border flex flex-wrap  items-center justify-center
                                       cursor-pointer hover:opacity-80 transition-all shadow-md relative
                                     `}
                                     onClick={() => handleSlotClick(slot)}
-                                    title={`${slot.slotNumber}: ${getSlotText(slot)}${slot.ownerName ? ` - ${slot.ownerName}` : ''}`}
+                                    title={`${slot.slotNumber}: ${getSlotText(slot)}`}
                                   >
                                     <div className="text-center leading-tight w-full px-1">
                                       <div className="text-xs sm:text-sm font-semibold">{slot.slotNumber.split('-')[2]}</div>
@@ -181,12 +175,7 @@ const ParkingSettings: React.FC = () => {
                                       ) : slot.isReserved ? (
                                         <div className="text-xs sm:text-sm">RESERVED</div>
                                       ) : (
-                                        <div className="text-xs sm:text-sm">EMPTY</div>
-                                      )}
-                                      {slot.ownerName && slot.isOccupied && (
-                                        <div className="text-xs opacity-80 truncate w-full sm:w-20" title={slot.ownerName}>
-                                          {slot.ownerName.slice(0, 8)}...
-                                        </div>
+                                        <div className="text-xs text-design-primary sm:text-sm">AVAILABLE</div>
                                       )}
                                     </div>
                                     {/* Edit icon */}
@@ -200,7 +189,7 @@ const ParkingSettings: React.FC = () => {
                           {/* Center divider with level indicator */}
                           <div className="flex flex-col items-center gap-1">
                             <div className="w-8 sm:w-10 h-16 sm:h-20 md:h-24 bg-gray-400 rounded-lg flex items-center justify-center">
-                              <span className="text-white text-xs font-bold transform -rotate-90 whitespace-nowrap">
+                              <span className="text-xs font-bold transform -rotate-90 whitespace-nowrap">
                                 ROW {actualRowIndex + 1}
                               </span>
                             </div>
@@ -214,12 +203,12 @@ const ParkingSettings: React.FC = () => {
                                   {/* Parking slot */}
                                   <div
                                     className={`
-                                      w-full h-24 ${getSlotColor(slot)} text-white text-xs sm:text-sm font-bold
+                                      w-full h-24 ${getSlotColor(slot)} ${slot.isOccupied || slot.isReserved ? 'text-white' : ''} text-xs sm:text-sm font-bold
                                       rounded-lg border flex flex-col items-center justify-center
                                       cursor-pointer hover:opacity-80 transition-all shadow-md relative
                                     `}
                                     onClick={() => handleSlotClick(slot)}
-                                    title={`${slot.slotNumber}: ${getSlotText(slot)}${slot.ownerName ? ` - ${slot.ownerName}` : ''}`}
+                                    title={`${slot.slotNumber}: ${getSlotText(slot)}`}
                                   >
                                     <div className="text-center leading-tight w-full px-1">
                                       <div className="text-xs sm:text-sm font-semibold">{slot.slotNumber.split('-')[2]}</div>
@@ -230,12 +219,7 @@ const ParkingSettings: React.FC = () => {
                                       ) : slot.isReserved ? (
                                         <div className="text-xs sm:text-sm">RESERVED</div>
                                       ) : (
-                                        <div className="text-xs sm:text-sm">EMPTY</div>
-                                      )}
-                                      {slot.ownerName && slot.isOccupied && (
-                                        <div className="text-xs opacity-80 truncate w-full sm:w-20" title={slot.ownerName}>
-                                          {slot.ownerName.slice(0, 8)}...
-                                        </div>
+                                        <div className="text-xs text-design-primary sm:text-sm">AVAILABLE</div>
                                       )}
                                     </div>
                                     {/* Edit icon */}
@@ -336,9 +320,7 @@ const ParkingSettings: React.FC = () => {
                       } else {
                         updated.isOccupied = false;
                         updated.isReserved = false;
-                        updated.vehicleNumber = undefined;
-                        updated.ownerName = undefined;
-                        updated.contactNumber = undefined;
+                        updated.unitNumber = undefined;
                       }
                       setEditingSlot(updated);
                     }}
@@ -354,39 +336,16 @@ const ParkingSettings: React.FC = () => {
                   </Select>
                 </div>
 
-                {(editingSlot.isOccupied || editingSlot.isReserved) && (
-                  <>
-                    <div>
-                      <Label htmlFor="vehicleNumber">Vehicle Number</Label>
-                      <Input
-                        id="vehicleNumber"
-                        placeholder="e.g., MH-12-AB-1234"
-                        value={editingSlot.vehicleNumber || ''}
-                        onChange={(e) => setEditingSlot({ ...editingSlot, vehicleNumber: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="ownerName">Owner Name</Label>
-                      <Input
-                        id="ownerName"
-                        placeholder="Owner name"
-                        value={editingSlot.ownerName || ''}
-                        onChange={(e) => setEditingSlot({ ...editingSlot, ownerName: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="contactNumber">Contact Number</Label>
-                      <Input
-                        id="contactNumber"
-                        placeholder="Contact number"
-                        value={editingSlot.contactNumber || ''}
-                        onChange={(e) => setEditingSlot({ ...editingSlot, contactNumber: e.target.value })}
-                      />
-                    </div>
-                  </>
-                )}
+                <div>
+                  <Label htmlFor="unitNumber">Unit Number</Label>
+                  <Input
+                    id="unitNumber"
+                    placeholder="e.g., Unit 101"
+                    value={editingSlot.unitNumber || ''}
+                    onChange={(e) => setEditingSlot({ ...editingSlot, unitNumber: e.target.value })}
+                    disabled={!editingSlot.isOccupied && !editingSlot.isReserved}
+                  />
+                </div>
               </div>
             </div>
           )}

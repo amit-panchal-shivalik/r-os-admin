@@ -30,6 +30,7 @@ import { SOSReportList } from "../pages/sos-report/SOSReportList";
 import { SOSReportView } from "../pages/sos-report/SOSReportView";
 import { AmenityPaymentsList } from "../pages/amenity-payments/AmenityPaymentsList";
 import { PaymentStatistics } from "../pages/amenity-payments/PaymentStatistics";
+import SocietyAdmins from "../pages/SocietyAdmins";
 
 /* current user roles */
 const getUserRoles = (): string[] => {
@@ -163,6 +164,9 @@ export const AppRoutes = () => {
         {/* SOS Report Routes */}
         <Route path="sos-report" element={<SOSReportList />} />
         <Route path="sos-report/view/:id" element={<SOSReportView />} />
+
+        {/* Society Admin Management Routes */}
+        <Route path="society-admins" element={<SocietyAdmins />} />
 
         {/* Catch-all inside private area (keeps the layout) */}
         <Route path="*" element={<RedirectByRole />} />

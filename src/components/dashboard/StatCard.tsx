@@ -27,7 +27,6 @@ export const StatCard = ({
 }: StatCardProps) => {
   return (
     <Card
-      shadow="sm"
       padding="lg"
       radius="md"
       withBorder
@@ -79,7 +78,7 @@ export const StatCard = ({
           <Progress
             value={percentage}
             color={color}
-            size="sm"
+            size="md"
             radius="xl"
           />
         )}

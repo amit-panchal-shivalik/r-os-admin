@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip';
 import SelectInput from '../../components/CustomInput/SelectInput';
 import { Building, Phone, MapPin, Users, Plus, Search, Eye, Edit, Trash2, Loader2 } from 'lucide-react';
 import { getAllSocieties, deleteSociety, getSocietyStats, Society } from '../../apis/societyApi';
 import { toast } from 'sonner';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Stats {
   total: number;
@@ -17,6 +19,7 @@ interface Stats {
 
 export const SocietiesList: React.FC = () => {
   const navigate = useNavigate();
+  const { admin } = useAuth();
   const [societies, setSocieties] = useState<Society[]>([]);
   const [stats, setStats] = useState<Stats>({
     total: 0,
@@ -31,6 +34,9 @@ export const SocietiesList: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
+
+  // Check if current user is super admin
+  const isSuperAdmin = admin?.roleKey === 'super_admin';
 
   // Fetch societies
   const fetchSocieties = async () => {
@@ -129,15 +135,19 @@ export const SocietiesList: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-design-primary">Society Management</h1>
-          <p className="text-design-secondary mt-1">Manage all registered societies</p>
+          <p className="text-design-secondary mt-1">
+            {isSuperAdmin ? 'Manage all registered societies' : 'View your society details'}
+          </p>
         </div>
-        <Button
-          onClick={handleAddNew}
-          className="btn-primary"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add New Society
-        </Button>
+        {isSuperAdmin && (
+          <Button
+            onClick={handleAddNew}
+            className="btn-primary"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add New Society
+          </Button>
+        )}
       </div>
 
       {/* Filters and Search */}
@@ -241,9 +251,11 @@ export const SocietiesList: React.FC = () => {
                 <p className="text-gray-600 mb-4">
                   {searchTerm || filterStatus
                     ? 'Try adjusting your search or filters'
-                    : 'Get started by adding your first society'}
+                    : isSuperAdmin 
+                      ? 'Get started by adding your first society'
+                      : 'No society assigned to you'}
                 </p>
-                {!searchTerm && !filterStatus && (
+                {!searchTerm && !filterStatus && isSuperAdmin && (
                   <Button onClick={handleAddNew} className="bg-gray-900 hover:bg-gray-800 text-white">
                     <Plus className="w-4 h-4 mr-2" />
                     Add New Society
@@ -257,8 +269,8 @@ export const SocietiesList: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center justify-between gap-3 mb-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Building className="w-6 h-6 text-blue-600" />
+                          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+                            <Building className="w-6 h-6 text-white" />
                           </div>
                           <div>
                             <div className="flex items-center gap-3">
@@ -273,7 +285,11 @@ export const SocietiesList: React.FC = () => {
 
                         {/* Actions */}
                         <div className="flex gap-2 ml-4">
-                          <Button
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+
+                                <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleView(society._id)}
@@ -281,22 +297,63 @@ export const SocietiesList: React.FC = () => {
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(society._id)}
-                            className="text-green-600 hover:bg-green-50"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDelete(society._id)}
-                            className="text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>View Society</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          
+                          
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                              {isSuperAdmin && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEdit(society._id)}
+                                className="text-green-600 hover:bg-green-50"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDelete(society._id)}
+                                className="text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit Society</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDelete(society._id)}
+                                  className="text-red-600 hover:bg-red-500 hover:text-design-white"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Delete Society</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </div>
 

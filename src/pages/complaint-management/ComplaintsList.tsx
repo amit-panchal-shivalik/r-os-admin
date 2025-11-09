@@ -158,7 +158,7 @@ export const ComplaintsList: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-2 w-full space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>

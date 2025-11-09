@@ -1339,7 +1339,7 @@ export const SocietySetupForm: React.FC<SocietySetupFormProps> = ({
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-green-600 hover:bg-green-700 text-white"
+                        className="bg-primary hover:bg-primary text-white"
                       >
                         {isSubmitting ? 'Submitting...' : 'Create Society/Project'}
                       </Button>

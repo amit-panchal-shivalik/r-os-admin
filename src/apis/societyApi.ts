@@ -1,4 +1,4 @@
-import apiClient from './apiService';
+import apiClient from "./apiService";
 
 export interface SocietyData {
   // Basic Information
@@ -145,7 +145,7 @@ export interface Society {
     fyStartMonth: string;
     currentFinancialYear: string;
   };
-  status: 'Active' | 'Pending' | 'Inactive';
+  status: "Active" | "Pending" | "Inactive";
   maintenanceBillingCycle?: string;
   registeredMembersCount?: number;
   isDeleted: boolean;
@@ -186,107 +186,170 @@ export interface StatsResponse {
 /**
  * Generate unique society code
  */
-export const generateSocietyCode = async (): Promise<{ societyCode: string }> => {
-  const response = await apiClient.post<any>('/societies/generate-code');
+export const generateSocietyCode = async (): Promise<{
+  societyCode: string;
+}> => {
+  const response = await apiClient.post<any>("/societies/generate-code");
   return response.data.result || response.data.data;
 };
 
 /**
  * Create a new society
  */
-export const createSociety = async (data: SocietyData, files?: Record<string, File>): Promise<any> => {
+export const createSociety = async (
+  data: SocietyData,
+  files?: Record<string, File>
+): Promise<any> => {
   const formData = new FormData();
 
   // Append basic fields
-  formData.append('societyName', data.societyName);
-  formData.append('societyCode', data.societyCode);
-  if (data.description) formData.append('description', data.description);
+  formData.append("societyName", data.societyName);
+  formData.append("societyCode", data.societyCode);
+  if (data.description) formData.append("description", data.description);
 
   // Project details
-  formData.append('projectType', data.projectType);
-  formData.append('totalUnits', data.totalUnits.toString());
-  if (data.totalBlocks) formData.append('totalBlocks', data.totalBlocks.toString());
-  if (data.totalFloors) formData.append('totalFloors', data.totalFloors.toString());
-  if (data.carpetAreaRange) formData.append('carpetAreaRange', data.carpetAreaRange);
-  if (data.projectStartDate) formData.append('projectStartDate', data.projectStartDate);
-  if (data.completionDate) formData.append('completionDate', data.completionDate);
-  formData.append('developerName', data.developerName);
+  formData.append("projectType", data.projectType);
+  formData.append("totalUnits", data.totalUnits.toString());
+  if (data.totalBlocks)
+    formData.append("totalBlocks", data.totalBlocks.toString());
+  if (data.totalFloors)
+    formData.append("totalFloors", data.totalFloors.toString());
+  if (data.carpetAreaRange)
+    formData.append("carpetAreaRange", data.carpetAreaRange);
+  if (data.projectStartDate)
+    formData.append("projectStartDate", data.projectStartDate);
+  if (data.completionDate)
+    formData.append("completionDate", data.completionDate);
+  formData.append("developerName", data.developerName);
 
   // Contact information
-  formData.append('contactPersonName', data.contactPersonName);
-  formData.append('contactNumber', data.contactNumber);
-  formData.append('email', data.email);
-  if (data.alternateContact) formData.append('alternateContact', data.alternateContact);
+  formData.append("contactPersonName", data.contactPersonName);
+  formData.append("contactNumber", data.contactNumber);
+  formData.append("email", data.email);
+  if (data.alternateContact)
+    formData.append("alternateContact", data.alternateContact);
 
   // Address (nested object)
-  formData.append('address[street]', data.address.street);
-  formData.append('address[city]', data.address.city);
-  formData.append('address[state]', data.address.state);
-  formData.append('address[pincode]', data.address.pincode);
+  formData.append("address[street]", data.address.street);
+  formData.append("address[city]", data.address.city);
+  formData.append("address[state]", data.address.state);
+  formData.append("address[pincode]", data.address.pincode);
 
   // Legal documents (nested object)
   if (data.legalDocuments?.rera?.number) {
-    formData.append('legalDocuments[rera][number]', data.legalDocuments.rera.number);
+    formData.append(
+      "legalDocuments[rera][number]",
+      data.legalDocuments.rera.number
+    );
   }
   if (data.legalDocuments?.rera?.expiryDate) {
-    formData.append('legalDocuments[rera][expiryDate]', data.legalDocuments.rera.expiryDate);
+    formData.append(
+      "legalDocuments[rera][expiryDate]",
+      data.legalDocuments.rera.expiryDate
+    );
   }
   if (data.legalDocuments?.fireNoc?.number) {
-    formData.append('legalDocuments[fireNoc][number]', data.legalDocuments.fireNoc.number);
+    formData.append(
+      "legalDocuments[fireNoc][number]",
+      data.legalDocuments.fireNoc.number
+    );
   }
   if (data.legalDocuments?.fireNoc?.validityDate) {
-    formData.append('legalDocuments[fireNoc][validityDate]', data.legalDocuments.fireNoc.validityDate);
+    formData.append(
+      "legalDocuments[fireNoc][validityDate]",
+      data.legalDocuments.fireNoc.validityDate
+    );
   }
   if (data.legalDocuments?.buCertificate?.number) {
-    formData.append('legalDocuments[buCertificate][number]', data.legalDocuments.buCertificate.number);
+    formData.append(
+      "legalDocuments[buCertificate][number]",
+      data.legalDocuments.buCertificate.number
+    );
   }
   if (data.legalDocuments?.buCertificate?.issueDate) {
-    formData.append('legalDocuments[buCertificate][issueDate]', data.legalDocuments.buCertificate.issueDate);
+    formData.append(
+      "legalDocuments[buCertificate][issueDate]",
+      data.legalDocuments.buCertificate.issueDate
+    );
   }
   if (data.legalDocuments?.liftLicence?.number) {
-    formData.append('legalDocuments[liftLicence][number]', data.legalDocuments.liftLicence.number);
+    formData.append(
+      "legalDocuments[liftLicence][number]",
+      data.legalDocuments.liftLicence.number
+    );
   }
   if (data.legalDocuments?.liftLicence?.expiryDate) {
-    formData.append('legalDocuments[liftLicence][expiryDate]', data.legalDocuments.liftLicence.expiryDate);
+    formData.append(
+      "legalDocuments[liftLicence][expiryDate]",
+      data.legalDocuments.liftLicence.expiryDate
+    );
   }
 
   // Bank details (nested object)
-  formData.append('bankDetails[bankName]', data.bankDetails.bankName);
-  formData.append('bankDetails[accountNumber]', data.bankDetails.accountNumber);
-  formData.append('bankDetails[accountHolderName]', data.bankDetails.accountHolderName);
-  formData.append('bankDetails[ifscCode]', data.bankDetails.ifscCode);
-  if (data.bankDetails.branchName) formData.append('bankDetails[branchName]', data.bankDetails.branchName);
-  if (data.bankDetails.branchAddress) formData.append('bankDetails[branchAddress]', data.bankDetails.branchAddress);
+  formData.append("bankDetails[bankName]", data.bankDetails.bankName);
+  formData.append("bankDetails[accountNumber]", data.bankDetails.accountNumber);
+  formData.append(
+    "bankDetails[accountHolderName]",
+    data.bankDetails.accountHolderName
+  );
+  formData.append("bankDetails[ifscCode]", data.bankDetails.ifscCode);
+  if (data.bankDetails.branchName)
+    formData.append("bankDetails[branchName]", data.bankDetails.branchName);
+  if (data.bankDetails.branchAddress)
+    formData.append(
+      "bankDetails[branchAddress]",
+      data.bankDetails.branchAddress
+    );
 
   // Tax information (nested object)
-  formData.append('taxInformation[gstNumber]', data.taxInformation.gstNumber);
-  formData.append('taxInformation[panNumber]', data.taxInformation.panNumber);
-  if (data.taxInformation.tanNumber) formData.append('taxInformation[tanNumber]', data.taxInformation.tanNumber);
+  formData.append("taxInformation[gstNumber]", data.taxInformation.gstNumber);
+  formData.append("taxInformation[panNumber]", data.taxInformation.panNumber);
+  if (data.taxInformation.tanNumber)
+    formData.append("taxInformation[tanNumber]", data.taxInformation.tanNumber);
 
   // Financial year (nested object)
-  formData.append('financialYear[fyStartMonth]', data.financialYear.fyStartMonth);
-  formData.append('financialYear[currentFinancialYear]', data.financialYear.currentFinancialYear);
+  formData.append(
+    "financialYear[fyStartMonth]",
+    data.financialYear.fyStartMonth
+  );
+  formData.append(
+    "financialYear[currentFinancialYear]",
+    data.financialYear.currentFinancialYear
+  );
 
   // Additional settings
-  if (data.status) formData.append('status', data.status);
-  formData.append('maintenanceBillingCycle', data.maintenanceBillingCycle);
-  if (data.registeredMembersCount) formData.append('registeredMembersCount', data.registeredMembersCount.toString());
+  if (data.status) formData.append("status", data.status);
+  formData.append("maintenanceBillingCycle", data.maintenanceBillingCycle);
+  if (data.registeredMembersCount)
+    formData.append(
+      "registeredMembersCount",
+      data.registeredMembersCount.toString()
+    );
 
   // Append files
   if (files) {
-    if (files.logo) formData.append('logo', files.logo);
-    if (files.reraCertificate) formData.append('reraCertificate', files.reraCertificate);
-    if (files.fireNocDocument) formData.append('fireNocDocument', files.fireNocDocument);
-    if (files.buCertificate) formData.append('buCertificate', files.buCertificate);
-    if (files.liftLicenceDocument) formData.append('liftLicenceDocument', files.liftLicenceDocument);
-    if (files.gstCertificate) formData.append('gstCertificate', files.gstCertificate);
+    if (files.logo) formData.append("logo", files.logo);
+    if (files.reraCertificate)
+      formData.append("reraCertificate", files.reraCertificate);
+    if (files.fireNocDocument)
+      formData.append("fireNocDocument", files.fireNocDocument);
+    if (files.buCertificate)
+      formData.append("buCertificate", files.buCertificate);
+    if (files.liftLicenceDocument)
+      formData.append("liftLicenceDocument", files.liftLicenceDocument);
+    if (files.gstCertificate)
+      formData.append("gstCertificate", files.gstCertificate);
   }
 
-  const response = await apiClient.post<SocietyResponse>('/societies', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  const response = await apiClient.post<SocietyResponse>(
+    "/societies",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
 
   return response.data.result;
 };
@@ -304,10 +367,17 @@ export const getAllSocieties = async (params?: {
   city?: string;
   sortBy?: string;
   sortOrder?: string;
-}): Promise<SocietiesListResponse['result']> => {
-  const response = await apiClient.get<SocietiesListResponse>('/societies', { params });
+}): Promise<SocietiesListResponse["result"]> => {
+  const response = await apiClient.get<SocietiesListResponse>("/societies", {
+    params,
+  });
   return response.data.result;
 };
+
+/**
+ * Alias for getAllSocieties (for backwards compatibility)
+ */
+export const getSocieties = getAllSocieties;
 
 /**
  * Get society by ID
@@ -321,20 +391,26 @@ export const getSocietyById = async (id: string): Promise<Society> => {
  * Get society by code
  */
 export const getSocietyByCode = async (code: string): Promise<Society> => {
-  const response = await apiClient.get<SocietyResponse>(`/societies/code/${code}`);
+  const response = await apiClient.get<SocietyResponse>(
+    `/societies/code/${code}`
+  );
   return response.data.result;
 };
 
 /**
  * Update society
  */
-export const updateSociety = async (id: string, data: Partial<SocietyData>, files?: Record<string, File>): Promise<any> => {
+export const updateSociety = async (
+  id: string,
+  data: Partial<SocietyData>,
+  files?: Record<string, File>
+): Promise<any> => {
   const formData = new FormData();
 
   // Append only provided fields
   Object.keys(data).forEach((key) => {
     const value = (data as any)[key];
-    if (value !== undefined && value !== null && typeof value !== 'object') {
+    if (value !== undefined && value !== null && typeof value !== "object") {
       formData.append(key, value.toString());
     }
   });
@@ -354,13 +430,19 @@ export const updateSociety = async (id: string, data: Partial<SocietyData>, file
 
   if (data.taxInformation) {
     Object.keys(data.taxInformation).forEach((key) => {
-      formData.append(`taxInformation[${key}]`, (data.taxInformation as any)[key]);
+      formData.append(
+        `taxInformation[${key}]`,
+        (data.taxInformation as any)[key]
+      );
     });
   }
 
   if (data.financialYear) {
     Object.keys(data.financialYear).forEach((key) => {
-      formData.append(`financialYear[${key}]`, (data.financialYear as any)[key]);
+      formData.append(
+        `financialYear[${key}]`,
+        (data.financialYear as any)[key]
+      );
     });
   }
 
@@ -371,11 +453,15 @@ export const updateSociety = async (id: string, data: Partial<SocietyData>, file
     });
   }
 
-  const response = await apiClient.put<SocietyResponse>(`/societies/${id}`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  const response = await apiClient.put<SocietyResponse>(
+    `/societies/${id}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
 
   return response.data.result;
 };
@@ -390,26 +476,33 @@ export const deleteSociety = async (id: string): Promise<void> => {
 /**
  * Get society statistics
  */
-export const getSocietyStats = async (): Promise<StatsResponse['result']> => {
-  const response = await apiClient.get<StatsResponse>('/societies/stats');
+export const getSocietyStats = async (): Promise<StatsResponse["result"]> => {
+  const response = await apiClient.get<StatsResponse>("/societies/stats");
   return response.data.result;
 };
 
 /**
  * Upload documents for existing society
  */
-export const uploadSocietyDocuments = async (id: string, files: Record<string, File>): Promise<any> => {
+export const uploadSocietyDocuments = async (
+  id: string,
+  files: Record<string, File>
+): Promise<any> => {
   const formData = new FormData();
 
   Object.keys(files).forEach((key) => {
     formData.append(key, files[key]);
   });
 
-  const response = await apiClient.post<SocietyResponse>(`/societies/${id}/documents`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  const response = await apiClient.post<SocietyResponse>(
+    `/societies/${id}/documents`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
 
   return response.data.result;
 };
@@ -423,7 +516,7 @@ export interface Unit {
   blockNumber: string;
   floorNumber: number;
   booked: boolean;
-  residentType: 'Owner' | 'Tenant' | 'Vacant';
+  residentType: "Owner" | "Tenant" | "Vacant";
   residentName: string | null;
   mobileNumber: string | null;
   email: string | null;
@@ -533,9 +626,13 @@ export interface BlockDetailsResponse {
  * Get complete society details with blocks, floors, and units
  * @param id - Society ID
  */
-export const getSocietyDetails = async (id: string): Promise<SocietyDetails> => {
+export const getSocietyDetails = async (
+  id: string
+): Promise<SocietyDetails> => {
   // ALWAYS fetch ALL blocks, floors, and units - no filtering
-  const response = await apiClient.get<SocietyDetailsResponse>(`/societies/${id}/details`);
+  const response = await apiClient.get<SocietyDetailsResponse>(
+    `/societies/${id}/details`
+  );
   return response.data.result;
 };
 
@@ -543,8 +640,12 @@ export const getSocietyDetails = async (id: string): Promise<SocietyDetails> => 
  * Get society statistics only (quick endpoint)
  * @param id - Society ID
  */
-export const getSocietyStatistics = async (id: string): Promise<SocietyStatistics> => {
-  const response = await apiClient.get<SocietyStatisticsResponse>(`/societies/${id}/statistics`);
+export const getSocietyStatistics = async (
+  id: string
+): Promise<SocietyStatistics> => {
+  const response = await apiClient.get<SocietyStatisticsResponse>(
+    `/societies/${id}/statistics`
+  );
   return response.data.result;
 };
 
@@ -553,8 +654,13 @@ export const getSocietyStatistics = async (id: string): Promise<SocietyStatistic
  * @param id - Society ID
  * @param blockLetter - Block letter (e.g., 'A', 'B', 'C')
  */
-export const getBlockDetails = async (id: string, blockLetter: string): Promise<BlockDetails> => {
-  const response = await apiClient.get<BlockDetailsResponse>(`/societies/${id}/blocks/${blockLetter}`);
+export const getBlockDetails = async (
+  id: string,
+  blockLetter: string
+): Promise<BlockDetails> => {
+  const response = await apiClient.get<BlockDetailsResponse>(
+    `/societies/${id}/blocks/${blockLetter}`
+  );
   return response.data.result;
 };
 
@@ -564,8 +670,13 @@ export const getBlockDetails = async (id: string, blockLetter: string): Promise<
  * @param blockLetter - Block letter (e.g., 'A')
  * @param floorNumber - Floor number (e.g., 1, 2, 3)
  */
-export const getFloorDetails = async (id: string, blockLetter: string, floorNumber: number): Promise<any> => {
-  const response = await apiClient.get<any>(`/societies/${id}/blocks/${blockLetter}/floors/${floorNumber}`);
+export const getFloorDetails = async (
+  id: string,
+  blockLetter: string,
+  floorNumber: number
+): Promise<any> => {
+  const response = await apiClient.get<any>(
+    `/societies/${id}/blocks/${blockLetter}/floors/${floorNumber}`
+  );
   return response.data.result;
 };
-

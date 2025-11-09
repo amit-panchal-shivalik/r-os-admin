@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, X } from 'lucide-react';
+import { ArrowLeft, Upload, X, MessageSquare } from 'lucide-react';
 import { createComplaint } from '../../apis/complaintApi';
 import { getAllSocieties } from '../../apis/societyApi';
 import {
@@ -32,6 +32,7 @@ export const AddComplaint: React.FC = () => {
   const [formData, setFormData] = useState<ComplaintFormData>({
     society: '',
     type: '',
+    title: '',
     description: '',
     priority: 'Medium',
     status: 'Pending',
@@ -124,6 +125,14 @@ export const AddComplaint: React.FC = () => {
       newErrors.type = 'Please select a complaint type';
     }
 
+    if (!formData.title || formData.title.trim().length < 3) {
+      newErrors.title = 'Title must be at least 3 characters';
+    }
+
+    if (formData.title && formData.title.length > 100) {
+      newErrors.title = 'Title cannot exceed 100 characters';
+    }
+
     if (!formData.description || formData.description.trim().length < 10) {
       newErrors.description = 'Description must be at least 10 characters';
     }
@@ -173,19 +182,26 @@ export const AddComplaint: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-2 w-full mx-auto">
       {/* Header */}
       <div className="mb-6">
         <Button
-          variant="ghost"
+          variant="outline"
           onClick={() => navigate('/complaints')}
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Complaints
         </Button>
-        <h1 className="text-3xl font-bold">Add New Complaint</h1>
-        <p className="text-gray-500 mt-1">Create a new complaint for a society</p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+            <MessageSquare className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">Add New Complaint</h1>
+            <p className="text-gray-500 mt-1">Create a new complaint for a society</p>
+          </div>
+        </div>
       </div>
 
       {/* Form */}
@@ -195,74 +211,100 @@ export const AddComplaint: React.FC = () => {
             <CardTitle>Complaint Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Society */}
-            <div className="space-y-2">
-              <Label htmlFor="society">
-                Society <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                value={formData.society}
-                onValueChange={(value) => handleInputChange('society', value)}
-              >
-                <SelectTrigger id="society" className={errors.society ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Select a society" />
-                </SelectTrigger>
-                <SelectContent>
-                  {societies.map((society) => (
-                    <SelectItem key={society._id} value={society._id}>
-                      {society.societyName} ({society.societyCode})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.society && (
-                <p className="text-sm text-red-500">{errors.society}</p>
-              )}
+            {/* Society, Type, and Priority in one row */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Society */}
+              <div className="space-y-2">
+                <Label htmlFor="society">
+                  Society <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.society}
+                  onValueChange={(value) => handleInputChange('society', value)}
+                >
+                  <SelectTrigger id="society" className={errors.society ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select a society" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {societies.map((society) => (
+                      <SelectItem key={society._id} value={society._id}>
+                        {society.societyName} ({society.societyCode})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.society && (
+                  <p className="text-sm text-red-500">{errors.society}</p>
+                )}
+              </div>
+
+              {/* Type */}
+              <div className="space-y-2">
+                <Label htmlFor="type">
+                  Complaint Type <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) => handleInputChange('type', value)}
+                >
+                  <SelectTrigger id="type" className={errors.type ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select complaint type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COMPLAINT_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.type && (
+                  <p className="text-sm text-red-500">{errors.type}</p>
+                )}
+              </div>
+
+              {/* Priority */}
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select
+                  value={formData.priority}
+                  onValueChange={(value) => handleInputChange('priority', value)}
+                >
+                  <SelectTrigger id="priority">
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COMPLAINT_PRIORITIES.map((priority) => (
+                      <SelectItem key={priority.value} value={priority.value}>
+                        {priority.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Type */}
+            {/* Title */}
             <div className="space-y-2">
-              <Label htmlFor="type">
-                Complaint Type <span className="text-red-500">*</span>
+              <Label htmlFor="title">
+                Complaint Title <span className="text-red-500">*</span>
               </Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) => handleInputChange('type', value)}
-              >
-                <SelectTrigger id="type" className={errors.type ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Select complaint type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMPLAINT_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.type && (
-                <p className="text-sm text-red-500">{errors.type}</p>
+              <Input
+                id="title"
+                type="text"
+                placeholder="Brief title for the complaint"
+                value={formData.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                className={errors.title ? 'border-red-500' : ''}
+              />
+              {errors.title ? (
+                <p className="text-sm text-red-500">{errors.title}</p>
+              ) : (
+                <p className="text-sm text-gray-500">Maximum 100 characters</p>
               )}
-            </div>
-
-            {/* Priority */}
-            <div className="space-y-2">
-              <Label htmlFor="priority">Priority</Label>
-              <Select
-                value={formData.priority}
-                onValueChange={(value) => handleInputChange('priority', value)}
-              >
-                <SelectTrigger id="priority">
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMPLAINT_PRIORITIES.map((priority) => (
-                    <SelectItem key={priority.value} value={priority.value}>
-                      {priority.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="text-right">
+                <p className="text-sm text-gray-500">{formData.title.length} / 100</p>
+              </div>
             </div>
 
             {/* Description */}
@@ -292,21 +334,23 @@ export const AddComplaint: React.FC = () => {
             <div className="space-y-2">
               <Label htmlFor="image">Image (Optional)</Label>
               {imagePreview ? (
-                <div className="relative inline-block">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full max-w-md h-auto rounded-lg border"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                    onClick={handleRemoveImage}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                <div className="relative inline-block w-full">
+                  <div className="relative inline-block w-1/3"> 
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full max-w-md h-auto rounded-lg border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={handleRemoveImage}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
@@ -332,10 +376,8 @@ export const AddComplaint: React.FC = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-4 pt-4">
-              <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? 'Creating...' : 'Create Complaint'}
-              </Button>
+            <div className="flex justify-end gap-4 pt-4">
+              
               <Button
                 type="button"
                 variant="outline"
@@ -343,6 +385,9 @@ export const AddComplaint: React.FC = () => {
                 disabled={loading}
               >
                 Cancel
+              </Button>
+              <Button type="submit" disabled={loading} className="">
+                {loading ? 'Creating...' : 'Create Complaint'}
               </Button>
             </div>
           </CardContent>

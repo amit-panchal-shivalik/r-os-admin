@@ -271,11 +271,11 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({ isEdit = false }) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full p-2 mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-design-description rounded-lg flex items-center justify-center">
-          <FileText className="w-6 h-6 text-design-primary" />
+        <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+          <FileText className="w-6 h-6 text-white" />
         </div>
         <div>
           <h1 className="text-3xl font-bold text-design-primary">
@@ -304,7 +304,7 @@ export const NoticeForm: React.FC<NoticeFormProps> = ({ isEdit = false }) => {
                   <h3 className="text-lg font-semibold text-gray-800">Notice Details</h3>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Society */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">

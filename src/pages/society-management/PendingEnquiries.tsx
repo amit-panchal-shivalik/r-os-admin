@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip';
 import { Building, Phone, MapPin, Users, Check, X, Eye } from 'lucide-react';
 
 interface Enquiry {
@@ -85,10 +86,10 @@ export const PendingEnquiries: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Total Enquiries</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{enquiries.length}</p>
+              <p className="text-2xl font-bold text-primary mt-1">{enquiries.length}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Building className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+              <Building className="w-6 h-6 text-white" />
             </div>
           </div>
         </Card>
@@ -97,12 +98,12 @@ export const PendingEnquiries: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Pending Review</p>
-              <p className="text-2xl font-bold text-yellow-600 mt-1">
+              <p className="text-2xl font-bold text-primary mt-1">
                 {pendingEnquiries.length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <Building className="w-6 h-6 text-yellow-600" />
+            <div className="w-12 h-12 bg-primary/50 rounded-lg flex items-center justify-center">
+              <Building className="w-6 h-6 text-white" />
             </div>
           </div>
         </Card>
@@ -111,12 +112,12 @@ export const PendingEnquiries: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Approved</p>
-              <p className="text-2xl font-bold text-green-600 mt-1">
+              <p className="text-2xl font-bold text-primary mt-1">
                 {enquiries.filter(e => e.status === 'Approved').length}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Check className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 border border-primary rounded-lg flex items-center justify-center">
+              <Check className="w-6 h-6 text-primary" />
             </div>
           </div>
         </Card>
@@ -137,8 +138,8 @@ export const PendingEnquiries: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-3 mb-6">
                     <div className="flex items-center gap-2">
-                      <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                        <Building className="w-6 h-6 text-yellow-600" />
+                      <div className="w-12 h-12 bg-primary/50 rounded-lg flex items-center justify-center">
+                        <Building className="w-6 h-6 text-white" />
                       </div>
                       <div>
                         <h3 className="text-xl font-bold text-gray-900">{enquiry.societyName}</h3>
@@ -147,33 +148,62 @@ export const PendingEnquiries: React.FC = () => {
                     </div>
                     {/* Actions */}
                     <div className="flex gap-2 ml-4">
-                      <Button
-                        variant="blue"
-                        size="sm"
-                        onClick={() => handleViewDetails(enquiry)}
-                        className="text-white"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </Button>
-                      <Button
-                        variant="green"
-                        size="sm"
-                        onClick={() => handleApprove(enquiry.id)}
-                        className="text-white"
-                      >
-                        <Check className="w-4 h-4 mr-2" />
-                        Approve
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleReject(enquiry.id)}
-                        className="text-white"
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        Reject
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewDetails(enquiry)}
+                              className="text-primary"
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              View
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View enquiry details</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleApprove(enquiry.id)}
+                              className="text-design-primary"
+                            >
+                              <Check className="w-4 h-4 mr-2" />
+                              Approve
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Approve this enquiry</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => handleReject(enquiry.id)}
+                              className="text-white"
+                            >
+                              <X className="w-4 h-4 mr-2" />
+                              Reject
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Reject this enquiry</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
                   </div>
 
@@ -226,12 +256,21 @@ export const PendingEnquiries: React.FC = () => {
             <div className="p-6">
               <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Enquiry Details</h2>
-                <button
-                  onClick={() => setShowDetailsModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-6 h-6" />
-                </button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => setShowDetailsModal(false)}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Close</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
 
               <div className="space-y-4">
@@ -280,27 +319,46 @@ export const PendingEnquiries: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    handleReject(selectedEnquiry.id);
-                    setShowDetailsModal(false);
-                  }}
-                  className="text-red-600 hover:bg-red-50"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Reject
-                </Button>
-                <Button
-                  onClick={() => {
-                    handleApprove(selectedEnquiry.id);
-                    setShowDetailsModal(false);
-                  }}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  Approve
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          handleReject(selectedEnquiry.id);
+                          setShowDetailsModal(false);
+                        }}
+                        className="text-red-600 hover:bg-red-500 hover:text-white"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Reject
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Reject this enquiry</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => {
+                          handleApprove(selectedEnquiry.id);
+                          setShowDetailsModal(false);
+                        }}
+                        className="bg-primary hover:bg-primary text-white"
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        Approve
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Approve this enquiry</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </div>
           </Card>

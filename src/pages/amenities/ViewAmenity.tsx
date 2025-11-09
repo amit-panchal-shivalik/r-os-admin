@@ -177,6 +177,22 @@ export const ViewAmenity: React.FC = () => {
         </div>
       </div>
 
+      {/* Big Image Section */}
+      {amenity.bigImage && (
+        <Card className="overflow-hidden">
+          <div className="relative h-96">
+            <img 
+              src={amenity.bigImage} 
+              alt={`${amenity.name} - Large View`}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.parentElement!.style.display = 'none';
+              }}
+            />
+          </div>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Details */}
         <div className="lg:col-span-2 space-y-6">

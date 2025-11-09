@@ -167,8 +167,23 @@ export const UserAmenitiesList: React.FC = () => {
                   key={amenity._id}
                   className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group"
                 >
+                  {/* Image Section */}
+                  {amenity.image && (
+                    <div className="relative h-48 overflow-hidden">
+                      <img 
+                        src={amenity.image} 
+                        alt={amenity.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.parentElement!.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  )}
+
                   {/* Header with status badge */}
-                  <div className="relative bg-gradient-to-r from-blue-500 to-blue-600 p-6">
+                  <div className={`relative ${amenity.image ? 'bg-gradient-to-r from-blue-500 to-blue-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'} p-6`}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="text-2xl font-bold text-white mb-2 group-hover:scale-105 transition-transform">

@@ -11,6 +11,8 @@ export interface AmenityData {
   endTime: string;   // HH:MM format (e.g., "22:00")
   isPaid: boolean;
   amount?: number | null;
+  image?: string | null;
+  bigImage?: string | null;
 }
 
 export interface Amenity {
@@ -22,6 +24,8 @@ export interface Amenity {
   isPaid: boolean;
   amount: number | null;
   qrCode: string | null;
+  image: string | null;
+  bigImage: string | null;
   status: 'ACTIVE' | 'INACTIVE' | 'DELETED';
   isDeleted: boolean;
   createdAt: string;

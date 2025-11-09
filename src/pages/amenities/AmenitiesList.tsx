@@ -230,8 +230,8 @@ export const AmenitiesList: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-design-description rounded-lg flex items-center justify-center">
-            <Building2 className="w-6 h-6 text-design-primary" />
+          <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
+            <Building2 className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-design-primary">Amenities Management</h1>

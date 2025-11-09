@@ -11,6 +11,8 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { useAuth } from "../../contexts/AuthContext";
+import { useState, useEffect } from "react";
 
 interface ParkingData {
   name: string;
@@ -18,23 +20,52 @@ interface ParkingData {
   available: number;
 }
 
-const mockData: ParkingData[] = [
-  { name: "2 Wheeler", occupied: 128, available: 42 },
-  { name: "4 Wheeler", occupied: 95, available: 30 },
-  { name: "Visitor", occupied: 22, available: 38 },
-  { name: "Reserved", occupied: 48, available: 12 },
+// Mock data for Super Admin (MORE parking categories - all societies aggregated)
+const superAdminData: ParkingData[] = [
+  { name: "2 Wheeler", occupied: 485, available: 145 },      // Total across all societies
+  { name: "4 Wheeler", occupied: 342, available: 98 },       // Total across all societies
+  { name: "Visitor 2W", occupied: 78, available: 142 },      // Visitor two-wheeler
+  { name: "Visitor 4W", occupied: 56, available: 104 },      // Visitor four-wheeler
+  { name: "Reserved", occupied: 164, available: 36 },        // Reserved spots
+  { name: "Disabled", occupied: 18, available: 32 },         // Disabled parking
+  { name: "EV Charging", occupied: 24, available: 16 },      // Electric vehicle spots
+];
+
+// Mock data for Society Admin (LESS parking categories - single society only)
+const societyAdminData: ParkingData[] = [
+  { name: "2 Wheeler", occupied: 82, available: 28 },        // Single society
+  { name: "4 Wheeler", occupied: 58, available: 17 },        // Single society
+  { name: "Visitor", occupied: 15, available: 25 },          // Combined visitor
 ];
 
 export const ParkingUtilizationChart = () => {
-  const totalOccupied = mockData.reduce((sum, item) => sum + item.occupied, 0);
-  const totalAvailable = mockData.reduce((sum, item) => sum + item.available, 0);
+  const { admin } = useAuth();
+  const [parkingData, setParkingData] = useState<ParkingData[]>([]);
+  
+  // Check if current user is society admin
+  const isSocietyAdmin = admin?.roleKey === 'society_admin';
+
+  useEffect(() => {
+    // Load data based on role
+    if (isSocietyAdmin) {
+      setParkingData(societyAdminData);
+    } else {
+      setParkingData(superAdminData);
+    }
+  }, [isSocietyAdmin]);
+
+  if (parkingData.length === 0) {
+    return null;
+  }
+
+  const totalOccupied = parkingData.reduce((sum, item) => sum + item.occupied, 0);
+  const totalAvailable = parkingData.reduce((sum, item) => sum + item.available, 0);
   const utilizationPercentage = Math.round(
     (totalOccupied / (totalOccupied + totalAvailable)) * 100
   );
 
   return (
     <Card
-      shadow="sm"
       padding="lg"
       radius="md"
       withBorder
@@ -48,6 +79,7 @@ export const ParkingUtilizationChart = () => {
           <div>
             <Text size="sm" c="dimmed" fw={500}>
               Parking Utilization
+              {isSocietyAdmin && <Text size="xs" c="dimmed"> (Your Society)</Text>}
             </Text>
             <Text size="xl" fw={700}>
               {utilizationPercentage}%
@@ -66,7 +98,7 @@ export const ParkingUtilizationChart = () => {
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart
-          data={mockData}
+          data={parkingData}
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -120,6 +152,12 @@ export const ParkingUtilizationChart = () => {
           </Text>
         </div>
       </Group>
+      
+      <Text size="xs" c="dimmed" mt="sm" ta="center">
+        {isSocietyAdmin 
+          ? `Showing parking data for your society (${parkingData.length} categories)` 
+          : `Aggregated parking across all societies (${parkingData.length} categories)`}
+      </Text>
     </Card>
   );
 };
