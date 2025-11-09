@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an Axios instance with a base URL and common settings
 const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL, // Set base URL from environment variables
+    baseURL: "https://shivalikbackend-1.onrender.com/api/v1/",//import.meta.env.VITE_API_URL, // Set base URL from environment variables
     timeout: 120000, // Set timeout for API requests
 });
 
@@ -30,14 +30,28 @@ apiClient.interceptors.response.use(
         const errorMessage = error.response?.data?.message || 'An unexpected error occurred';
         // Check for 401 (Unauthorized) or 403 (Forbidden) status codes
         if (status === 401 || status === 403) {
-            // Remove auth token from localStorage
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('user_data');
-            localStorage.clear();
-            // Navigate to the root page ("/")
+            // If the failing request was a public auth endpoint (login/verify),
+            // don't perform a global redirect — let the caller handle the error.
+            const requestUrl: string = error.config?.url || '';
+            const isAuthEndpoint = /users\/(login|verify-otp)/i.test(requestUrl);
+            if (isAuthEndpoint) {
+                // preserve original axios error so callers can inspect response.data
+                return Promise.reject(error);
+            }
+
+            // For protected endpoints, clear auth and redirect to root (login)
+            try {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user_data');
+                // don't call clear() to avoid removing unrelated app data
+            } catch (e) {
+                // ignore
+            }
+            // Navigate to the root page ("/") to force re-authentication
             window.location.href = '/';
         }
-        return Promise.reject(new Error(errorMessage));
+        // Reject the original error so upstream can read response.data and status
+        return Promise.reject(error);
     }
 );
 

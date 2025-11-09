@@ -26,14 +26,17 @@ export const LoginPage = () => {
             showMessage(error, 'error');
             setSubmitting(false);
         }
-    }, [status, navigate, dispatch, submitting]);
+    }, [status, navigate, dispatch]);
 
     const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value.replace(/[^0-9]/g, '');
         setPhoneNumber(value);
+        
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
+        
+        // return
         e.preventDefault();
         setSubmitting(true);
         if (!phoneNumber) {
@@ -48,7 +51,7 @@ export const LoginPage = () => {
         }
 
         await setToLocalStorage('user_mobile', phoneNumber);
-        dispatch(loginUser({ countryCode: '+91', phoneNumber }));
+        dispatch(loginUser({ countryCode: '+91', phone: phoneNumber }));
     };
 
     return (
