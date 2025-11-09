@@ -33,7 +33,7 @@ export default function TPTab({ territory }: any) {
             {tpData.map((tp: any) => (
                 <AccordionItem key={tp._id} value={tp.tpNumber}>
                     <AccordionTrigger>
-                        <span className="font-semibold px-4">TP {tp.tpNumber}</span>  {tp.villageName}
+                        <span className="font-semibold px-4">TP {tp.tpNumber} - {tp.villageName}</span>  
                     </AccordionTrigger>
                     <AccordionContent>
                         <div className="flex flex-col gap-6 p-2">
