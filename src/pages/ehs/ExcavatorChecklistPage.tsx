@@ -6,6 +6,7 @@ import {
   Badge,
   Button,
   Card,
+  HoverCard,
   Group,
   Loader,
   Modal,
@@ -17,9 +18,10 @@ import {
   Text,
   TextInput,
   Textarea,
+  Image,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
-import { IconAlertCircle, IconClipboardCheck, IconEye, IconPencil, IconPlus, IconPrinter, IconRefresh } from '@tabler/icons-react';
+import { IconAlertCircle, IconClipboardCheck, IconEye, IconInfoCircle, IconPencil, IconPlus, IconPrinter, IconRefresh } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import EhsPageLayout from '@/components/ehs/EhsPageLayout';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -27,6 +29,7 @@ import { useSites } from '@/hooks/useSites';
 import { useExcavatorChecklists } from '@/hooks/useExcavatorChecklists';
 import { ExcavatorChecklistPayload } from '@/apis/ehs';
 import { showMessage } from '@/utils/Constant';
+import excavatorReferenceImg from '@/assets/ehs/EXCAVATOR.jpeg';
 
 const DEFAULT_ITEMS = [
   'Front & reverse horn',
@@ -132,13 +135,44 @@ const ExcavatorChecklistPage = () => {
     [sites]
   );
 
+  const renderReferenceIcon = useCallback(
+    (index: number) => (
+      index < 12 ? (
+        <HoverCard width={300} shadow="md" withArrow withinPortal>
+          <HoverCard.Target>
+            <ActionIcon
+              variant="subtle"
+              color="gray"
+              aria-label={`Show visual reference for checkpoint ${index + 1}`}
+            >
+              <IconInfoCircle size={16} />
+            </ActionIcon>
+          </HoverCard.Target>
+          <HoverCard.Dropdown>
+            <Stack gap="xs" align="center">
+              <Text size="sm" fw={600}>
+                Visual reference (points 1–12)
+              </Text>
+              <Image src={excavatorReferenceImg} alt="Excavator inspection reference" width={260} fit="contain" />
+              <Text size="xs" c="dimmed" ta="center">
+                Match numbered callouts with the inspection questions for quick orientation.
+              </Text>
+            </Stack>
+          </HoverCard.Dropdown>
+        </HoverCard>
+      ) : null
+    ),
+    []
+  );
+
   useEffect(() => {
     if (!watchedSiteId) {
       return;
     }
     const selectedSite = sites.find((site) => site._id === watchedSiteId);
     if (selectedSite) {
-      setValue('operatorName', selectedSite.contactPerson ?? '');
+      const siteDetails = selectedSite as unknown as { contactPerson?: string };
+      setValue('operatorName', siteDetails.contactPerson ?? '');
     }
   }, [watchedSiteId, sites, setValue]);
 
@@ -492,6 +526,16 @@ const ExcavatorChecklistPage = () => {
         <ScrollArea h="70vh">
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack gap="xl" p="sm">
+              <Card withBorder radius="md" padding="lg" shadow="xs">
+                <Stack gap="xs" align="center">
+                  <Text fw={600}>Excavator inspection reference</Text>
+                  <Image src={excavatorReferenceImg} alt="Excavator checklist reference" width={280} fit="contain" />
+                  <Text size="xs" c="dimmed" ta="center">
+                    Hover the info icons beside checklist items to reopen this diagram while filling the form.
+                  </Text>
+                </Stack>
+              </Card>
+
               <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
                 <Controller
                   control={control}
@@ -549,11 +593,15 @@ const ExcavatorChecklistPage = () => {
                       <Card key={field.id} withBorder radius="md" padding="md" shadow="xs">
                         <Stack gap="sm">
                           <Text fw={600}>#{index + 1}</Text>
-                          <TextInput
-                            label="Description"
-                            value={field.description}
-                            onChange={(event) => setValue(`items.${index}.description`, event.currentTarget.value)}
-                          />
+                          <Stack gap={4}>
+                            <TextInput
+                              label="Description"
+                              value={field.description}
+                              onChange={(event) => setValue(`items.${index}.description`, event.currentTarget.value)}
+                              rightSection={renderReferenceIcon(index)}
+                              rightSectionWidth={32}
+                            />
+                          </Stack>
                           <SimpleGrid cols={{ base: 1, md: 3 }} spacing="md">
                             <Controller
                               control={control}
@@ -575,14 +623,13 @@ const ExcavatorChecklistPage = () => {
                               name={`items.${index}.needRepairs` as const}
                               render={({ field: repairField }) => (
                                 <Select
-                                  {...repairField}
                                   label="Need Repairs"
                                   data={[
-                                    { label: 'No', value: false as any },
-                                    { label: 'Yes', value: true as any },
+                                    { label: 'No', value: 'false' },
+                                    { label: 'Yes', value: 'true' },
                                   ]}
-                                  onChange={(value) => repairField.onChange(value === 'true' || value === true)}
                                   value={repairField.value ? 'true' : 'false'}
+                                  onChange={(value) => repairField.onChange(value === 'true')}
                                 />
                               )}
                             />
@@ -689,6 +736,16 @@ const ExcavatorChecklistPage = () => {
               </Card>
             </SimpleGrid>
 
+            <Card withBorder radius="md" padding="md" shadow="xs">
+              <Stack gap="xs" align="center">
+                <Text fw={600}>Visual reference for checkpoints 1–12</Text>
+                <Image src={excavatorReferenceImg} alt="Excavator inspection visual reference" width={260} fit="contain" />
+                <Text size="xs" c="dimmed" ta="center">
+                  Use the numbered callouts to locate inspection points while reviewing responses.
+                </Text>
+              </Stack>
+            </Card>
+
             <Table withTableBorder striped>
               <Table.Thead>
                 <Table.Tr>
@@ -705,15 +762,22 @@ const ExcavatorChecklistPage = () => {
                   return (
                     <Table.Tr key={description}>
                       <Table.Td>{index + 1}</Table.Td>
-                      <Table.Td>{description}</Table.Td>
+                      <Table.Td>
+                        <Group gap="xs" align="flex-start">
+                          <Text size="sm" style={{ flex: 1 }}>
+                            {description}
+                          </Text>
+                          {renderReferenceIcon(index)}
+                        </Group>
+                      </Table.Td>
                       <Table.Td>{item?.status || '—'}</Table.Td>
                       <Table.Td>{item?.needRepairs ? 'YES' : 'NO'}</Table.Td>
                       <Table.Td>{item?.remark || '—'}</Table.Td>
                     </Table.Tr>
                   );
                 })}
-              </Table.Tbody>
-            </Table>
+                </Table.Tbody>
+              </Table>
           </Stack>
         ) : null}
       </Modal>
