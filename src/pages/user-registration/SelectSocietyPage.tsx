@@ -97,10 +97,10 @@ export const SelectSocietyPage = () => {
                     <h3 className="font-semibold text-gray-900 mb-1">{society.name}</h3>
                     <p className="text-sm text-gray-600 mb-1">{society.location}</p>
                     <div className="flex gap-4 text-sm text-gray-500">
-                      {society.membersCount && (
+                      {society.membersCount > 0 ? (
                         <span>{society.membersCount} Members</span>
-                      )}
-                      {society.blocksCount && <span>{society.blocksCount} Blocks</span>}
+                      ) : (<span>0 Members</span>)}
+                      {society.blocksCount > 0 ? (<span>{society.blocksCount} Blocks</span>) : (<span>0 Blocks</span>)}
                     </div>
                   </div>
                 </button>

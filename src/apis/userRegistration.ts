@@ -1,5 +1,7 @@
 import { apiRequest } from './apiRequest';
 
+import { FamilyMember } from '../types/MemberTypes';
+
 export interface RegisterUserPayload {
   type: 'Owner' | 'Tenant';
   societyId: string;
@@ -18,6 +20,7 @@ export interface RegisterUserPayload {
   panNumber?: string;
   profilePicture?: File | string;
   ownershipProof?: File | string;
+  familyMembers?: FamilyMember[];
   [key: string]: any;
 }
 
