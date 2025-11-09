@@ -1,25 +1,30 @@
-import { takeLatest, put, call } from 'redux-saga/effects';
+import { takeLatest, put, call, select } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { verifyOTP, verifyOTPSuccess, verifyOTPFailure } from '../slices/otpSlice';
-import { verifyOTPApi } from '../../apis/auth';
-import { User } from '../../types/CommonTypes';
+import { superAdminVerifyOTPApi, buildingAdminVerifyOTPApi } from '../../apis/auth';
+import { VerifyOTPPayload, BuildingAdminVerifyOTPPayload } from '@/types/LoginTypes';
 
-// Saga to handle user Verify OTP
-function* handleVerifyOTP(action: PayloadAction<any>) {
+// Saga to handle OTP verification
+function* handleVerifyOTP(action: PayloadAction<VerifyOTPPayload | BuildingAdminVerifyOTPPayload>) {
     try {
-        // Call the verifyOTPApi API function
-        const user: User = yield call(verifyOTPApi, action.payload);
-        // Dispatch the verifyOTPSuccess action
-        yield put(verifyOTPSuccess(user));
+        // Check if it's building admin OTP (has buildingId)
+        const isBuildingAdmin = 'buildingId' in action.payload;
+        
+        let response: any;
+        if (isBuildingAdmin) {
+            response = yield call(buildingAdminVerifyOTPApi, action.payload as BuildingAdminVerifyOTPPayload);
+        } else {
+            response = yield call(superAdminVerifyOTPApi, action.payload as VerifyOTPPayload);
+        }
+        
+        yield put(verifyOTPSuccess(response));
     } catch (error: any) {
-        // If there is an error, dispatch the verifyOTPFailure action with the error message
         yield put(verifyOTPFailure(error.message || 'An error occurred'));
     }
 }
 
-function* verifyOTPSaga() {
-    // Listen for the handleVerifyOTP action and call the handleVerifyOTP saga when dispatched
+function* otpSaga() {
     yield takeLatest(verifyOTP.type, handleVerifyOTP);
 }
 
-export default verifyOTPSaga;
+export default otpSaga;

@@ -4,35 +4,62 @@ const initialState = {
     // Login User Data
     user: null,
     error: null,
-    status: 'idle',
+    status: 'idle', // idle, pending, complete, failed
+    userType: null, // 'superadmin' or 'buildingadmin'
 };
 
 const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
-        // Login User Actions
-        loginUser(state, action) {
+        // Super Admin Login Actions
+        superAdminLogin(state, action) {
             state.status = 'pending';
+            state.userType = 'superadmin';
         },
-        loginUserSuccess(state, action) {
+        superAdminLoginSuccess(state, action) {
             state.user = action.payload;
             state.error = null;
             state.status = 'complete';
         },
-        loginUserFailure(state, action) {
+        superAdminLoginFailure(state, action) {
             state.user = null;
             state.error = action.payload;
             state.status = 'failed';
         },
-        resetLoginUser(state) {
+        
+        // Building Admin Login Actions
+        buildingAdminLogin(state, action) {
+            state.status = 'pending';
+            state.userType = 'buildingadmin';
+        },
+        buildingAdminLoginSuccess(state, action) {
+            state.user = action.payload;
+            state.error = null;
+            state.status = 'complete';
+        },
+        buildingAdminLoginFailure(state, action) {
+            state.user = null;
+            state.error = action.payload;
+            state.status = 'failed';
+        },
+        
+        // Reset
+        resetAuth(state) {
             state.status = 'idle';
+            state.error = null;
         },
     },
 });
 
 export const {
-    loginUser, loginUserSuccess, loginUserFailure, resetLoginUser
+    superAdminLogin,
+    superAdminLoginSuccess,
+    superAdminLoginFailure,
+    buildingAdminLogin,
+    buildingAdminLoginSuccess,
+    buildingAdminLoginFailure,
+    resetAuth
 } = authSlice.actions;
 
 export default authSlice.reducer;

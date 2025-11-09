@@ -1,25 +1,39 @@
 import { takeLatest, put, call } from 'redux-saga/effects';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { loginUser, loginUserSuccess, loginUserFailure } from '../slices/authSlice';
-import { authenticateUserApi } from '../../apis/auth';
-import { LoginPayload } from '@/types/LoginTypes';
+import {
+    superAdminLogin,
+    superAdminLoginSuccess,
+    superAdminLoginFailure,
+    buildingAdminLogin,
+    buildingAdminLoginSuccess,
+    buildingAdminLoginFailure
+} from '../slices/authSlice';
+import { superAdminSendOTPApi, buildingAdminSendOTPApi } from '../../apis/auth';
+import { LoginPayload, BuildingAdminLoginPayload } from '@/types/LoginTypes';
 
-// Saga to handle user login
-function* handleLogin(action: PayloadAction<LoginPayload>) {
+// Saga to handle super admin login
+function* handleSuperAdminLogin(action: PayloadAction<LoginPayload>) {
     try {
-        // Call the authenticateUser API function with the email
-        const user: LoginPayload = yield call(authenticateUserApi, action.payload);
-        // Dispatch the loginUserSuccess action with the user data
-        yield put(loginUserSuccess(user));
+        const response: any = yield call(superAdminSendOTPApi, action.payload);
+        yield put(superAdminLoginSuccess(response));
     } catch (error: any) {
-        // If there is an error, dispatch the loginUserFailure action with the error message
-        yield put(loginUserFailure(error.message || 'An error occurred'));
+        yield put(superAdminLoginFailure(error.message || 'An error occurred'));
+    }
+}
+
+// Saga to handle building admin login
+function* handleBuildingAdminLogin(action: PayloadAction<BuildingAdminLoginPayload>) {
+    try {
+        const response: any = yield call(buildingAdminSendOTPApi, action.payload);
+        yield put(buildingAdminLoginSuccess(response));
+    } catch (error: any) {
+        yield put(buildingAdminLoginFailure(error.message || 'An error occurred'));
     }
 }
 
 function* authSaga() {
-    // Listen for the loginUser action and call the handleLogin saga when dispatched
-    yield takeLatest(loginUser.type, handleLogin);
+    yield takeLatest(superAdminLogin.type, handleSuperAdminLogin);
+    yield takeLatest(buildingAdminLogin.type, handleBuildingAdminLogin);
 }
 
 export default authSaga;

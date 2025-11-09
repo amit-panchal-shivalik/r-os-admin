@@ -1,20 +1,38 @@
-import { LoginPayload } from '@/types/LoginTypes';
+import { LoginPayload, BuildingAdminLoginPayload, VerifyOTPPayload, BuildingAdminVerifyOTPPayload } from '@/types/LoginTypes';
 import { apiRequest } from './apiRequest';
 
-// API function to authenticate user
-export const authenticateUserApi = async (data: LoginPayload): Promise<LoginPayload> => {
-    return await apiRequest<LoginPayload>({
+// Super Admin - Send OTP
+export const superAdminSendOTPApi = async (data: LoginPayload): Promise<any> => {
+    return await apiRequest<any>({
         method: 'POST',
-        url: 'users/admin/send-phone-otp',
+        url: 'auth/superadmin/send-otp',
         data: data,
     });
 };
 
-// API function to verify OTP
-export const verifyOTPApi = async (data: any): Promise<LoginPayload> => {
-    return await apiRequest<LoginPayload>({
+// Super Admin - Verify OTP
+export const superAdminVerifyOTPApi = async (data: VerifyOTPPayload): Promise<any> => {
+    return await apiRequest<any>({
         method: 'POST',
-        url: 'users/admin/verify-phone-otp',
+        url: 'auth/superadmin/verify-otp',
+        data: data,
+    });
+};
+
+// Building Admin - Send OTP
+export const buildingAdminSendOTPApi = async (data: BuildingAdminLoginPayload): Promise<any> => {
+    return await apiRequest<any>({
+        method: 'POST',
+        url: 'auth/buildingadmin/send-otp',
+        data: data,
+    });
+};
+
+// Building Admin - Verify OTP
+export const buildingAdminVerifyOTPApi = async (data: BuildingAdminVerifyOTPPayload): Promise<any> => {
+    return await apiRequest<any>({
+        method: 'POST',
+        url: 'auth/buildingadmin/verify-otp',
         data: data,
     });
 };
