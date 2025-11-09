@@ -54,6 +54,20 @@ const MODULE_SYNONYMS: Record<string, string> = {
   safetyviolationdebitnote: 'SafetyViolationDebitNote',
   debitnote: 'SafetyViolationDebitNote',
   safetydebitnote: 'SafetyViolationDebitNote',
+  ehsdashboard: 'EHSDashboard',
+  dashboard: 'EHSDashboard',
+  fireextinguishermonitoring: 'FireExtinguisherMonitoring',
+  fireextinguishersheet: 'FireExtinguisherMonitoring',
+  firstaidchecklist: 'FirstAidChecklist',
+  mockdrillschedule: 'MockDrillSchedule',
+  mockdrillreport: 'MockDrillReport',
+  ladderinspection: 'LadderInspection',
+  heightsafety: 'HeightSafety',
+  workpermit: 'WorkPermit',
+  ehscoreteam: 'EhsCoreTeam',
+  ehscommitteemom: 'EhsCommitteeMom',
+  nearmissreport: 'NearMissReport',
+  scaffoldinspectionchecklist: 'ScaffoldInspectionChecklist',
 };
 
 const normaliseAction = (action: string): PermissionAction => {

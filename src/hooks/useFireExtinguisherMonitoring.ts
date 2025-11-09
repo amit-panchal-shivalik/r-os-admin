@@ -4,27 +4,16 @@ import {
   listFireExtinguisherMonitoring,
   updateFireExtinguisherMonitoring,
   FireExtinguisherMonitoringPayload,
+  FireExtinguisherMonitoringRecord,
 } from '@/apis/ehs';
 import { showMessage } from '@/utils/Constant';
-
-export type FireExtinguisherMonitoringRecord = FireExtinguisherMonitoringPayload & {
-  _id: string;
-  siteSnapshot?: {
-    id?: string;
-    name?: string;
-    location?: string;
-  };
-  projectIncharge?: string;
-  createdAt?: string;
-  updatedAt?: string;
-};
 
 export const useFireExtinguisherMonitoring = (initialParams: Record<string, unknown> = {}) => {
   const [records, setRecords] = useState<FireExtinguisherMonitoringRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [params, setParams] = useState(initialParams);
 
-  const fetchSheets = useCallback(
+  const fetchRecords = useCallback(
     async (overrideParams?: Record<string, unknown>) => {
       setLoading(true);
       try {
@@ -32,7 +21,7 @@ export const useFireExtinguisherMonitoring = (initialParams: Record<string, unkn
         const payload = response?.result?.records ?? response?.result ?? [];
         setRecords(Array.isArray(payload) ? payload : []);
       } catch (error: any) {
-        showMessage(error?.message ?? 'Unable to load fire extinguisher monitoring records', 'error');
+        showMessage(error?.message ?? 'Unable to load fire extinguisher records', 'error');
       } finally {
         setLoading(false);
       }
@@ -41,42 +30,42 @@ export const useFireExtinguisherMonitoring = (initialParams: Record<string, unkn
   );
 
   useEffect(() => {
-    fetchSheets().catch(() => undefined);
-  }, [fetchSheets]);
+    fetchRecords().catch(() => undefined);
+  }, [fetchRecords]);
 
-  const createSheet = useCallback(async (payload: FireExtinguisherMonitoringPayload) => {
+  const createRecord = useCallback(async (payload: FireExtinguisherMonitoringPayload) => {
     const response = await createFireExtinguisherMonitoring(payload);
     const record = response?.result;
     if (record) {
       setRecords((prev) => [record, ...prev]);
-      showMessage('Monitoring sheet saved');
+      showMessage('Fire extinguisher record saved');
       return record;
     }
-    await fetchSheets();
+    await fetchRecords();
     return null;
-  }, [fetchSheets]);
+  }, [fetchRecords]);
 
-  const updateSheet = useCallback(
+  const updateRecord = useCallback(
     async (id: string, payload: Partial<FireExtinguisherMonitoringPayload>) => {
       const response = await updateFireExtinguisherMonitoring(id, payload);
       const record = response?.result;
       if (record) {
         setRecords((prev) => prev.map((item) => (item._id === id ? record : item)));
-        showMessage('Monitoring sheet updated');
+        showMessage('Fire extinguisher record updated');
         return record;
       }
-      await fetchSheets();
+      await fetchRecords();
       return null;
     },
-    [fetchSheets]
+    [fetchRecords]
   );
 
   return {
     records,
     loading,
-    fetchSheets,
-    createSheet,
-    updateSheet,
+    fetchRecords,
+    createRecord,
+    updateRecord,
     params,
     setParams,
   };
