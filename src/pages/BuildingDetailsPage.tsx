@@ -5,9 +5,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { buildingDetailsSchema } from '../utils/validationSchemas/buildingDetailsSchema';
 import { CustomSelect } from '../components/ui/CustomSelect';
-import { updateBuilding, resetUpdateBuilding } from '../store/slices/buildingSlice';
+import { getBuilding, updateBuilding, resetUpdateBuilding, resetGetBuilding } from '../store/slices/buildingSlice';
 import { showMessage } from '../utils/Constant';
 import { UpdateBuildingPayload } from '../apis/building';
+import { getFromLocalStorage } from '../utils/localstorage';
 
 type BuildingDetailsFormData = Yup.InferType<typeof buildingDetailsSchema>;
 
@@ -24,16 +25,47 @@ export const BuildingDetailsPage = () => {
     building,
     error,
     status,
+    fetchStatus,
+    fetchError,
   }: any = useSelector((state: any) => state.building);
 
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const [societyId, setSocietyId] = useState<string | null>(null);
+
+  // Helper function to get society ID
+  const getSocietyId = (): string | null => {
+    const userInfo = getFromLocalStorage<any>('userInfo');
+    const selectedSociety = getFromLocalStorage<any>('selectedSociety');
+    return userInfo?.societyId || userInfo?.society?.id || selectedSociety?.id || selectedSociety?._id || null;
+  };
 
   useEffect(() => {
     document.title = 'Building Details - Smart Society';
-  }, []);
+    
+    // Get society ID from userInfo or selectedSociety
+    const id = getSocietyId();
+    setSocietyId(id);
+    
+    if (id) {
+      dispatch(getBuilding(id));
+    } else {
+      showMessage('Society ID not found. Please select a society first.', 'error');
+    }
+  }, [dispatch]);
 
-  // Handle success and error messages
+  // Handle fetch success and error messages
+  useEffect(() => {
+    if (fetchStatus === 'failed' && fetchError) {
+      // Only show error if it's not a 404 (building might not exist yet)
+      if (!fetchError.includes('404') && !fetchError.includes('not found')) {
+        showMessage(fetchError || 'Failed to fetch building details', 'error');
+      }
+      dispatch(resetGetBuilding());
+    }
+  }, [fetchStatus, fetchError, dispatch]);
+
+  // Handle update success and error messages
   useEffect(() => {
     if (status === 'complete' && building) {
       showMessage('Building details updated successfully!', 'success');
@@ -67,6 +99,29 @@ export const BuildingDetailsPage = () => {
     },
   });
 
+  // Map fetched building data to form fields
+  useEffect(() => {
+    if (fetchStatus === 'complete' && building) {
+      // Map backend data to form fields
+      setValue('buildingName', building.buildingName || '');
+      setValue('societyName', building.society?.name || '');
+      setValue('address', building.address || '');
+      setValue('city', building.city || '');
+      setValue('state', building.state || '');
+      setValue('pincode', building.pinCode || building.pincode || '');
+      setValue('totalBlocks', building.totalBlocks || 0);
+      setValue('totalUnits', building.totalUnits || 0);
+      setValue('buildingType', building.buildingType || '');
+      
+      // Set logo preview if logo exists
+      if (building.society?.logo) {
+        setLogoPreview(building.society.logo);
+      }
+      
+      dispatch(resetGetBuilding());
+    }
+  }, [building, fetchStatus, setValue, dispatch]);
+
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -94,6 +149,14 @@ export const BuildingDetailsPage = () => {
   };
 
   const onSubmit = async (data: BuildingDetailsFormData) => {
+    // Get society ID (refresh in case it changed)
+    const currentSocietyId = getSocietyId();
+    
+    if (!currentSocietyId) {
+      showMessage('Society ID not found. Please select a society first.', 'error');
+      return;
+    }
+
     let logoBase64: string | undefined;
     if (data.logo && data.logo instanceof File) {
       try {
@@ -106,6 +169,7 @@ export const BuildingDetailsPage = () => {
 
     // Map form data to API payload structure
     const payload: UpdateBuildingPayload = {
+      societyId: currentSocietyId, // Include society ID for update/create operation
       society: {
         name: data.societyName,
         logo: logoBase64, // Send base64 string or undefined
@@ -133,8 +197,21 @@ export const BuildingDetailsPage = () => {
           <h1 className="text-3xl font-bold text-primary-black mb-2">Building Details</h1>
         </div>
 
+        {/* Loading State */}
+        {fetchStatus === 'loading' && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6 lg:p-8">
+            <div className="flex items-center justify-center py-12">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+                <p className="text-sm text-gray-600">Loading building details...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg border border-gray-200 p-6 lg:p-8">
+        {fetchStatus !== 'loading' && (
+          <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg border border-gray-200 p-6 lg:p-8">
           {/* Basic Information Section */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-primary-black mb-6">Basic Information</h2>
@@ -402,6 +479,7 @@ export const BuildingDetailsPage = () => {
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
