@@ -89,18 +89,27 @@ export const DashboardLayout = () => {
                   <MenuIcon className="h-5 w-5 text-gray-600" />
                 </UnstyledButton>
                 {/* R-OS Logo */}
-                <Group gap="sm">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-sm">R</span>
-                  </div>
-                  <Text
-                    size="lg"
-                    fw={700}
-                    c="#111827"
-                  >
-                    R-OS
-                  </Text>
-                </Group>
+                <div className="flex items-center">
+                  <img
+                    src="/logo.jpg"
+                    alt="R-OS Logo"
+                    className="h-10 w-auto object-contain"
+                    onError={(e) => {
+                      // Fallback to text logo if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallbackDiv = document.createElement('div');
+                      fallbackDiv.className = 'flex items-center gap-2';
+                      fallbackDiv.innerHTML = `
+                        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                          <span class="text-primary-foreground font-bold text-sm">R</span>
+                        </div>
+                        <span class="text-lg font-bold text-gray-900">R-OS</span>
+                      `;
+                      target.parentElement?.appendChild(fallbackDiv);
+                    }}
+                  />
+                </div>
               </Group>
 
               <Group gap="md">

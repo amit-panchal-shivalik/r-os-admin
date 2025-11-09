@@ -1,18 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronDown,
   Home,
   Building2,
-  Users,
-  Wrench,
   MessageSquare,
   Car,
-  Calendar,
-  Image,
-  BookOpen,
   AlertTriangle,
-  Building
+  Building,
+  CreditCard,
+  ShieldAlert
 } from 'lucide-react';
 
 interface MenuItem {
@@ -20,13 +17,26 @@ interface MenuItem {
   href?: string;
   icon: React.ComponentType<any>;
   subItems?: { name: string; href: string }[];
+  allowedRoles?: string[]; // If not specified, available to all roles
 }
 
-const menuItems: MenuItem[] = [
+// Get current admin role from localStorage
+const getAdminRole = (): string => {
+  try {
+    const adminData = JSON.parse(localStorage.getItem('admin_data') ?? '{}');
+    return adminData.roleKey || 'guest';
+  } catch {
+    return 'guest';
+  }
+};
+
+// All menu items with role-based access control (Only implemented features)
+const allMenuItems: MenuItem[] = [
   {
     name: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: Home,
+    // Available to all roles
   },
   {
     name: 'Society Management',
@@ -35,79 +45,86 @@ const menuItems: MenuItem[] = [
       { name: 'All Societies', href: '/societies' },
       { name: 'Pending Enquiries', href: '/societies/enquiries' },
     ],
+    allowedRoles: ['super_admin', 'society_admin'],
   },
   {
-    name: 'Building Settings',
+    name: 'Amenities',
     icon: Building2,
     subItems: [
-      { name: 'Building Details', href: '/building-details' },
-      { name: 'Blocks', href: '/blocks' },
-      { name: 'Floors', href: '/floors' },
-      { name: 'Units', href: '/units' },
-      { name: 'Parking', href: '/building-parking' },
-      { name: 'Amenities', href: '/amenities' },
-      { name: 'Notice Board', href: '/notice-board' },
+      { name: 'All Amenities', href: '/amenities' },
+      { name: 'Add Amenity', href: '/societies/book-amenity' },
     ],
+    allowedRoles: ['super_admin', 'society_admin'],
   },
   {
-    name: 'Users',
-    icon: Users,
-    subItems: [
-      { name: 'Members', href: '/members' },
-      { name: 'Society Employee', href: '/society-employee' },
-      { name: 'Committee Members', href: '/committee-members' },
-    ],
+    name: 'Browse Amenities',
+    icon: Building2,
+    href: '/user-amenities',
+    allowedRoles: ['super_admin', 'society_admin'],
   },
   {
-    name: 'Maintenance & Bill',
-    icon: Wrench,
+    name: 'Amenity Payments',
+    icon: CreditCard,
     subItems: [
-      { name: 'Maintenance', href: '/maintenance' },
-      { name: 'Bill', href: '/bill' },
+      { name: 'All Bookings', href: '/amenity-payments' },
+      { name: 'Payment Statistics', href: '/amenity-payments/statistics' },
     ],
+    allowedRoles: ['super_admin', 'society_admin', 'finance_admin'],
   },
   {
     name: 'Complaints',
-    href: '/complaints',
     icon: MessageSquare,
+    subItems: [
+      { name: 'All Complaints', href: '/complaints' },
+      { name: 'Add Complaint', href: '/complaints/add' },
+    ],
+    allowedRoles: ['super_admin', 'society_admin', 'helpdesk_operator'],
+  },
+  {
+    name: 'Notice',
+    href: '/notice',
+    icon: AlertTriangle,
+    allowedRoles: ['super_admin', 'society_admin', 'community_manager'],
   },
   {
     name: 'Parking',
     icon: Car,
     subItems: [
-      { name: 'Members Vehicles', href: '/members-vehicles' },
-      { name: 'Vehicles In/Out', href: '/vehicle-in-out' },
       { name: 'Parking Settings', href: '/parking-settings' },
-      { name: 'Tag Reader Reports', href: '/tag-reader-reports' },
-      { name: 'RFID Reports', href: '/rfid-reports' },
     ],
+    allowedRoles: ['super_admin', 'society_admin'],
   },
   {
-    name: 'Events',
-    href: '/events',
-    icon: Calendar,
-  },
-  {
-    name: 'Building Gallery',
-    href: '/building-gallery',
-    icon: Image,
-  },
-  {
-    name: 'Book Amenity',
-    href: '/societies/book-amenity',
-    icon: BookOpen,
-  },
-  {
-    name: 'Penalty',
-    href: '/penalty',
-    icon: AlertTriangle,
+    name: 'SOS Report',
+    href: '/sos-report',
+    icon: ShieldAlert,
+    allowedRoles: ['super_admin', 'society_admin', 'security_manager'],
   },
   {
     name: 'Input Demo',
     href: '/input-demo',
     icon: Home,
+    allowedRoles: ['super_admin'], // Demo page only for super admin
   },
 ];
+
+// Filter menu items based on role
+const getMenuItemsForRole = (roleKey: string): MenuItem[] => {
+  // Super admin sees everything
+  if (roleKey === 'super_admin') {
+    return allMenuItems;
+  }
+
+  // Filter items based on allowed roles
+  return allMenuItems.filter(item => {
+    // If no allowedRoles specified, it's available to everyone
+    if (!item.allowedRoles || item.allowedRoles.length === 0) {
+      return true;
+    }
+    // Check if user's role is in allowed roles
+    return item.allowedRoles.includes(roleKey);
+  });
+};
 
 interface AdminSidebarProps {
   collapsed?: boolean;
@@ -118,6 +135,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ collapsed = false })
   const location = useLocation();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  
+  // Get filtered menu items based on current role
+  const menuItems = useMemo(() => {
+    const roleKey = getAdminRole();
+    return getMenuItemsForRole(roleKey);
+  }, []); // Empty dependency array since role doesn't change without page reload
 
   const toggleExpanded = (itemName: string) => {
     const newExpanded = new Set(expandedItems);

@@ -41,11 +41,12 @@ const SocietyView: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await getSocietyDetails(id, selectedBlock || undefined);
+        // Fetch ALL blocks, floors, and units - no filtering
+        const data = await getSocietyDetails(id);
         setSocietyData(data);
 
         // Set first block as default if not selected
-        if (!selectedBlock && data.blocks.length > 0) {
+        if (!selectedBlock && data?.blocks && data.blocks.length > 0) {
           setSelectedBlock(data.blocks[0].blockLetter);
         }
       } catch (err: any) {
@@ -62,7 +63,7 @@ const SocietyView: React.FC = () => {
     };
 
     fetchSocietyDetails();
-  }, [id, selectedBlock, toast]);
+  }, [id, toast]); // Removed selectedBlock from dependencies
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -305,7 +306,7 @@ const SocietyView: React.FC = () => {
                             // TODO: Navigate to unit detail page or show unit details modal
                             toast({
                               title: unit.unitNumber,
-                              description: `Status: ${unit.booked ? 'Booked' : 'Unbooked'} | Type: ${unit.residentType}${unit.phoneNumber ? ` | Phone: ${unit.phoneNumber}` : ''}`,
+                              description: `Status: ${unit.booked ? 'Booked' : 'Unbooked'} | Type: ${unit.residentType}${unit.mobileNumber ? ` | Phone: ${unit.mobileNumber}` : ''}`,
                             });
                           }}
                         >
@@ -318,7 +319,7 @@ const SocietyView: React.FC = () => {
                             </div>
                             <div className="text-xs text-design-secondary">
                               <p>{unit.residentType}</p>
-                              {unit.phoneNumber && <p className="truncate">📞 {unit.phoneNumber}</p>}
+                              {unit.mobileNumber && <p className="truncate">📞 {unit.mobileNumber}</p>}
                             </div>
                           </div>
                         </Card>

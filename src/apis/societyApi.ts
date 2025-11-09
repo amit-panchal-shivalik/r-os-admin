@@ -425,7 +425,7 @@ export interface Unit {
   booked: boolean;
   residentType: 'Owner' | 'Tenant' | 'Vacant';
   residentName: string | null;
-  phoneNumber: string | null;
+  mobileNumber: string | null;
   email: string | null;
   isActive: boolean;
   isOccupied: boolean;
@@ -470,9 +470,9 @@ export interface SocietyDetails {
 }
 
 export interface SocietyDetailsResponse {
-  success: boolean;
+  success?: boolean;
   message: string;
-  data: SocietyDetails;
+  result: SocietyDetails;
 }
 
 export interface SocietyStatistics {
@@ -500,9 +500,9 @@ export interface SocietyStatistics {
 }
 
 export interface SocietyStatisticsResponse {
-  success: boolean;
+  success?: boolean;
   message: string;
-  data: SocietyStatistics;
+  result: SocietyStatistics;
 }
 
 export interface BlockDetails {
@@ -524,20 +524,19 @@ export interface BlockDetails {
 }
 
 export interface BlockDetailsResponse {
-  success: boolean;
+  success?: boolean;
   message: string;
-  data: BlockDetails;
+  result: BlockDetails;
 }
 
 /**
  * Get complete society details with blocks, floors, and units
  * @param id - Society ID
- * @param blockLetter - Optional: Filter by specific block (e.g., 'A')
  */
-export const getSocietyDetails = async (id: string, blockLetter?: string): Promise<SocietyDetails> => {
-  const params = blockLetter ? { blockLetter } : {};
-  const response = await apiClient.get<SocietyDetailsResponse>(`/societies/${id}/details`, { params });
-  return response.data.data;
+export const getSocietyDetails = async (id: string): Promise<SocietyDetails> => {
+  // ALWAYS fetch ALL blocks, floors, and units - no filtering
+  const response = await apiClient.get<SocietyDetailsResponse>(`/societies/${id}/details`);
+  return response.data.result;
 };
 
 /**
@@ -546,7 +545,7 @@ export const getSocietyDetails = async (id: string, blockLetter?: string): Promi
  */
 export const getSocietyStatistics = async (id: string): Promise<SocietyStatistics> => {
   const response = await apiClient.get<SocietyStatisticsResponse>(`/societies/${id}/statistics`);
-  return response.data.data;
+  return response.data.result;
 };
 
 /**
@@ -556,7 +555,7 @@ export const getSocietyStatistics = async (id: string): Promise<SocietyStatistic
  */
 export const getBlockDetails = async (id: string, blockLetter: string): Promise<BlockDetails> => {
   const response = await apiClient.get<BlockDetailsResponse>(`/societies/${id}/blocks/${blockLetter}`);
-  return response.data.data;
+  return response.data.result;
 };
 
 /**
@@ -567,6 +566,6 @@ export const getBlockDetails = async (id: string, blockLetter: string): Promise<
  */
 export const getFloorDetails = async (id: string, blockLetter: string, floorNumber: number): Promise<any> => {
   const response = await apiClient.get<any>(`/societies/${id}/blocks/${blockLetter}/floors/${floorNumber}`);
-  return response.data.data;
+  return response.data.result;
 };
 

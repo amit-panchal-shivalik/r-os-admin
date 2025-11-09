@@ -477,7 +477,7 @@ export const SocietySetupForm: React.FC<SocietySetupFormProps> = ({
                         <label htmlFor="societyName" className="standard-label">
                           Society/Project Name <span className="text-red-500">*</span>
                         </label>
-                        <input
+                        <Field
                           type="text"
                           id="societyName"
                           name="societyName"
@@ -535,7 +535,8 @@ export const SocietySetupForm: React.FC<SocietySetupFormProps> = ({
                       <label htmlFor="description" className="block text-sm font-semibold text-gray-900 mb-2">
                         Description/Notes <span className="text-red-500">*</span>
                       </label>
-                      <textarea
+                      <Field
+                        as="textarea"
                         id="description"
                         name="description"
                         rows={4}
