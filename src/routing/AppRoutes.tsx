@@ -12,8 +12,6 @@ import { UnitsPage } from '../pages/building-details/UnitsPage';
 import { NoticeBoardPage } from '../pages/building-details/NoticeBoardPage';
 import { AmenitiesPage } from '../pages/building-details/AmenitiesPage';
 import { ParkingPage } from '../pages/building-details/ParkingPage';
-import { AmenitiesPage } from '../pages/building-details/AmenitiesPage';
-import { ParkingPage } from '../pages/building-details/ParkingPage';
 import SocietyManagement from '../pages/society-management/SocietyManagement';
 
 /* current user roles */

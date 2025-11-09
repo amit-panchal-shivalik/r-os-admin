@@ -44,10 +44,10 @@ export const LoginPage = () => {
         email: userData.email || "",
         phone: userData.mobileNumber || "",
         role: userData.role || "",
+        societyId: userData.society,
         userRoles: userData.roles || [],
         avatar: userData.avatar || "",
       };
-        console.log("user info", userInfo);
 
       const accessToken = authUser.data.token || "";
       authLogin(userInfo, accessToken);

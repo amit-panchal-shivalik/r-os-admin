@@ -823,8 +823,5 @@ const SocietyManagement = () => {
     </div>
   );
 };
-  );
-};
 
-export default SocietyManagement;
 export default SocietyManagement;

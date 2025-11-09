@@ -7,6 +7,7 @@ interface User {
   phone: string;
   role: string; // Keep as string for PrivateRoute compatibility
   userRoles?: string[]; // Optional array for flexibility
+  societyId?: string;
   avatar?: string;
 }
 
