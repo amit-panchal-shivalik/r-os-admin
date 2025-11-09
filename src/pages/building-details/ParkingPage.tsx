@@ -355,7 +355,7 @@ export const ParkingPage = () => {
                   return (
                     <Card
                       key={parking.id}
-                      className="hover:shadow-lg transition-shadow duration-200 border border-gray-200"
+                      className="hover:shadow-lg transition-shadow duration-200 border border-gray-200 bg-primary-white"
                     >
                       <CardHeader>
                         <div className="flex items-start justify-between">

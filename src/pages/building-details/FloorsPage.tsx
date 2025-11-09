@@ -12,7 +12,6 @@ import {
   addFloorApi,
   updateFloorApi,
   deleteFloorApi,
-  batchCreateFloorsApi,
   Floor,
   GetFloorsParams,
   AddFloorPayload,
@@ -38,7 +37,6 @@ export const FloorsPage = () => {
   const [floors, setFloors] = useState<FloorWithUnits[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [showAddMultipleForm, setShowAddMultipleForm] = useState(false);
   const [editingFloor, setEditingFloor] = useState<Floor | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string>>({});
@@ -194,43 +192,6 @@ export const FloorsPage = () => {
       
       reset();
       setShowForm(false);
-      setShowAddMultipleForm(false);
-      setEditingFloor(null);
-      fetchFloors();
-      fetchUnitsCount();
-    } catch (error: any) {
-      console.error('Error saving floor:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to save floor';
-      showMessage(errorMessage, 'error');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const onSubmitBatch = async (data: FloorsFormData) => {
-    try {
-      setSubmitting(true);
-      
-      // For batch create, we need additional fields: prefix, startNumber, endNumber
-      // This is a simplified version - you might want to add a separate form for batch create
-      const prefix = data.floorName || 'Floor';
-      const startNumber = data.floorNumber;
-      const endNumber = data.floorNumber; // For single floor, start and end are the same
-      
-      // For now, we'll create a single floor even in batch mode
-      // You can enhance this later with a proper batch form
-      const addPayload: AddFloorPayload = {
-        name: data.floorName,
-        number: data.floorNumber,
-        block: data.blockId,
-        status: data.status || 'active',
-      };
-      await addFloorApi(addPayload);
-      showMessage('Floor added successfully!', 'success');
-      
-      reset();
-      setShowForm(false);
-      setShowAddMultipleForm(false);
       setEditingFloor(null);
       fetchFloors();
       fetchUnitsCount();
@@ -252,7 +213,6 @@ export const FloorsPage = () => {
       setValue('blockId', typeof fullFloor.block === 'string' ? fullFloor.block : fullFloor.block?._id || '');
       setValue('status', fullFloor.status || 'active');
       setShowForm(true);
-      setShowAddMultipleForm(false);
     } catch (error: any) {
       console.error('Error fetching floor details:', error);
       showMessage('Failed to fetch floor details', 'error');
@@ -377,7 +337,6 @@ export const FloorsPage = () => {
             <button
               onClick={() => {
                 setShowForm(true);
-                setShowAddMultipleForm(false);
                 setEditingFloor(null);
                 reset({
                   floorNumber: 0,
@@ -390,27 +349,11 @@ export const FloorsPage = () => {
             >
               Add Floor
             </button>
-            <button
-              onClick={() => {
-                setShowAddMultipleForm(true);
-                setShowForm(false);
-                setEditingFloor(null);
-                reset({
-                  floorNumber: 0,
-                  floorName: '',
-                  blockId: '',
-                  status: 'active',
-                });
-              }}
-              className="px-4 py-2 text-sm font-medium text-white bg-primary-black rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
-            >
-              Add Multiple Floors
-            </button>
           </div>
         </div>
 
         {/* Data Table */}
-        {!showForm && !showAddMultipleForm && (
+        {!showForm && (
           <div>
             {/* Search and Filter Section */}
             <div className="mb-6 space-y-4">
@@ -514,20 +457,19 @@ export const FloorsPage = () => {
         )}
 
         {/* Add/Edit Form */}
-        {(showForm || showAddMultipleForm) && (
+        {showForm && (
           <form
-            onSubmit={handleSubmit(showAddMultipleForm ? onSubmitBatch : onSubmit)}
+            onSubmit={handleSubmit(onSubmit)}
             className="bg-white rounded-lg border border-gray-200 p-6 lg:p-8"
           >
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-primary-black">
-                {editingFloor ? 'Edit Floor' : showAddMultipleForm ? 'Add Multiple Floors' : 'Add New Floor'}
+                {editingFloor ? 'Edit Floor' : 'Add New Floor'}
               </h2>
               <button
                 type="button"
                 onClick={() => {
                   setShowForm(false);
-                  setShowAddMultipleForm(false);
                   setEditingFloor(null);
                   reset();
                 }}
@@ -629,7 +571,6 @@ export const FloorsPage = () => {
                     status: 'active',
                   });
                   setShowForm(false);
-                  setShowAddMultipleForm(false);
                   setEditingFloor(null);
                 }}
                 className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

@@ -172,7 +172,8 @@ export const BuildingDetailsPage = () => {
       societyId: currentSocietyId, // Include society ID for update/create operation
       society: {
         name: data.societyName,
-        logo: logoBase64, // Send base64 string or undefined
+        logo: logoBase64 || undefined, // Send base64 string or undefined
+        // Do not send ref - let backend handle it from societyId
       },
       buildingName: data.buildingName,
       address: data.address,
@@ -184,6 +185,11 @@ export const BuildingDetailsPage = () => {
       buildingType: data.buildingType,
       // territory and createdBy can be added if needed
     };
+    
+    // Ensure we don't accidentally send invalid ref
+    if (payload.society) {
+      delete (payload.society as any).ref;
+    }
 
     // Dispatch the update building action
     dispatch(updateBuilding(payload));
