@@ -55,7 +55,6 @@ export const FloorsPage = () => {
     fetchBlocks();
     fetchFloors();
     fetchUnitsCount();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -68,12 +67,10 @@ export const FloorsPage = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
   useEffect(() => {
     fetchFloors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, selectedFilters]);
 
   const fetchBlocks = async () => {
@@ -96,7 +93,6 @@ export const FloorsPage = () => {
 
   const fetchUnitsCount = async () => {
     try {
-      // Fetch all units to count them per floor
       const response = await getUnitsApi({ limit: 10000 });
       const units = response.items || [];
       const countMap: Record<string, number> = {};
@@ -110,8 +106,6 @@ export const FloorsPage = () => {
       
       setUnitsCountMap(countMap);
     } catch (error: any) {
-      console.error('Error fetching units count:', error);
-      // Don't show error to user, just continue without unit counts
     }
   };
 
@@ -170,7 +164,6 @@ export const FloorsPage = () => {
       setSubmitting(true);
       
       if (editingFloor) {
-        // Update existing floor
         const updatePayload: UpdateFloorPayload = {
           id: editingFloor._id,
           name: data.floorName,
@@ -181,7 +174,6 @@ export const FloorsPage = () => {
         await updateFloorApi(updatePayload);
         showMessage('Floor updated successfully!', 'success');
       } else {
-        // Add new floor
         const addPayload: AddFloorPayload = {
           name: data.floorName,
           number: data.floorNumber,
@@ -211,14 +203,10 @@ export const FloorsPage = () => {
     try {
       setSubmitting(true);
       
-      // For batch create, we need additional fields: prefix, startNumber, endNumber
-      // This is a simplified version - you might want to add a separate form for batch create
       const prefix = data.floorName || 'Floor';
       const startNumber = data.floorNumber;
-      const endNumber = data.floorNumber; // For single floor, start and end are the same
+      const endNumber = data.floorNumber;
       
-      // For now, we'll create a single floor even in batch mode
-      // You can enhance this later with a proper batch form
       const addPayload: AddFloorPayload = {
         name: data.floorName,
         number: data.floorNumber,
@@ -276,8 +264,11 @@ export const FloorsPage = () => {
 
   const handleView = (floor: FloorWithUnits) => {
     const statusDisplay = floor.status === 'active' ? 'Active' : 'Inactive';
+    const unitsDisplay = floor.totalUnits === 0 
+      ? '0 units' 
+      : `${floor.totalUnits} ${floor.totalUnits === 1 ? 'unit' : 'units'}`;
     alert(
-      `Floor Details:\n\nName: ${floor.name}\nFloor Number: ${floor.number}\nBlock: ${floor.blockName}\nStatus: ${statusDisplay}\nTotal Units: ${floor.totalUnits}`
+      `Floor Details:\n\nName: ${floor.name}\nFloor Number: ${floor.number}\nBlock: ${floor.blockName}\nStatus: ${statusDisplay}\nTotal Units: ${unitsDisplay}`
     );
   };
 
@@ -315,7 +306,20 @@ export const FloorsPage = () => {
         </div>
       ),
     },
-    { key: 'totalUnits', header: 'Total Units', sortable: true },
+    {
+      key: 'totalUnits',
+      header: 'Total Units',
+      sortable: true,
+      render: (floor) => (
+        <div className="text-sm text-primary-black">
+          {floor.totalUnits === 0 ? (
+            <span className="text-gray-500">0 units</span>
+          ) : (
+            `${floor.totalUnits} ${floor.totalUnits === 1 ? 'unit' : 'units'}`
+          )}
+        </div>
+      ),
+    },
   ];
 
   const actions: ActionButton<FloorWithUnits>[] = [
@@ -339,7 +343,6 @@ export const FloorsPage = () => {
     },
   ];
 
-  // Filter floors by search term and filters (client-side filtering is already handled by API)
   const filteredFloors = floors;
 
   const handleFilterChange = (key: string, value: string) => {
@@ -348,7 +351,6 @@ export const FloorsPage = () => {
         ...prev,
         [key]: value || undefined,
       };
-      // Remove undefined values
       Object.keys(newFilters).forEach((k) => {
         if (newFilters[k] === undefined || newFilters[k] === '') {
           delete newFilters[k];
@@ -356,7 +358,7 @@ export const FloorsPage = () => {
       });
       return newFilters;
     });
-    setPage(1); // Reset to first page when filter changes
+    setPage(1);
   };
 
   if (loading && floors.length === 0) {
@@ -370,7 +372,6 @@ export const FloorsPage = () => {
   return (
     <div className="min-h-screen bg-[#f9fafb]">
       <div className="max-w-7xl mx-auto ">
-        {/* Page Header */}
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-primary-black">Floors</h1>
           <div className="flex gap-2">
@@ -409,14 +410,10 @@ export const FloorsPage = () => {
           </div>
         </div>
 
-        {/* Data Table */}
         {!showForm && !showAddMultipleForm && (
           <div>
-            {/* Search and Filter Section */}
             <div className="mb-6 space-y-4">
-              {/* Search bar and Filters row */}
               <div className="flex flex-col sm:flex-row gap-4">
-                {/* Search Bar */}
                 <div className="flex-1">
                   <div className="relative">
                     <input
@@ -486,7 +483,6 @@ export const FloorsPage = () => {
               loading={loading}
             />
 
-            {/* Pagination */}
             {total > limit && (
               <div className="mt-4 flex items-center justify-between">
                 <div className="text-sm text-gray-700">
@@ -513,7 +509,6 @@ export const FloorsPage = () => {
           </div>
         )}
 
-        {/* Add/Edit Form */}
         {(showForm || showAddMultipleForm) && (
           <form
             onSubmit={handleSubmit(showAddMultipleForm ? onSubmitBatch : onSubmit)}
@@ -539,12 +534,10 @@ export const FloorsPage = () => {
               </button>
             </div>
 
-            {/* Floor Information Section */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold text-primary-black mb-6">Floor Information</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Floor Number */}
                 <div>
                   <label htmlFor="floorNumber" className="block text-sm font-medium text-gray-700 mb-1">
                     Floor Number <span className="text-red-500">*</span>
@@ -562,7 +555,6 @@ export const FloorsPage = () => {
                   )}
                 </div>
 
-                {/* Floor Name */}
                 <div>
                   <label htmlFor="floorName" className="block text-sm font-medium text-gray-700 mb-1">
                     Floor Name <span className="text-red-500">*</span>
@@ -579,7 +571,6 @@ export const FloorsPage = () => {
                   )}
                 </div>
 
-                {/* Block */}
                 <div>
                   <label htmlFor="blockId" className="block text-sm font-medium text-gray-700 mb-1">
                     Block <span className="text-red-500">*</span>
@@ -597,7 +588,6 @@ export const FloorsPage = () => {
                   />
                 </div>
 
-                {/* Status */}
                 <div>
                   <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
                     Status <span className="text-red-500">*</span>
@@ -617,7 +607,6 @@ export const FloorsPage = () => {
               </div>
             </div>
 
-            {/* Form Actions */}
             <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
               <button
                 type="button"

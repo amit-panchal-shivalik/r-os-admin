@@ -490,19 +490,35 @@ const SocietyManagement = () => {
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm font-medium text-gray-500 mb-1">Total Units</p>
-                            <p className="text-base text-gray-900">{selectedSociety.totalUnits || 0}</p>
+                            <p className="text-base text-gray-900">
+                              {selectedSociety.totalUnits === 0 || !selectedSociety.totalUnits
+                                ? '0 units'
+                                : `${selectedSociety.totalUnits} ${selectedSociety.totalUnits === 1 ? 'unit' : 'units'}`}
+                            </p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-500 mb-1">Total Blocks</p>
-                            <p className="text-base text-gray-900">{selectedSociety.totalBlocks || 0}</p>
+                            <p className="text-base text-gray-900">
+                              {selectedSociety.totalBlocks === 0 || !selectedSociety.totalBlocks
+                                ? '0 blocks'
+                                : `${selectedSociety.totalBlocks} ${selectedSociety.totalBlocks === 1 ? 'block' : 'blocks'}`}
+                            </p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-500 mb-1">Parking Spaces</p>
-                            <p className="text-base text-gray-900">{selectedSociety.parkingSpaces || 0}</p>
+                            <p className="text-base text-gray-900">
+                              {selectedSociety.parkingSpaces === 0 || !selectedSociety.parkingSpaces
+                                ? '0 spaces'
+                                : `${selectedSociety.parkingSpaces} ${selectedSociety.parkingSpaces === 1 ? 'space' : 'spaces'}`}
+                            </p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-500 mb-1">Total Residents</p>
-                            <p className="text-base text-gray-900">{selectedSociety.totalResidents || 0}</p>
+                            <p className="text-base text-gray-900">
+                              {selectedSociety.totalResidents === 0 || !selectedSociety.totalResidents
+                                ? '0 residents'
+                                : `${selectedSociety.totalResidents} ${selectedSociety.totalResidents === 1 ? 'resident' : 'residents'}`}
+                            </p>
                           </div>
                         </div>
                       </div>
