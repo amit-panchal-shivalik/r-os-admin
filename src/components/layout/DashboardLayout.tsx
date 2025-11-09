@@ -237,8 +237,8 @@ export const DashboardLayout = () => {
         navigate(storedPath, { replace: true });
       } else if (!isValidPath && storedPath) {
         // If stored path is invalid, clear it and navigate to default
-        localStorage.setItem('lastActivePath', '/users');
-        navigate('/users', { replace: true });
+        localStorage.setItem('lastActivePath', '/map');
+        navigate('/map', { replace: true });
       }
       isInitialMount.current = false;
     }

@@ -101,7 +101,9 @@ All colors MUST be HSL.
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
+.maplibregl-ctrl-top-right{
+  display: none;
+}
 @layer base {
   * {
     @apply border-border;

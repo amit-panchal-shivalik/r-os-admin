@@ -47,8 +47,9 @@ export const OtpPage = () => {
     }, [resendTimer]);
 
     useEffect(() => {
-        if (status === 'complete' && user?.result?.accessToken) {
+        if (status === 'complete') {
             // Prepare user data for login
+             console.log('OTP verified, logging in user:', user);
             const userData = {
                 id: user.result.id || '',
                 name: user.result.name || '',
@@ -57,6 +58,7 @@ export const OtpPage = () => {
                 role: user.result.userRoles?.join(',') || '',
                 avatar: user.result.avatar || ''
             };
+           
             login(userData, user.result.accessToken);
             setToLocalStorage('userInfo', user.result);
             setToLocalStorage('auth_token', user.result.accessToken);
@@ -96,6 +98,7 @@ export const OtpPage = () => {
         e.preventDefault();
         const otp = otpArray.join('');
         if (otp.length === 6) {
+            console.log('Submitting OTP:', otp);
             dispatch(verifyOTP({ otp, phoneNumber, countryCode: '+91' }));
         } else {
             showMessage('Please enter a 6-digit OTP.', 'error');

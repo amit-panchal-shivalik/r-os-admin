@@ -1,0 +1,71 @@
+.marker-el {
+    border: 1px solid black;
+    transform: scale(1);
+    transform-origin: center;
+
+}
+
+/* Marker style inspired by the provided image */
+.custom-marker {
+    /* The main container for the marker shape */
+    width: 54px;
+    height: 70px;
+    /* Total height including the tail */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    pointer-events: none;
+    /* Pass clicks to the map unless on the image */
+}
+
+.marker-body {
+    /* The main rounded-square body */
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    /* border: 2px solid #111; */
+    border-radius: 12px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+    /* Enable clicks on the marker body/image */
+}
+
+.marker-body img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 8px;
+    /* Slightly smaller radius for the inner image */
+}
+
+/* Create the pointer using two pseudo-elements for a clean border */
+.marker-body::before,
+.marker-body::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    /* Position the triangle below the body */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+}
+
+.marker-body::before {
+    /* The black border of the triangle */
+    border-width: 12px 12px 0 12px;
+    border-color: transparent;
+    bottom: -14px;
+    /* Position it 2px below the white triangle */
+}
+
+.marker-body::after {
+    /* The white fill of the triangle */
+    border-width: 10px 10px 0 10px;
+    border-color: white transparent transparent transparent;
+}
