@@ -26,5 +26,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "theme.config.tsx"]
+  "include": ["src"]
 }
