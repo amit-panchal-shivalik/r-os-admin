@@ -25,6 +25,8 @@ import { SelectUnitPage } from '../pages/user-registration/SelectUnitPage';
 import { RegistrationFormPage } from '../pages/user-registration/RegistrationFormPage';
 import { AddBillPage } from '../pages/maintenance-bill/AddBillPage';
 import { ViewBillsPage } from '../pages/maintenance-bill/ViewBillsPage';
+import { ComplaintsPage } from '../pages/complaints/ComplaintsPage';
+import { AddComplaintPage } from '../pages/complaints/AddComplaintPage';
 
 /* current user roles */
 const getUserRoles = (): string => {
@@ -204,6 +206,10 @@ export const AppRoutes = () => {
         {/* Maintenance & Bills Routes */}
         <Route path="maintenance-bill/add-bill" element={<AddBillPage />} />
         <Route path="maintenance-bill/view" element={<ViewBillsPage />} />
+        
+        {/* Complaints Routes */}
+        <Route path="maintenance-bill/complaints" element={<ComplaintsPage />} />
+        <Route path="maintenance-bill/complaints/add" element={<AddComplaintPage />} />
         
         {/* Legacy routes for backward compatibility - redirect to new paths */}
         <Route path="building-details" element={<Navigate to="/building-settings/building-details" replace />} />
