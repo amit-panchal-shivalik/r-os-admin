@@ -16,8 +16,13 @@ import { AmenitiesPage } from '../pages/building-details/AmenitiesPage';
 import { ParkingPage } from '../pages/building-details/ParkingPage';
 import SocietyManagement from '../pages/society-management/SocietyManagement';
 import { MembersPage } from '../pages/users/MembersPage';
-import CommitteeMembersPage from '../pages/users/CommitteeMembersPage';
-import EmployeesPage from '../pages/users/EmployeesPage';
+import {CommitteeMembersPage} from '../pages/users/CommitteeMembersPage';
+import {EmployeesPage} from '../pages/users/EmployeesPage';
+import { SelectTypePage } from '../pages/user-registration/SelectTypePage';
+import { SelectSocietyPage } from '../pages/user-registration/SelectSocietyPage';
+import { SelectBlockPage } from '../pages/user-registration/SelectBlockPage';
+import { SelectUnitPage } from '../pages/user-registration/SelectUnitPage';
+import { RegistrationFormPage } from '../pages/user-registration/RegistrationFormPage';
 import { AddBillPage } from '../pages/maintenance-bill/AddBillPage';
 import { ViewBillsPage } from '../pages/maintenance-bill/ViewBillsPage';
 
@@ -105,6 +110,48 @@ export const AppRoutes = () => {
         element={
           <PublicRoute>
             <OtpPage />
+          </PublicRoute>
+        }
+      />
+
+      {/* User Registration Routes - Public */}
+      <Route
+        path="/user/register/type"
+        element={
+          <PublicRoute>
+            <SelectTypePage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/user/register/society"
+        element={
+          <PublicRoute>
+            <SelectSocietyPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/user/register/block"
+        element={
+          <PublicRoute>
+            <SelectBlockPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/user/register/unit"
+        element={
+          <PublicRoute>
+            <SelectUnitPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/user/register/details"
+        element={
+          <PublicRoute>
+            <RegistrationFormPage />
           </PublicRoute>
         }
       />

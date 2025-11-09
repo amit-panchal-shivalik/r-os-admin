@@ -74,19 +74,16 @@ export const FloorsPage = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm]);
 
   useEffect(() => {
     fetchFloors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, selectedFilters]);
 
   const fetchBlocks = async (): Promise<void> => {
     try {
       setLoadingBlocks(true);
       const response = await getBlocksBySocietyApi({ limit: 500, status: 'active' });
-      // Ensure all block IDs are normalized to strings
       const blocks = (response.items || []).map((block: Block) => ({
         value: String(block._id).trim(), // Normalize to string and trim
         label: block.name || 'Unnamed Block',
@@ -105,8 +102,6 @@ export const FloorsPage = () => {
 
   const fetchUnitsCount = async () => {
     try {
-      // Fetch units with a reasonable limit and pagination if needed
-      // Don't block the UI with a huge query
       const response = await getUnitsApi({ limit: 500, page: 1 });
       const units = response.items || [];
       const countMap: Record<string, number> = {};
@@ -120,8 +115,6 @@ export const FloorsPage = () => {
       
       setUnitsCountMap(countMap);
     } catch (error: any) {
-      console.error('Error fetching units count:', error);
-      // Don't show error to user, just continue without unit counts
       setUnitsCountMap({});
     }
   };
@@ -261,8 +254,6 @@ export const FloorsPage = () => {
           }
         }
         
-        // Update existing floor - send name, number, block, status, and societyId
-        // Backend will silently preserve/use building ID from existing floor or get from block/society
         const updatePayload: UpdateFloorPayload = {
           id: editingFloor._id,
           name: data.floorName,
@@ -276,7 +267,6 @@ export const FloorsPage = () => {
         await updateFloorApi(updatePayload);
         showMessage('Floor updated successfully!', 'success');
       } else {
-        // Add new floor - backend will automatically get building from block or society
         const addPayload: AddFloorPayload = {
           name: data.floorName,
           number: data.floorNumber,
@@ -436,8 +426,11 @@ export const FloorsPage = () => {
 
   const handleView = (floor: FloorWithUnits) => {
     const statusDisplay = floor.status === 'active' ? 'Active' : 'Inactive';
+    const unitsDisplay = floor.totalUnits === 0 
+      ? '0 units' 
+      : `${floor.totalUnits} ${floor.totalUnits === 1 ? 'unit' : 'units'}`;
     alert(
-      `Floor Details:\n\nName: ${floor.name}\nFloor Number: ${floor.number}\nBlock: ${floor.blockName}\nStatus: ${statusDisplay}\nTotal Units: ${floor.totalUnits}`
+      `Floor Details:\n\nName: ${floor.name}\nFloor Number: ${floor.number}\nBlock: ${floor.blockName}\nStatus: ${statusDisplay}\nTotal Units: ${unitsDisplay}`
     );
   };
 
@@ -475,7 +468,20 @@ export const FloorsPage = () => {
         </div>
       ),
     },
-    { key: 'totalUnits', header: 'Total Units', sortable: true },
+    {
+      key: 'totalUnits',
+      header: 'Total Units',
+      sortable: true,
+      render: (floor) => (
+        <div className="text-sm text-primary-black">
+          {floor.totalUnits === 0 ? (
+            <span className="text-gray-500">0 units</span>
+          ) : (
+            `${floor.totalUnits} ${floor.totalUnits === 1 ? 'unit' : 'units'}`
+          )}
+        </div>
+      ),
+    },
   ];
 
   const actions: ActionButton<FloorWithUnits>[] = [
@@ -499,7 +505,6 @@ export const FloorsPage = () => {
     },
   ];
 
-  // Filter floors by search term and filters (client-side filtering is already handled by API)
   const filteredFloors = floors;
 
   const handleFilterChange = (key: string, value: string) => {
@@ -508,7 +513,6 @@ export const FloorsPage = () => {
         ...prev,
         [key]: value || undefined,
       };
-      // Remove undefined values
       Object.keys(newFilters).forEach((k) => {
         if (newFilters[k] === undefined || newFilters[k] === '') {
           delete newFilters[k];
@@ -516,7 +520,7 @@ export const FloorsPage = () => {
       });
       return newFilters;
     });
-    setPage(1); // Reset to first page when filter changes
+    setPage(1);
   };
 
   // Only show loading screen on initial load, allow form to show even if loading
@@ -531,7 +535,6 @@ export const FloorsPage = () => {
   return (
     <div className="min-h-screen bg-[#f9fafb]">
       <div className="max-w-7xl mx-auto ">
-        {/* Page Header */}
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-primary-black">Floors</h1>
           {/* Only show Add Floor button when not in edit mode */}
@@ -699,11 +702,8 @@ export const FloorsPage = () => {
         {/* Data Table */}
         {!showForm && (
           <div>
-            {/* Search and Filter Section */}
             <div className="mb-6 space-y-4">
-              {/* Search bar and Filters row */}
               <div className="flex flex-col sm:flex-row gap-4">
-                {/* Search Bar */}
                 <div className="flex-1">
                   <div className="relative">
                     <input
@@ -773,7 +773,6 @@ export const FloorsPage = () => {
               loading={loading}
             />
 
-            {/* Pagination */}
             {total > limit && (
               <div className="mt-4 flex items-center justify-between">
                 <div className="text-sm text-gray-700">
