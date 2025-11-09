@@ -1,4 +1,5 @@
-# R-OS Admin Dashboard  
+# R-OS Admin Dashboard
+
 **Real Estate Management System**
 
 ![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react&logoColor=white)
@@ -16,12 +17,13 @@
 Built with **React 18 + TypeScript + Vite**, this admin panel empowers property managers, agents, and enterprises with **real-time analytics, intuitive UI, and seamless backend integration**.
 
 Powered by:
-- **Mantine UI v8** – Enterprise-grade components
-- **Tailwind CSS** – Rapid, responsive styling
-- **Redux Toolkit + RTK Query** – Predictable state & API caching
-- **Axios** – Typed, interceptable HTTP client
-- **React Router v6** – Declarative routing
-- **Zod + React Hook Form** – Bulletproof forms
+
+- **Mantine UI v8**
+- **Tailwind CSS**
+- **Redux Toolkit**
+- **Axios**
+- **React Router**
+- **React Hook Form**
 
 ---
 
@@ -58,3 +60,4 @@ Rules:
 - No deletion
 
 All changes via Pull Request only.
+```
