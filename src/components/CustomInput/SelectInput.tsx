@@ -51,69 +51,20 @@ const SelectInput: React.FC<SelectInputProps> = ({ id, label, register, errors, 
             };
 
     return (
-        <div className="input-wrapper material-input-wrapper">
-            <style>
-                {`
-                    .material-input-wrapper {
-                        position: relative;
-                        margin-bottom: 1.5rem;
-                    }
-                    .material-input-wrapper select {
-                        width: 100%;
-                        padding: 0.75rem 2.5rem 0.75rem 0.75rem; /* Adjusted padding for arrow space */
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        outline: none;
-                        font-size: 1rem;
-                        background-color: white;
-                        cursor: pointer;
-                        appearance: none; /* Remove default browser styling */
-                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23000' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-                        background-repeat: no-repeat;
-                        background-position: right 0.75rem center;
-                        background-size: 12px 12px;
-                        transition: border-color 0.2s ease-in-out;
-                    }
-                    .material-input-wrapper select:disabled {
-                        cursor: not-allowed;
-                        background-color: #f3f4f6;
-                        opacity: 0.7;
-                    }
-                    .material-input-wrapper select:focus {
-                        border: 2px solid #000;
-                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23000' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-                    }
-                    .material-input-wrapper input:not(:placeholder-shown) + .material-label,
-                    .material-input-wrapper select:not(:placeholder-shown) + .material-label,
-                    .material-input-wrapper textarea:not(:placeholder-shown) + .material-label,
-                    .material-input-wrapper input:focus + .material-label,
-                    .material-input-wrapper select:focus + .material-label,
-                    .material-input-wrapper textarea:focus + .material-label {
-                        top: -0.75rem;
-                        left: 0.75rem;
-                        font-size: 0.75rem;
-                        color: #000;
-                        background: #fff;
-                        padding: 0 0.25rem;
-                    }
-                    .material-label {
-                        position: absolute;
-                        top: 0.75rem;
-                        left: 0.75rem;
-                        font-size: 1rem;
-                        color: #999;
-                        pointer-events: none;
-                        transition: all 0.2s ease-in-out;
-                    }
-                    .material-input-wrapper .error-message {
-                        color: #ef4444;
-                        font-size: 0.875rem;
-                        margin-top: 0.25rem;
-                    }
-                `}
-            </style>
-            <select id={id} aria-label={label} {...selectProps} disabled={disabled} className={`custom-input ${disabled ? 'cursor-not-allowed bg-gray-100' : ''}`}>
-                <option value="" disabled hidden></option>
+        <div className="relative">
+            <label htmlFor={id} className="standard-label">
+                {label} {required && <span className="text-red-500">*</span>}
+            </label>
+            <select
+                id={id}
+                aria-label={label}
+                {...selectProps}
+                disabled={disabled}
+                className={`w-full px-4 py-3 pr-10 border rounded-lg appearance-none cursor-pointer bg-background focus:outline-none focus:ring-1 focus:ring-design-primary text-foreground ${error ? 'border-red-500' : 'border'} ${disabled ? 'cursor-not-allowed bg-muted opacity-70 text-muted-foreground' : ''}`}
+            >
+                <option value="" disabled hidden>
+                    Select an option
+                </option>
                 {!disabled && <option value="unset">Unset</option>}
                 {options?.map((opt) => (
                     <option key={opt?.value} value={opt?.value}>
@@ -121,10 +72,18 @@ const SelectInput: React.FC<SelectInputProps> = ({ id, label, register, errors, 
                     </option>
                 ))}
             </select>
-            <span className="material-label">
-                {label} {required && '*'}
-            </span>
-            {error && <p className="error-message">{error}</p>}
+            {/* Custom dropdown arrow */}
+            <div className="absolute right-3 bottom-3 transform pointer-events-none">
+                <svg
+                    className={`w-5 h-5 transition-transform duration-200 ${disabled ? 'text-muted-foreground' : 'text-foreground'}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+            {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
         </div>
     );
 };

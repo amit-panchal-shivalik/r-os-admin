@@ -4,6 +4,10 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -66,6 +70,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
+    "formik": "^2.4.8",
     "html2pdf.js": "^0.12.1",
     "input-otp": "^1.2.4",
     "libphonenumber-js": "^1.12.23",
@@ -79,6 +84,7 @@
     "react-dom": "^18.3.1",
     "react-google-autocomplete": "^2.7.5",
     "react-hook-form": "^7.53.0",
+    "react-hot-toast": "^2.6.0",
     "react-phone-number-input": "^3.4.12",
     "react-qr-code": "^2.0.18",
     "react-quill": "^2.0.0",

@@ -5,23 +5,29 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  const env = loadEnv(mode, process.cwd(), "");
   return {
     server: {
       host: "::",
       port: 8080,
     },
-    plugins: [
-      react(),
-      mode === 'development' && componentTagger(),
-    ].filter(Boolean),
+    preview: {
+      allowedHosts: [
+        "realos.devpress.net",
+        "realos-api.devpress.net",
+        "localhost",
+      ],
+    },
+    plugins: [react(), mode === "development" && componentTagger()].filter(
+      Boolean
+    ),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
     },
     define: {
-      'import.meta.env': env,
+      "import.meta.env": env,
     },
   };
 });
