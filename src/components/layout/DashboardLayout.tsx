@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, Outlet } from "react-router-dom";
+import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, 
@@ -13,6 +13,8 @@ import {
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { useAuth } from '@/hooks/useAuth';
 
 interface NavItem {
   title: string;
@@ -36,7 +38,7 @@ const navItems: NavItem[] = [
       { title: "Leave Groups", href: "/leave/groups" },
       { title: "Bulk Leave Assignment", href: "/leave/bulk-assign" },
       { title: "Leave Balance", href: "/leave/balance" },
-      { title: "Leave Requests", href: "/leave/requests" },
+      // { title: "Leave Requests", href: "/leave/requests" },
     ],
   },
   {
@@ -57,6 +59,8 @@ const navItems: NavItem[] = [
 ];
 
 export default function DashboardLayout({ children }: { children?: React.ReactNode }) {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const location = useLocation();
   const [expandedItems, setExpandedItems] = useState<string[]>(["/leave", "/holidays"]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -197,6 +201,23 @@ export default function DashboardLayout({ children }: { children?: React.ReactNo
                 )?.title || "Dashboard"}
               </h2>
             </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    try {
+                      logout();
+                    } catch (e) {
+                      // ignore
+                    }
+                    navigate('/login');
+                  }}
+                  className="gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
           </div>
         </header>
 

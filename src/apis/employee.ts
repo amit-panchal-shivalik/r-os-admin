@@ -32,4 +32,55 @@ export const getEmployeesApi = async (data: GetEmployeesPayload): Promise<GetEmp
   });
 };
 
+export type ListItem = {
+  _id?: string;
+  name?: string;
+  [key: string]: unknown;
+};
+
+export type GetListResponse = {
+  message: ListItem[];
+  result: Record<string, unknown>;
+};
+
+export const getDepartmentsApi = async (): Promise<GetListResponse> => {
+  return apiRequest<GetListResponse>({
+    method: 'POST',
+    url: 'users/department-list',
+    data: {},
+  });
+};
+
+export const getBranchesApi = async (): Promise<GetListResponse> => {
+  return apiRequest<GetListResponse>({
+    method: 'POST',
+    url: 'users/branch-list',
+    data: {},
+  });
+};
+
 export default getEmployeesApi;
+
+export type AddEmployeePayload = {
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  department_id: string;
+  branch_id: string;
+  manager_id?: string;
+};
+
+export type AddEmployeeResponse = {
+  success: boolean;
+  message?: string;
+  result?: any;
+};
+
+export const addEmployeeApi = async (data: AddEmployeePayload): Promise<AddEmployeeResponse> => {
+  return apiRequest<AddEmployeeResponse>({
+    method: 'POST',
+    url: 'users/add-employee',
+    data,
+  });
+};

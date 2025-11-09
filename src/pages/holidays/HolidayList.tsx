@@ -19,10 +19,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CalendarIcon, Plus, Edit, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import Swal from 'sweetalert2';
+import { format, parse } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { getHolidaysApi, HolidayItem, addHolidayApi, AddHolidayPayload } from "@/apis/holiday";
+import { getHolidaysApi, HolidayItem, addHolidayApi, AddHolidayPayload, deleteHolidayApi, editHolidayApi } from "@/apis/holiday";
 
 export default function HolidayList() {
   const { toast } = useToast();
@@ -30,6 +31,9 @@ export default function HolidayList() {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
   const [date, setDate] = useState<Date>();
   const [formData, setFormData] = useState({
     name: "",
@@ -39,19 +43,42 @@ export default function HolidayList() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name?.trim()) {
-      toast({ title: "Validation", description: "Please enter holiday name" });
+      toast({ title: "Validation", description: "Please enter holiday name", variant: 'destructive' });
       return;
     }
     if (!date) {
-      toast({ title: "Validation", description: "Please pick a date" });
+      toast({ title: "Validation", description: "Please pick a date", variant: 'destructive' });
       return;
     }
-
-    const payload: AddHolidayPayload = {
+    if (!formData.description || String(formData.description).trim() === '') {
+      toast({ title: 'Validation', description: 'Please enter holiday description', variant: 'destructive' });
+      return;
+    }
+    const payload = {
       name: formData.name.trim(),
       date: format(date, 'dd-MM-yyyy'),
       description: formData.description?.trim() || '',
-    };
+    } as AddHolidayPayload;
+
+    // If editingId is present, call edit API
+    if (editingId) {
+      setSavingId(editingId);
+      try {
+        await editHolidayApi({ id: editingId, ...payload });
+        toast({ title: 'Updated', description: 'Holiday updated successfully' });
+        setFormData({ name: '', description: '' });
+        setDate(undefined);
+        setShowForm(false);
+        setEditingId(null);
+        await loadHolidays();
+      } catch (err: any) {
+        const message = err instanceof Error ? err.message : 'Failed to update holiday';
+        toast({ title: 'Error', description: message, variant: 'destructive' });
+      } finally {
+        setSavingId(null);
+      }
+      return;
+    }
 
     setAdding(true);
     try {
@@ -65,10 +92,19 @@ export default function HolidayList() {
         await loadHolidays();
       }
     } catch (error: any) {
-      toast({ title: "Error", description: error?.message || 'Failed to add holiday' });
+      toast({ title: "Error", description: error?.message || 'Failed to add holiday', variant: 'destructive' });
     } finally {
       setAdding(false);
     }
+  };
+
+  const handleEditClick = (h: HolidayItem) => {
+    setFormData({ name: h.name || '', description: h.description || '' });
+    const parsed = parseHolidayDate(h.date);
+    setDate(parsed ?? undefined);
+    setEditingId(h.id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const loadHolidays = async () => {
@@ -76,7 +112,29 @@ export default function HolidayList() {
     try {
   const res = await getHolidaysApi();
   console.log('[DEBUG] Holiday Response ', res );
-  setHolidays(res.result ?? []);
+  // Normalize response to an array and canonicalize items before setting state.
+  // API may return items with `_id` instead of `id`, and date in `dd-MM-yyyy`.
+  const raw = res?.message;
+  let items: any[] = [];
+
+  if (Array.isArray(raw)) {
+    items = raw;
+  } else if (raw && typeof raw === "object") {
+    if (Array.isArray((raw as any).data)) {
+      items = (raw as any).data;
+    } else {
+      items = Object.values(raw);
+    }
+  }
+
+  const normalized = (items || []).map((it: any) => ({
+    id: it.id ?? it._id ?? String(it._id ?? it.id ?? Math.random()),
+    name: it.name,
+    date: it.date,
+    description: it.description,
+  })) as HolidayItem[];
+
+  setHolidays(normalized ?? []);
     } catch (error: any) {
       toast({ title: "Error", description: error?.message || "Failed to load holidays" });
     } finally {
@@ -84,10 +142,46 @@ export default function HolidayList() {
     }
   };
 
+  // Parse holiday date safely. Accepts ISO or `dd-MM-yyyy` format.
+  const parseHolidayDate = (dateStr?: string) => {
+    if (!dateStr) return null;
+    const asDate = new Date(dateStr);
+    if (!isNaN(asDate.getTime())) return asDate;
+    const parsed = parse(dateStr, 'dd-MM-yyyy', new Date());
+    if (!isNaN(parsed.getTime())) return parsed;
+    return null;
+  };
+
   useEffect(() => {
     loadHolidays();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleDelete = async (id: string) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you really want to delete this holiday?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc2626',
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      setDeletingId(id);
+      await deleteHolidayApi({ id });
+      await loadHolidays();
+      toast({ title: 'Deleted', description: 'Holiday deleted successfully' });
+    } catch (err: any) {
+      const message = err instanceof Error ? err.message : 'Failed to delete holiday';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -105,7 +199,7 @@ export default function HolidayList() {
       {showForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Add New Holiday</CardTitle>
+            <CardTitle>{editingId ? 'Edit Holiday' : 'Add New Holiday'}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -161,17 +255,37 @@ export default function HolidayList() {
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" disabled={adding}>
-                  {adding ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                      Adding...
-                    </>
+                <Button type="submit" disabled={adding || Boolean(savingId)}>
+                  {editingId ? (
+                    savingId ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Update'
+                    )
                   ) : (
-                    'Submit'
+                    adding ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2" />
+                        Adding...
+                      </>
+                    ) : (
+                      'Submit'
+                    )
                   )}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                    setFormData({ name: '', description: '' });
+                    setDate(undefined);
+                  }}
+                >
                   Cancel
                 </Button>
               </div>
@@ -200,28 +314,55 @@ export default function HolidayList() {
                 </TableRow>
               ) : holidays.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
-                    No holidays found.
+                  <TableCell colSpan={4} className="py-12 text-center text-muted-foreground">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m2 0a2 2 0 002-2V7a2 2 0 00-2-2h-3l-2-2H8L6 5H3a2 2 0 00-2 2v4a2 2 0 002 2h2l2 2h6" />
+                      </svg>
+                      <div className="text-sm">No holidays found.</div>
+                      <div className="text-xs text-muted-foreground">Click "Add Holiday" to create a new one.</div>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
-                holidays.map((h) => (
-                  <TableRow key={h.id}>
-                    <TableCell className="font-medium">{h.name}</TableCell>
-                    <TableCell>{h.date ? format(new Date(h.date), 'PPP') : '-'}</TableCell>
-                    <TableCell>{h.description || '-'}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                holidays.map((h) => {
+                  const parsedDate = parseHolidayDate(h.date);
+                  return (
+                    <TableRow key={h.id}>
+                      <TableCell className="font-medium">{h.name}</TableCell>
+                      <TableCell>{parsedDate ? format(parsedDate, 'PPP') : '-'}</TableCell>
+                      <TableCell>{h.description || '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditClick(h)}
+                            disabled={deletingId === h.id || savingId === h.id || loading}
+                          >
+                            {savingId === h.id ? (
+                              <div className="w-4 h-4 rounded-full border-2 border-gray-300 border-t-transparent animate-spin" />
+                            ) : (
+                              <Edit className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDelete(h.id)}
+                            disabled={deletingId === h.id}
+                          >
+                            {deletingId === h.id ? (
+                              <div className="w-4 h-4 rounded-full border-2 border-destructive border-t-transparent animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            )}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

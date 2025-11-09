@@ -35,7 +35,8 @@ apiClient.interceptors.response.use(
             const requestUrl: string = error.config?.url || '';
             const isAuthEndpoint = /users\/(login|verify-otp)/i.test(requestUrl);
             if (isAuthEndpoint) {
-                return Promise.reject(new Error(errorMessage));
+                // preserve original axios error so callers can inspect response.data
+                return Promise.reject(error);
             }
 
             // For protected endpoints, clear auth and redirect to root (login)
@@ -49,7 +50,8 @@ apiClient.interceptors.response.use(
             // Navigate to the root page ("/") to force re-authentication
             window.location.href = '/';
         }
-        return Promise.reject(new Error(errorMessage));
+        // Reject the original error so upstream can read response.data and status
+        return Promise.reject(error);
     }
 );
 

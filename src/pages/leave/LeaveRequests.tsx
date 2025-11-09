@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,8 @@ import { CalendarIcon, CheckCircle, XCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { getFromLocalStorage } from '@/utils/localstorage';
+import { getManagerLeaveRequestsApi } from '@/apis/leave';
 
 export default function LeaveRequests() {
   const { toast } = useToast();
@@ -38,11 +40,43 @@ export default function LeaveRequests() {
     employeeType: "",
   });
 
+  const [status, setStatus] = useState<string>('Pending');
+  const [requests, setRequests] = useState<any[]>([]);
+  const [fetching, setFetching] = useState(false);
+
   const [showResults, setShowResults] = useState(false);
 
   const handleGetData = () => {
-    setShowResults(true);
+    // call manager leave requests API
+    const doLoad = async () => {
+      try {
+        setFetching(true);
+        const storedUser = getFromLocalStorage<Record<string, unknown>>('userInfo');
+        const userId = (storedUser && ((storedUser as any)?.user?._id as string)) || '';
+        const payload: any = { id: userId };
+        if (status) payload.status = status;
+        const res = await getManagerLeaveRequestsApi(payload);
+        const items = (res?.message || []) as any[];
+        setRequests(items);
+        setShowResults(true);
+        toast({ title: 'Loaded', description: `${items.length} requests loaded` });
+      } catch (err: any) {
+        const message = err instanceof Error ? err.message : 'Failed to load requests';
+        toast({ title: 'Error', description: message, variant: 'destructive' });
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    doLoad();
   };
+
+  // auto-load pending requests on mount
+  useEffect(() => {
+    
+    handleGetData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleApprove = (name: string) => {
     toast({
@@ -167,8 +201,30 @@ export default function LeaveRequests() {
             </div>
           </div>
 
-          <div className="mt-6">
-            <Button onClick={handleGetData}>Get Data</Button>
+            <div className="mt-6">
+            <div className="flex gap-2">
+              <Select value={status} onValueChange={(v) => setStatus(v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="Approved">Approved</SelectItem>
+                  <SelectItem value="Rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button onClick={handleGetData} disabled={fetching}>
+                {fetching ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  'Get Data'
+                )}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -195,74 +251,64 @@ export default function LeaveRequests() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">John Doe</TableCell>
-                    <TableCell>Head Office</TableCell>
-                    <TableCell>IT</TableCell>
-                    <TableCell>Jan 5, 2024</TableCell>
-                    <TableCell>Jan 10-11, 2024</TableCell>
-                    <TableCell>
-                      <span className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
-                        Casual
-                      </span>
-                    </TableCell>
-                    <TableCell>Full Day</TableCell>
-                    <TableCell className="max-w-xs truncate">Personal work</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleApprove("John Doe")}
-                          className="text-success hover:text-success"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleReject("John Doe")}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <XCircle className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Jane Smith</TableCell>
-                    <TableCell>Branch 1</TableCell>
-                    <TableCell>HR</TableCell>
-                    <TableCell>Jan 6, 2024</TableCell>
-                    <TableCell>Jan 12, 2024</TableCell>
-                    <TableCell>
-                      <span className="px-2 py-1 text-xs font-medium bg-secondary/10 text-secondary rounded-full">
-                        Sick
-                      </span>
-                    </TableCell>
-                    <TableCell>Half Day</TableCell>
-                    <TableCell className="max-w-xs truncate">Medical appointment</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleApprove("Jane Smith")}
-                          className="text-success hover:text-success"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleReject("Jane Smith")}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <XCircle className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                  {requests.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={9} className="font-medium">No requests found</TableCell>
+                    </TableRow>
+                  ) : (
+                    requests.map((r: any, idx: number) => {
+                      // map common fields defensively
+                      const emp = r.employee_id || r.employee || {};
+                      const branch = (r.branch || r.branch_id || r.branchName) || '-';
+                      const dept = (r.department || r.department_id || r.departmentName) || '-';
+                      const requestedAt = r.createdAt ? format(new Date(r.createdAt), 'PPP') : (r.requestedDate ? format(new Date(r.requestedDate), 'PPP') : '-');
+                      const leaveDate = (() => {
+                        if (r.fromDate && r.toDate) return `${format(new Date(r.fromDate), 'PPP')} - ${format(new Date(r.toDate), 'PPP')}`;
+                        if (r.leaveDate) return format(new Date(r.leaveDate), 'PPP');
+                        return r.leave_range || '-';
+                      })();
+                      const type = (r.leave_type && r.leave_type.name) || (r.leaveType && r.leaveType.name) || (r.type || '-');
+                      const dayType = r.dayType || r.day_type || r.day || '-';
+                      const reason = r.reason || '-';
+
+                      return (
+                        <TableRow key={r._id ?? r.id ?? idx}>
+                          <TableCell className="font-medium">{emp?.name || 'Unknown'}</TableCell>
+                          <TableCell>{branch}</TableCell>
+                          <TableCell>{dept}</TableCell>
+                          <TableCell>{requestedAt}</TableCell>
+                          <TableCell>{leaveDate}</TableCell>
+                          <TableCell>
+                            <span className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+                              {type}
+                            </span>
+                          </TableCell>
+                          <TableCell>{dayType}</TableCell>
+                          <TableCell className="max-w-xs truncate">{reason}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleApprove(emp?.name || 'employee')}
+                                className="text-success hover:text-success"
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleReject(emp?.name || 'employee')}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
                 </TableBody>
               </Table>
             </div>

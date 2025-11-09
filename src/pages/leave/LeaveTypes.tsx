@@ -28,6 +28,7 @@ interface LeaveType {
   name: string;
   applyOnHoliday: string;
   applyOnPastDays: string;
+  applyBeforeDays?: string;
   status: string;
 }
 
@@ -40,6 +41,7 @@ export default function LeaveTypes() {
     name: "",
     applyOnHoliday: "",
     applyOnPastDays: "",
+    applyBeforeDays: "",
     status: "",
   });
 
@@ -57,6 +59,7 @@ export default function LeaveTypes() {
         name: it.name,
         applyOnHoliday: it.applyOnHoliday ? 'Yes' : 'No',
         applyOnPastDays: it.applyOnPastDays ? 'Yes' : 'No',
+        applyBeforeDays: it.applyBeforeDays !== undefined && it.applyBeforeDays !== null ? String(it.applyBeforeDays) : '',
         status: it.isActive ? 'Active' : 'Inactive',
       }));
       setLeaveTypes(mapped);
@@ -72,11 +75,46 @@ export default function LeaveTypes() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // validate required fields (all mandatory)
+    if (!formData.name || !formData.name.trim()) {
+      toast({ title: 'Validation', description: 'Please enter a leave type name', variant: 'destructive' });
+      return;
+    }
+    if (formData.applyOnHoliday !== 'Yes' && formData.applyOnHoliday !== 'No') {
+      console.log('[DEBUG] Working on this ==> ', formData);
+      toast({ title: 'Validation', description: 'Please choose whether leave applies on holiday', variant: 'destructive' });
+      return;
+    }
+    if (formData.applyOnPastDays !== 'Yes' && formData.applyOnPastDays !== 'No') {
+      toast({ title: 'Validation', description: 'Please choose whether leave applies on past days', variant: 'destructive' });
+      return;
+    }
+    // applyBeforeDays validation depends on applyOnPastDays
+    if (formData.applyOnPastDays === 'Yes') {
+      if (formData.applyBeforeDays === undefined || formData.applyBeforeDays === null || String(formData.applyBeforeDays).trim() === '') {
+        toast({ title: 'Validation', description: 'Please enter Apply Before Days (number)', variant: 'destructive' });
+        return;
+      }
+      // numeric check and minimum 1
+      if (!/^[0-9]+$/.test(String(formData.applyBeforeDays)) || Number(formData.applyBeforeDays) < 1) {
+        toast({ title: 'Validation', description: 'Apply Before Days must be an integer >= 1', variant: 'destructive' });
+        return;
+      }
+    } else {
+      // when applyOnPastDays is No, ensure it's 0
+      setFormData({ ...formData, applyBeforeDays: '0' });
+    }
+    if (formData.status !== 'Active' && formData.status !== 'Inactive') {
+      toast({ title: 'Validation', description: 'Please choose a status', variant: 'destructive' });
+      return;
+    }
+
     // convert form values to payload expected by backend
     const payload = {
-      name: formData.name,
+      name: formData.name.trim(),
       applyOnHoliday: formData.applyOnHoliday === 'Yes',
       applyOnPastDays: formData.applyOnPastDays === 'Yes',
+      applyBeforeDays: Number(formData.applyBeforeDays),
       isActive: formData.status === 'Active',
     };
     try {
@@ -86,7 +124,7 @@ export default function LeaveTypes() {
         setSavingId(editingId);
         await editLeaveTypeApi({ id: editingId, ...payload });
         await loadLeaveTypes();
-        setFormData({ name: "", applyOnHoliday: "", applyOnPastDays: "", status: "" });
+  setFormData({ name: "", applyOnHoliday: "", applyOnPastDays: "", applyBeforeDays: "", status: "" });
         setShowForm(false);
         setEditingId(null);
         toast({ title: 'Updated', description: 'Leave type updated successfully' });
@@ -95,7 +133,7 @@ export default function LeaveTypes() {
         await addLeaveTypeApi(payload);
         // refresh list from server
         await loadLeaveTypes();
-        setFormData({ name: "", applyOnHoliday: "", applyOnPastDays: "", status: "" });
+  setFormData({ name: "", applyOnHoliday: "", applyOnPastDays: "", applyBeforeDays: "", status: "" });
         setShowForm(false);
         toast({ title: 'Success', description: 'Leave type added successfully' });
       }
@@ -113,6 +151,7 @@ export default function LeaveTypes() {
       name: lt.name,
       applyOnHoliday: lt.applyOnHoliday,
       applyOnPastDays: lt.applyOnPastDays,
+      applyBeforeDays: lt.applyBeforeDays ?? '',
       status: lt.status,
     });
     setEditingId(lt.id);
@@ -172,7 +211,7 @@ export default function LeaveTypes() {
             <CardTitle>Add New Leave Type</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Leave Type Name</Label>
@@ -205,7 +244,17 @@ export default function LeaveTypes() {
                   <Label htmlFor="applyOnPastDays">Apply Leave on Past Days</Label>
                   <Select
                     value={formData.applyOnPastDays}
-                    onValueChange={(value) => setFormData({ ...formData, applyOnPastDays: value })}
+                      onValueChange={(value) => {
+                        // when Apply on Past Days is set to No, default applyBeforeDays to 0 and freeze it
+                        if (value === 'No') {
+                          setFormData({ ...formData, applyOnPastDays: value, applyBeforeDays: '0' });
+                        } else {
+                          // when Yes, ensure applyBeforeDays is at least 1
+                          const current = String(formData.applyBeforeDays || '').trim();
+                          const next = (!current || current === '0') ? '1' : current;
+                          setFormData({ ...formData, applyOnPastDays: value, applyBeforeDays: next });
+                        }
+                      }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select option" />
@@ -215,6 +264,32 @@ export default function LeaveTypes() {
                       <SelectItem value="No">No</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="applyBeforeDays">Apply Before Days</Label>
+                  <Input
+                    id="applyBeforeDays"
+                    placeholder="Number of days"
+                    value={formData.applyBeforeDays}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/[^0-9]/g, '');
+                      // if applyOnPastDays is Yes, enforce minimum 1
+                      if (formData.applyOnPastDays === 'Yes') {
+                        if (val === '' ) {
+                          // allow empty while typing but will enforce on blur/submit
+                        } else if (Number(val) < 1) {
+                          val = '1';
+                        }
+                      } else {
+                        // when disabled state (No), always keep 0
+                        val = '0';
+                      }
+                      setFormData({ ...formData, applyBeforeDays: val });
+                    }}
+                    inputMode="numeric"
+                    disabled={formData.applyOnPastDays !== 'Yes'}
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -248,7 +323,7 @@ export default function LeaveTypes() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => { setShowForm(false); setEditingId(null); setFormData({ name: "", applyOnHoliday: "", applyOnPastDays: "", status: "" }); }}
+                  onClick={() => { setShowForm(false); setEditingId(null); setFormData({ name: "", applyOnHoliday: "", applyOnPastDays: "", applyBeforeDays: "", status: "" }); }}
                 >
                   Cancel
                 </Button>
@@ -266,6 +341,7 @@ export default function LeaveTypes() {
                 <TableHead>Leave Type Name</TableHead>
                 <TableHead>Apply on Holiday</TableHead>
                 <TableHead>Apply on Past Days</TableHead>
+                <TableHead>Apply Before Days</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -289,6 +365,7 @@ export default function LeaveTypes() {
                   <TableCell className="font-medium">{leaveType.name}</TableCell>
                   <TableCell>{leaveType.applyOnHoliday}</TableCell>
                   <TableCell>{leaveType.applyOnPastDays}</TableCell>
+                  <TableCell>{leaveType.applyBeforeDays ?? '-'}</TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${
