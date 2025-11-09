@@ -3,21 +3,12 @@
 import { useEffect } from "react";
 import AreaAnalytics from "./AreaAnalytics/AreaAnalytics"
 import { BarChart2, Compass, Map, Pin, Ruler, Shapes } from "lucide-react"
-import { getsocietiesData } from "@/apis/apiService";
 
 export default function OverviewTab({ territory }: any) {
 
 
   const projects = territory.projects || []
   console.log(territory);
-
-  useEffect(() => {
-    if (territory) {
-      getsocietiesData(territory._id).then((data) => {
-        console.log("Societies Data:", data);
-      });
-    }
-  }, [territory]);
 
   const totalProjects = projects.length
   const types = countBy(projects, "type")
