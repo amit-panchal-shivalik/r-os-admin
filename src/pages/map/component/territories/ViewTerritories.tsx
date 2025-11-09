@@ -11,6 +11,7 @@ import { Building2, Users, Home, Lightbulb, TrendingUp, Shield, Calendar } from 
 import { Territory } from "@/apis/apiService"
 import ViewPulses from "../pulses/ViewPulses"
 import TPTab from "./tabs/tp-tab"
+import SocietiesTab from "./tabs/societies-tab"
 
 const tabs = [
   { id: "overview", label: "Overview", icon: Building2 },
@@ -21,6 +22,7 @@ const tabs = [
   { id: "pulses", label: "Pulses", icon: TrendingUp },
   { id: "governance", label: "Governance", icon: Shield },
   { id: "events", label: "Events", icon: Calendar },
+  { id: "societies", label: "Societies", icon: Users },
 
 ]
 
@@ -52,6 +54,8 @@ export function ViewTerritories({ territory, project }: any) {
         return <EventsTab />
       case "TP":
         return <TPTab territory={territory} />
+      case "societies":
+        return <SocietiesTab territory={territory} />
       default:
         return <OverviewTab />
     }

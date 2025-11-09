@@ -3,21 +3,12 @@
 import { useEffect } from "react";
 import AreaAnalytics from "./AreaAnalytics/AreaAnalytics"
 import { BarChart2, Compass, Map, Pin, Ruler, Shapes } from "lucide-react"
-import { getsocietiesData } from "@/apis/apiService";
 
 export default function OverviewTab({ territory }: any) {
 
 
   const projects = territory.projects || []
   console.log(territory);
-
-  useEffect(() => {
-    if (territory) {
-      getsocietiesData(territory._id).then((data) => {
-        console.log("Societies Data:", data);
-      });
-    }
-  }, [territory]);
 
   const totalProjects = projects.length
   const types = countBy(projects, "type")
@@ -89,9 +80,9 @@ export default function OverviewTab({ territory }: any) {
 
       </div>
 
-      <Section>
+    
         <ShowTrendingPulses />
-      </Section>
+   
       
         <div className="flex justify-between gap-3">
           <AvgPriceCard label="Average Price pr sq ft" value={territory.avg_price ? `₹${territory.avg_price} /-` : "—"} />
@@ -208,25 +199,44 @@ function ShowTrendingPulses() {
   return (
     <div
       key={pulses.id}
-
-      className="shadow-md rounded-2xl hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+      className="shadow-md rounded-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer "
     >
-      {pulses.image && (
-        <img
-          src={pulses.image}
-          alt={pulses.title}
-          className="w-full h-48 object-cover rounded-t-2xl"
-        />
-      )}
-      <div className="p-4">
-        <h3 className="text-lg font-bold text-gray-900 truncate">
-          {pulses.title}
-        </h3>
-        <p className="text-sm text-gray-500 mt-1">
-          By{' '}
-          <span className="font-medium text-gray-600">{pulses.author}</span>
-        </p>
+      <div className="relative">
+        {pulses.image && (
+          <img
+            src={pulses.image}
+            alt={pulses.title}
+            className="w-full h-48 object-cover"
+          />
+        )}
+
+        {/* Back button over the image */}
+        {/* <button
+          onClick={() => typeof window !== "undefined" && window.history.back()}
+          aria-label="Back"
+          className="absolute top-3 left-3 bg-black/40 text-white w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-sm hover:bg-black/50"
+        >
+          ←
+        </button> */}
+
+        {/* Bottom overlay with details */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent text-white p-3">
+          <h3 className="text-sm font-bold truncate">{pulses.title}</h3>
+          <div className="mt-1 text-[12px] opacity-90 flex items-center justify-between">
+            <div className="truncate">
+              <div className="font-medium">{pulses.author}</div>
+              <div className="text-xs opacity-80 truncate">{pulses.location}</div>
+            </div>
+            {/* <div className="flex items-center gap-3 text-xs opacity-90">
+              <span>{pulses.likes} likes</span>
+              <span>{pulses.comments} comments</span>
+            </div> */}
+          </div>
+        </div>
       </div>
+
+      {/* Details below the image */}
+      {/* - */}
     </div>
   )
 }
