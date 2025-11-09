@@ -11,6 +11,7 @@ import {
   rem,
   Divider,
   Modal,
+  Stack,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -24,14 +25,31 @@ import {
   IconSpeakerphone,
   IconCalendar,
   IconMessageCircle2,
-  IconTrendingUp
+  IconTrendingUp,
+  IconShield
 } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { User, Users2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import type { ComponentType } from 'react';
 
 // Navigation array
-const navigation = [
+type NavigationSubItem = {
+  name: string;
+  href?: string;
+  children?: NavigationSubItem[];
+};
+
+type NavigationIcon = ComponentType<Record<string, unknown>>;
+
+type NavigationItem = {
+  name: string;
+  href: string;
+  icon: NavigationIcon;
+  subItems?: NavigationSubItem[];
+};
+
+const navigation: NavigationItem[] = [
   { name: 'People', href: '/users', icon: IconUsers },
   {
     name: 'Territory',
@@ -66,7 +84,6 @@ const navigation = [
     subItems: [
       { name: 'Dashboard', href: '/employee/dashboard' },
       { name: 'Employee List', href: '/employee/employee-list' },
-      // { name: 'Attendance', href: '/employee/attendance' },
       { name: 'Designation', href: '/employee/designation' },
       { name: 'Department', href: '/employee/department' },
       { name: 'Branch', href: '/employee/branch' },
@@ -90,7 +107,139 @@ const navigation = [
     href: '/growth-partner-list',
     icon: IconTrendingUp,
   },
+  {
+    name: 'EHS',
+    href: '/ehs/dashboard',
+    icon: IconShield,
+    subItems: [
+      { name: 'Dashboard', href: '/ehs/dashboard' },
+      {
+        name: 'Induction & Training',
+        children: [
+          { name: 'Site Directory', href: '/ehs/sites' },
+          { name: 'Safety Induction Form', href: '/ehs/safety-induction' },
+          { name: 'Contractor Directory', href: '/ehs/contractors' },
+          { name: 'Induction Tracking List', href: '/ehs/induction-tracking' }
+        ]
+      },
+      {
+        name: 'Meetings & Communication',
+        children: [
+          { name: 'Tool Box Talk Attendance', href: '/ehs/tool-box-talk' },
+          { name: 'EHS Committee MOM', href: '/ehs/committee-mom' }
+        ]
+      },
+      {
+        name: 'First Aid & Medical',
+        children: [
+          { name: 'First Aid Treatment Register', href: '/ehs/first-aid' },
+          { name: 'First Aid Box Checklist', href: '/ehs/first-aid-checklist' }
+        ]
+      },
+      {
+        name: 'Equipment & Monitoring',
+        children: [
+          { name: 'Equipment Testing Monitoring', href: '/ehs/equipment-testing' },
+          { name: 'Portable Electrical Tools Register', href: '/ehs/portable-tools' },
+          { name: 'Fire Extinguisher Monitoring', href: '/ehs/fire-extinguisher' }
+        ]
+      },
+      {
+        name: 'Heavy Equipment Checklists',
+        children: [
+          { name: 'Excavator Checklist', href: '/ehs/excavator-checklist' },
+          { name: 'JCB Checklist', href: '/ehs/jcb-checklist' },
+          { name: 'Truck Checklist', href: '/ehs/truck-checklist' }
+        ]
+      },
+      {
+        name: 'Machinery & Fabrication',
+        children: [
+          { name: 'Welding Machine Checklist', href: '/ehs/welding-machine-checklist' },
+          { name: 'Reinforcement Cutting Checklist', href: '/ehs/reinforcement-cutting-checklist' },
+          { name: 'Reinforcement Bending Checklist', href: '/ehs/reinforcement-bending-checklist' }
+        ]
+      },
+      {
+        name: 'Permits & Height Safety',
+        children: [
+          { name: 'Work Permit Register', href: '/ehs/work-permit' },
+          { name: 'Height Safety Compliance', href: '/ehs/height-safety' },
+          { name: 'Ladder Inspection Checklist', href: '/ehs/ladder-inspection' },
+          { name: 'Scaffold Inspection Checklist', href: '/ehs/scaffold-inspection' },
+          { name: 'Full Body Harness Inspection', href: '/ehs/full-body-harness' }
+        ]
+      },
+      {
+        name: 'Observations & Compliance',
+        children: [
+          { name: 'Safety Observation Sheet', href: '/ehs/observation-sheet' },
+          { name: 'PPE Register', href: '/ehs/ppe-register' },
+          { name: 'Safety Violation Debit Note', href: '/ehs/safety-violation' },
+          { name: 'Near Miss / Unsafe Act Report', href: '/ehs/near-miss' },
+          { name: 'Suggestions Review Sheet', href: '/ehs/suggestions-review' }
+        ]
+      },
+      {
+        name: 'Emergency Preparedness',
+        children: [
+          { name: 'Mock Drill Schedule', href: '/ehs/mock-drill-schedule' },
+          { name: 'Mock Drill Report', href: '/ehs/mock-drill-report' },
+          { name: 'EHS Core Team Structure', href: '/ehs/core-team' }
+        ]
+      },
+      {
+        name: 'Reporting & Analytics',
+        children: [
+          { name: 'Safety Statistics Board', href: '/ehs/safety-statistics' },
+          { name: 'Accident Investigation Report', href: '/ehs/accident-investigation' }
+        ]
+      }
+    ],
+  },
 ];
+
+const flattenSubItemHrefs = (items: NavigationSubItem[] = []): string[] => {
+  return items.flatMap((item) => {
+    if (item.children?.length) {
+      return flattenSubItemHrefs(item.children);
+    }
+    return item.href ? [item.href] : [];
+  });
+};
+
+const findFirstLeafHref = (items: NavigationSubItem[] = []): string | undefined => {
+  for (const item of items) {
+    if (item.href) {
+      return item.href;
+    }
+    if (item.children?.length) {
+      const childHref = findFirstLeafHref(item.children);
+      if (childHref) return childHref;
+    }
+  }
+  return undefined;
+};
+
+const findParentForHref = (items: NavigationItem[], href: string): NavigationItem | undefined => {
+  for (const item of items) {
+    if (item.href === href) return item;
+    if (item.subItems?.length && flattenSubItemHrefs(item.subItems).includes(href)) {
+      return item;
+    }
+  }
+  return undefined;
+};
+
+const isHrefWithinSubItems = (items: NavigationSubItem[] = [], href: string): boolean => {
+  return items.some((item) => {
+    if (item.href === href) return true;
+    if (item.children?.length) {
+      return isHrefWithinSubItems(item.children, href);
+    }
+    return false;
+  });
+};
 
 // Mapping of roles allowed tabs
 const roleToTabs: Record<string, string[]> = {
@@ -117,7 +266,10 @@ const roleToTabs: Record<string, string[]> = {
   FurnitureDealerAdmin: ['Desk', 'Territory'],
   GrowthPartnerAdmin: ['Growth Partner'],
   InstituteManager: ['Desk'],
-  InstituteExecutive: ['Desk']
+  InstituteExecutive: ['Desk'],
+  EHSManager: ['EHS'],
+  EHSExecutive: ['EHS'],
+  EHSSupervisor: ['EHS']
 };
 
 // Filter navigation based on user roles
@@ -199,7 +351,7 @@ export const DashboardLayout = () => {
   const location = useLocation();
   const [activePath, setActivePath] = useState(() => {
     const storedPath = localStorage.getItem('lastActivePath');
-    return storedPath || '/users'; // Default to '/users' if no stored path
+    return storedPath || '/ehs/dashboard';
   });
   const [tabOpenStates, setTabOpenStates] = useState<{ [key: string]: boolean }>(() => {
     try {
@@ -228,17 +380,19 @@ export const DashboardLayout = () => {
   useEffect(() => {
     if (isInitialMount.current) {
       const storedPath = localStorage.getItem('lastActivePath');
-      const isValidPath = filteredNavigation.some(
-        (item) =>
-          item.href === storedPath ||
-          (item.subItems && item.subItems.some((sub) => sub.href === storedPath))
-      );
+      const isValidPath = filteredNavigation.some((item) => {
+        if (item.href === storedPath) return true;
+        if (item.subItems?.length) {
+          return isHrefWithinSubItems(item.subItems, storedPath || '');
+        }
+        return false;
+      });
       if (storedPath && isValidPath && storedPath !== location.pathname) {
         navigate(storedPath, { replace: true });
       } else if (!isValidPath && storedPath) {
         // If stored path is invalid, clear it and navigate to default
-        localStorage.setItem('lastActivePath', '/users');
-        navigate('/users', { replace: true });
+        localStorage.setItem('lastActivePath', '/ehs/dashboard');
+        navigate('/ehs/dashboard', { replace: true });
       }
       isInitialMount.current = false;
     }
@@ -255,7 +409,8 @@ export const DashboardLayout = () => {
 
     filteredNavigation.forEach((item) => {
       if (item.subItems) {
-        const isSubActive = item.subItems.some((sub) => location.pathname === sub.href);
+        const leafHrefs = flattenSubItemHrefs(item.subItems);
+        const isSubActive = leafHrefs.includes(location.pathname);
         const isParentActive = location.pathname === item.href;
         const shouldBeOpen = isSubActive || isParentActive;
         if (updatedTabOpenStates[item.href] !== shouldBeOpen) {
@@ -278,22 +433,20 @@ export const DashboardLayout = () => {
     navigate('/login');
   };
 
-  const handleTabClick = (item: typeof navigation[0]) => {
-    if (item.subItems) {
+  const handleTabClick = (item: NavigationItem) => {
+    if (item.subItems?.length) {
       setTabOpenStates((prev) => {
         const isCurrentlyOpen = !!prev[item.href];
         const newState = { ...prev, [item.href]: !isCurrentlyOpen };
         localStorage.setItem('tabOpenStates', JSON.stringify(newState));
-        // When opening a menu with sub-items, navigate to its first sub-item
-        if (!isCurrentlyOpen && item.subItems) {
-          const targetPath = item.subItems[0].href;
-          if (location.pathname !== targetPath) {
+        if (!isCurrentlyOpen) {
+          const targetPath = findFirstLeafHref(item.subItems) ?? item.href;
+          if (targetPath && location.pathname !== targetPath) {
             navigate(targetPath);
             setActivePath(targetPath);
             localStorage.setItem('lastActivePath', targetPath);
           }
         }
-        // When closing, do not navigate away; simply collapse the menu
         return newState;
       });
     } else {
@@ -308,10 +461,7 @@ export const DashboardLayout = () => {
     navigate(href);
     setActivePath(href);
     localStorage.setItem('lastActivePath', href);
-    // Ensure parent menu stays open
-    const parentItem = filteredNavigation.find((item) =>
-      item.subItems?.some((sub) => sub.href === href)
-    );
+    const parentItem = findParentForHref(filteredNavigation, href);
     if (parentItem) {
       setTabOpenStates((prev) => {
         const newState = { ...prev, [parentItem.href]: true };
@@ -322,11 +472,53 @@ export const DashboardLayout = () => {
     close();
   };
 
-  const NavItem = ({ item }: { item: typeof navigation[0] }) => {
-    const hasSubItems = !!item.subItems;
+  const NavItem = ({ item }: { item: NavigationItem }) => {
+    const hasSubItems = !!item.subItems?.length;
+    const leafHrefs = item.subItems ? flattenSubItemHrefs(item.subItems) : [];
     const isActive =
       activePath === item.href ||
-      (hasSubItems && (item.subItems?.some((sub) => activePath === sub.href) || tabOpenStates[item.href]));
+      leafHrefs.includes(activePath) ||
+      (hasSubItems && tabOpenStates[item.href]);
+
+    const renderLeaf = (subItem: NavigationSubItem) => {
+      if (!subItem.href) {
+        return null;
+      }
+      const isLeafActive = activePath === subItem.href;
+      return (
+        <div
+          key={subItem.name}
+          style={{
+            padding: '8px 10px',
+            borderRadius: rem(6),
+            color: isLeafActive ? '#ffffff' : '#e0e7ff',
+            backgroundColor: isLeafActive ? 'rgba(37, 99, 235, 0.35)' : 'transparent',
+            fontSize: rem(13),
+            display: 'flex',
+            alignItems: 'center',
+            gap: rem(8),
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            handleSubItemClick(subItem.href!);
+          }}
+        >
+          <span
+            style={{
+              width: rem(4),
+              height: rem(4),
+              backgroundColor: isLeafActive ? '#60a5fa' : '#cbd5f5',
+              borderRadius: '50%',
+            }}
+          />
+          <Text size="sm" style={{ flex: 1 }} c={isLeafActive ? '#ffffff' : undefined}>
+            {subItem.name}
+          </Text>
+        </div>
+      );
+    };
 
     return (
       <li
@@ -343,7 +535,10 @@ export const DashboardLayout = () => {
           transition: 'all 0.3s ease-in-out',
           listStyle: 'none',
           position: 'relative',
-          boxShadow: hasSubItems && tabOpenStates[item.href] ? '0 4px 6px rgba(0, 0, 0, 0.1)' : 'none',
+          boxShadow:
+            hasSubItems && tabOpenStates[item.href]
+              ? '0 4px 6px rgba(0, 0, 0, 0.1)'
+              : 'none',
           borderLeft: isActive ? '4px solid #60a5fa' : 'none',
           marginBottom: hasSubItems ? rem(4) : 0,
           minHeight: hasSubItems ? rem(48) : 'auto',
@@ -377,70 +572,37 @@ export const DashboardLayout = () => {
           )}
         </Group>
         {hasSubItems && tabOpenStates[item.href] && (
-          <ul
+          <div
             style={{
               marginTop: 20,
-              padding: 'rem(12) 0 0 rem(28)',
-              margin: 'rem(8) 0 0 0',
+              padding: '12px 0 0 16px',
               listStyle: 'none',
               background: 'linear-gradient(135deg, #2a4365, #3b82f6)',
               borderRadius: rem(6),
               overflow: 'hidden',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-              animation: 'slideDown 0.3s ease-out',
             }}
-            onAnimationEnd={(e) => (e.target as HTMLElement).style.animation = 'none'}
+            onClick={(event) => event.stopPropagation()}
           >
-            {item.subItems.map((subItem) => (
-              <li
-                key={subItem.name}
-                style={{
-                  padding: rem(10),
-                  color: activePath === subItem.href ? '#ffffff' : '#e0e7ff',
-                  backgroundColor: activePath === subItem.href ? '#1e40af' : 'transparent',
-                  fontSize: rem(13),
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  borderRadius: rem(4),
-                  marginBottom: rem(8),
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent parent click
-                  handleSubItemClick(subItem.href);
-                }}
-                onMouseEnter={(e) => {
-                  if (activePath !== subItem.href) {
-                    (e.target as HTMLElement).style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-                    (e.target as HTMLElement).style.color = '#ffffff';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activePath !== subItem.href) {
-                    (e.target as HTMLElement).style.backgroundColor = 'transparent';
-                    (e.target as HTMLElement).style.color = '#e0e7ff';
-                  }
-                }}
-              >
-                <Box
-                  style={{
-                    width: rem(4),
-                    height: rem(4),
-                    backgroundColor: activePath === subItem.href ? '#60a5fa' : 'transparent',
-                    borderRadius: '50%',
-                    marginRight: rem(10),
-                  }}
-                />
-                {subItem.name}
-              </li>
-            ))}
-          </ul>
+            <Stack gap={12}>
+              {item.subItems?.map((subItem) =>
+                subItem.children?.length ? (
+                  <Stack key={subItem.name} gap={8}>
+                    <Text size="xs" c="#bfdbfe" fw={600} tt="uppercase">
+                      {subItem.name}
+                    </Text>
+                    <Stack gap={6}>{subItem.children.map((child) => renderLeaf(child))}</Stack>
+                  </Stack>
+                ) : (
+                  renderLeaf(subItem)
+                )
+              )}
+            </Stack>
+          </div>
         )}
       </li>
     );
   };
-
   return (
     <AppShell
       header={{ height: { base: 60, sm: 70 } }}
