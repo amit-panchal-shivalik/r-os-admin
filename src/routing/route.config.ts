@@ -35,8 +35,10 @@ export const ROLE_ROUTES: Record<string, string[]> = {
     '/building-settings/notice-board',
     '/building-settings/parking',
     '/building-settings/amenities',
-    '/employees',
+    '/users',
     '/users/members',
+    '/users/society-employee',
+    '/users/committee-member',
     // Legacy routes for backward compatibility
     '/building-details',
     '/floors',
@@ -45,6 +47,7 @@ export const ROLE_ROUTES: Record<string, string[]> = {
     '/notice-board',
     '/parking',
     '/amenities',
+    '/employees',
   ],
   Manager: [
     '/dashboard',
@@ -55,9 +58,10 @@ export const ROLE_ROUTES: Record<string, string[]> = {
     '/building-settings/notice-board',
     '/building-settings/parking',
     '/building-settings/amenities',
-    '/employees',
+    '/users',
     '/users/members',
-    // Legacy routes for backward compatibility
+    '/users/society-employee',
+    '/users/committee-member',
     '/building-details',
     '/floors',
     '/blocks',
@@ -65,10 +69,10 @@ export const ROLE_ROUTES: Record<string, string[]> = {
     '/notice-board',
     '/parking',
     '/amenities',
+    '/employees',
   ],
 };
 
-// Base navigation menu items
 const BASE_MENU_ITEMS: MenuItem[] = [
   {
     name: 'Society Management',
