@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
-import { Building2, Search, Plus, Edit, Trash2, Eye, MapPin, Users, X, UserPlus, XCircle } from 'lucide-react';
+import { Building2, Search, Plus, Edit, Trash2, Eye, MapPin, Users, X, UserPlus, XCircle, Calendar } from 'lucide-react';
 import { adminApi } from '../../apis/admin';
 import { useToast } from '../../hooks/use-toast';
+import { getImageUrl } from '../../utils/imageUtils';
 
 interface CommunityFormData {
   name: string;
@@ -101,6 +103,7 @@ const INDIAN_CITIES_BY_STATE: Record<string, string[]> = {
 
 const Communities = () => {
   const navigate = useNavigate();
+  const { user, addUserRole } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -142,6 +145,10 @@ const Communities = () => {
   // Add state for delete confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteCommunity, setDeleteCommunity] = useState<any>(null);
+  
+  // Add state for detailed community view modal
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewCommunity, setViewCommunity] = useState<any>(null);
 
   // Update cities when state changes
   useEffect(() => {
@@ -165,18 +172,67 @@ const Communities = () => {
         search: searchTerm
       });
       
-      setCommunities(response.data.communities || []);
-      setPagination(response.data.pagination || pagination);
+      console.log('Communities response:', response);
+      
+      // Handle different response formats
+      // Backend returns: { message: "...", result: { communities: [...], pagination: {...} } }
+      let communitiesData = [];
+      let paginationData = pagination;
+      
+      if (response?.result) {
+        // Direct result object
+        communitiesData = response.result.communities || [];
+        paginationData = response.result.pagination || pagination;
+      } else if (response?.data?.result) {
+        // Nested result in data
+        communitiesData = response.data.result.communities || [];
+        paginationData = response.data.result.pagination || pagination;
+      } else if (response?.data?.communities) {
+        // Direct data.communities
+        communitiesData = response.data.communities;
+        paginationData = response.data.pagination || pagination;
+      } else if (response?.communities) {
+        // Direct communities array
+        communitiesData = response.communities;
+        paginationData = response.pagination || pagination;
+      } else if (Array.isArray(response?.data)) {
+        // Array directly in data
+        communitiesData = response.data;
+      } else if (Array.isArray(response)) {
+        // Array directly
+        communitiesData = response;
+      }
+      
+      console.log('Parsed communities:', communitiesData);
+      console.log('Parsed pagination:', paginationData);
+      
+      setCommunities(communitiesData);
+      setPagination(paginationData);
       
       // Fetch managers for each community
       const managersData: Record<string, any[]> = {};
-      for (const community of response.data.communities || []) {
+      for (const community of communitiesData) {
         try {
           const managersResponse = await adminApi.getCommunityManagers(community._id, {
             page: 1,
             limit: 10
           });
-          managersData[community._id] = managersResponse.data.managers || [];
+          
+          // Handle managers response format
+          let managers = [];
+          if (managersResponse?.result?.managers) {
+            managers = managersResponse.result.managers;
+          } else if (managersResponse?.data?.managers) {
+            managers = managersResponse.data.managers;
+          } else if (managersResponse?.managers) {
+            managers = managersResponse.managers;
+          } else if (Array.isArray(managersResponse?.data)) {
+            managers = managersResponse.data;
+          } else if (Array.isArray(managersResponse)) {
+            managers = managersResponse;
+          }
+          
+          managersData[community._id] = managers;
         } catch (error) {
           console.error(`Error fetching managers for community ${community._id}:`, error);
           managersData[community._id] = [];
@@ -373,7 +429,7 @@ const Communities = () => {
     }
 
     try {
-      await adminApi.assignCommunityManager({
+      const response = await adminApi.assignCommunityManager({
         communityId: selectedCommunity._id,
         userId: managerUserId,
         role: 'Manager' // Always assign as Manager role
@@ -388,6 +444,13 @@ const Communities = () => {
       setSelectedCommunity(null);
       setManagerUserId('');
       fetchCommunities(); // Refresh the list
+      
+      // Update the user's role in the auth context if this is the current user
+      if (user && user.id === managerUserId) {
+        if (addUserRole) {
+          addUserRole('Manager');
+        }
+      }
     } catch (error) {
       console.error('Error assigning manager:', error);
       toast({
@@ -400,7 +463,7 @@ const Communities = () => {
 
   const handleRemoveManager = async (communityId: string, managerId: string) => {
     try {
-      await adminApi.removeCommunityManager(managerId);
+      await adminApi.removeCommunityManager(communityId, managerId);
       
       toast({
         title: "Success",
@@ -423,6 +486,35 @@ const Communities = () => {
       toast({
         title: "Error",
         description: "Failed to remove manager",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRemoveUser = async (communityId: string, userId: string) => {
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "User ID is required",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      await adminApi.removeUserFromCommunity(communityId, userId);
+      
+      toast({
+        title: "Success",
+        description: "User removed from community successfully"
+      });
+      
+      fetchCommunities(); // Refresh the list
+    } catch (error) {
+      console.error('Error removing user from community:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove user from community",
         variant: "destructive"
       });
     }
@@ -640,9 +732,55 @@ const Communities = () => {
             Add New Community
           </Button>
         </div>
-
+<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+        <Card className="bg-white border border-gray-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Total Communities</p>
+                <p className="text-2xl font-bold text-black">{pagination.total || 0}</p>
+              </div>
+              <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white border border-gray-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Active Communities</p>
+                <p className="text-2xl font-bold text-black">
+                  {communities.filter(c => c.status === 'active' || c.status === 'Active').length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white border border-gray-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Pending Communities</p>
+                <p className="text-2xl font-bold text-black">
+                  {communities.filter(c => c.status === 'pending' || c.status === 'Pending').length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gray-500 rounded-lg flex items-center justify-center">
+                <Building2 className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
         {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-4 mb-6 mt-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 w-4 h-4" />
             <Input
@@ -652,10 +790,6 @@ const Communities = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" className="border border-gray-400 text-black hover:bg-gray-100">All Status</Button>
-            <Button variant="outline" className="border border-gray-400 text-black hover:bg-gray-100">All Managers</Button>
           </div>
         </div>
       </div>
@@ -679,7 +813,6 @@ const Communities = () => {
                   <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Community</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Location</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Manager</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Members</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-black uppercase">Actions</th>
                 </tr>
@@ -698,7 +831,7 @@ const Communities = () => {
                         <div className="flex items-center gap-3">
                           {community.bannerImage ? (
                             <img 
-                              src={community.bannerImage} 
+                              src={getImageUrl(community.bannerImage)} 
                               alt={community.name} 
                               className="w-12 h-12 rounded-lg object-cover"
                             />
@@ -709,7 +842,6 @@ const Communities = () => {
                           )}
                           <div>
                             <p className="font-semibold text-sm text-black">{community.name}</p>
-                            <p className="text-xs text-gray-600 line-clamp-2">{community.description}</p>
                           </div>
                         </div>
                       </td>
@@ -762,37 +894,35 @@ const Communities = () => {
                           </Button>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        {getStatusBadge(community.status || 'Pending')}
-                      </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {community.members?.length || 0} members
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <Button 
-                            variant="ghost" 
+                            variant="outline" 
                             size="sm" 
-                            className="text-blue-600 hover:bg-blue-50"
-                            onClick={() => openManagerModal(community)}
+                            className="bg-gray-900 text-white hover:bg-gray-800 border-gray-900"
+                            onClick={() => {
+                              setViewCommunity(community);
+                              setShowViewModal(true);
+                            }}
                           >
-                            <UserPlus className="w-4 h-4" />
+                            <Eye className="w-4 h-4 mr-1" />
+                            View
                           </Button>
                           <Button 
-                            variant="ghost" 
+                            variant="outline" 
                             size="sm" 
-                            className="text-black hover:bg-gray-100"
-                            onClick={() => navigate(`/admin/communities/${community._id}/edit`)}
+                            className="text-red-600 border-red-600 hover:bg-red-50"
+                            onClick={() => {
+                              const userId = prompt('Enter the User ID to remove from this community:');
+                              if (userId) {
+                                handleRemoveUser(community._id, userId);
+                              }
+                            }}
                           >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-black hover:bg-gray-100"
-                            onClick={() => openDeleteModal(community)}
-                          >
-                            <Trash2 className="w-4 h-4" />
+                            Remove User
                           </Button>
                         </div>
                       </td>
@@ -882,6 +1012,259 @@ const Communities = () => {
         </div>
       )}
 
+      {/* Detailed Community View Modal */}
+      {showViewModal && viewCommunity && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-5xl my-8 shadow-2xl">
+            {/* Close Button */}
+            <div className="flex justify-end p-4 border-b border-gray-200">
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  setShowViewModal(false);
+                  setViewCommunity(null);
+                }}
+                className="hover:bg-gray-100 rounded-full p-2"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </Button>
+            </div>
+
+            {/* Hero Image Section - Large Area */}
+            <div className="relative w-full h-80 md:h-96 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
+              {viewCommunity.bannerImage ? (
+                <img 
+                  src={getImageUrl(viewCommunity.bannerImage)} 
+                  alt={viewCommunity.name} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Building2 className="w-24 h-24 text-white opacity-50" />
+                </div>
+              )}
+              {/* Overlay Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+              
+              {/* Community Name Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <div className="flex items-center gap-3 mb-3">
+                  {getStatusBadge(viewCommunity.status)}
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+                  {viewCommunity.name}
+                </h2>
+              </div>
+            </div>
+
+            {/* Content Section */}
+            <div className="p-6 md:p-8 space-y-6">
+              {/* Location Section - Large Fonts */}
+              <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Location</h3>
+                    <div className="space-y-2">
+                      {viewCommunity.location?.address && (
+                        <p className="text-lg md:text-xl font-semibold text-gray-900">
+                          {viewCommunity.location.address}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap items-center gap-2">
+                        {viewCommunity.location?.city && (
+                          <span className="text-lg md:text-xl font-bold text-gray-900">
+                            {viewCommunity.location.city}
+                          </span>
+                        )}
+                        {viewCommunity.location?.city && viewCommunity.location?.state && (
+                          <span className="text-lg md:text-xl text-gray-600">,</span>
+                        )}
+                        {viewCommunity.location?.state && (
+                          <span className="text-lg md:text-xl font-bold text-gray-900">
+                            {viewCommunity.location.state}
+                          </span>
+                        )}
+                        {viewCommunity.location?.zipCode && (
+                          <span className="text-lg md:text-xl text-gray-600">
+                            {viewCommunity.location.zipCode}
+                          </span>
+                        )}
+                        {viewCommunity.location?.country && (
+                          <span className="text-lg md:text-xl text-gray-600">
+                            {viewCommunity.location.country}
+                          </span>
+                        )}
+                      </div>
+                      {!viewCommunity.location?.city && !viewCommunity.location?.state && (
+                        <p className="text-lg md:text-xl text-gray-500 italic">Location not specified</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description Section */}
+              {viewCommunity.description && (
+                <div className="bg-white rounded-xl p-6 border border-gray-200">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-gray-900" />
+                    About Community
+                  </h3>
+                  <p className="text-gray-700 leading-relaxed text-base md:text-lg">
+                    {viewCommunity.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Members Count */}
+                <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+                      <Users className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Members</p>
+                      <p className="text-2xl font-bold text-gray-900">{viewCommunity.members?.length || 0}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Territory */}
+                {viewCommunity.territory && (
+                  <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Territory</p>
+                        <p className="text-xl font-bold text-gray-900">{viewCommunity.territory}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Established Year */}
+                {viewCommunity.establishedYear && (
+                  <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Established</p>
+                        <p className="text-xl font-bold text-gray-900">{viewCommunity.establishedYear}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Total Units */}
+                {viewCommunity.totalUnits && (
+                  <div className="bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Units</p>
+                        <p className="text-xl font-bold text-gray-900">{viewCommunity.totalUnits}</p>
+                        {viewCommunity.occupiedUnits !== undefined && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {viewCommunity.occupiedUnits} occupied
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Managers Section */}
+              {communityManagers[viewCommunity._id] && communityManagers[viewCommunity._id].length > 0 && (
+                <div className="bg-white rounded-xl p-6 border border-gray-200">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-gray-900" />
+                    Community Managers
+                  </h3>
+                  <div className="space-y-3">
+                    {communityManagers[viewCommunity._id].map((manager: any) => (
+                      <div key={manager._id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        <Avatar className="w-10 h-10">
+                          <AvatarFallback className="bg-gray-900 text-white">
+                            {manager.userId?.name ? manager.userId.name.charAt(0) : 'M'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900">{manager.userId?.name || 'Unknown'}</p>
+                          <p className="text-sm text-gray-600">{manager.userId?.email || 'No email'}</p>
+                        </div>
+                        <Badge className="bg-gray-900 text-white">Manager</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Contact Information */}
+              {viewCommunity.contactInfo && (
+                <div className="bg-white rounded-xl p-6 border border-gray-200">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Contact Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {viewCommunity.contactInfo.email && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 mb-1">Email</p>
+                        <p className="text-base text-gray-900">{viewCommunity.contactInfo.email}</p>
+                      </div>
+                    )}
+                    {viewCommunity.contactInfo.phone && (
+                      <div>
+                        <p className="text-sm font-medium text-gray-600 mb-1">Phone</p>
+                        <p className="text-base text-gray-900">{viewCommunity.contactInfo.phone}</p>
+                      </div>
+                    )}
+                    {viewCommunity.contactInfo.website && (
+                      <div className="md:col-span-2">
+                        <p className="text-sm font-medium text-gray-600 mb-1">Website</p>
+                        <a 
+                          href={viewCommunity.contactInfo.website} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-base text-blue-600 hover:underline"
+                        >
+                          {viewCommunity.contactInfo.website}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Actions */}
+            <div className="border-t border-gray-200 p-6 bg-gray-50 rounded-b-2xl">
+              <div className="flex justify-end gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setViewCommunity(null);
+                  }}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Delete Community Modal */}
       {showDeleteModal && selectedCommunity && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -917,53 +1300,7 @@ const Communities = () => {
       )}
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-        <Card className="bg-white border border-gray-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Communities</p>
-                <p className="text-2xl font-bold text-black">{pagination.total || 0}</p>
-              </div>
-              <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white border border-gray-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Active Communities</p>
-                <p className="text-2xl font-bold text-black">
-                  {communities.filter(c => c.status === 'active' || c.status === 'Active').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white border border-gray-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Pending Communities</p>
-                <p className="text-2xl font-bold text-black">
-                  {communities.filter(c => c.status === 'pending' || c.status === 'Pending').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-gray-500 rounded-lg flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      
     </div>
   );
 };

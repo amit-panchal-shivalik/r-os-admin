@@ -5,6 +5,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Card, CardContent, CardHeader } from '../../components/ui/card';
 import { Avatar, AvatarFallback } from '../../components/ui/avatar';
 import { Badge } from '../../components/ui/badge';
+import { getImageUrl } from '../../utils/imageUtils';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react';
 import { adminApi } from '../../apis/admin';
 import { useToast } from '../../hooks/use-toast';
+import { formatDateToDDMMYYYY } from '../../utils/dateUtils';
 
 interface MarketplaceListing {
   _id: string;
@@ -241,7 +243,7 @@ const MarketplaceApprovals = () => {
                   <div className="flex items-start gap-4 flex-1">
                     {listing.attachment ? (
                       <div className="w-24 h-24 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0">
-                        <img src={listing.attachment} alt={listing.title} className="w-full h-full object-cover" />
+                        <img src={getImageUrl(listing.attachment)} alt={listing.title} className="w-full h-full object-cover" />
                       </div>
                     ) : (
                       <div className="w-24 h-24 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
@@ -286,7 +288,8 @@ const MarketplaceApprovals = () => {
                     </p>
                     {listing.reviewedBy && (
                       <p className="text-xs text-gray-600 mt-1">
-                        Reviewed by: {listing.reviewedBy.name} on {new Date(listing.reviewedAt || '').toLocaleDateString()}
+                        Reviewed by: {listing.reviewedBy.name} on {formatDateToDDMMYYYY(listing.reviewedAt || '')}
+
                       </p>
                     )}
                   </div>
@@ -296,7 +299,8 @@ const MarketplaceApprovals = () => {
                 {listing.status === 'approved' && listing.reviewedBy && (
                   <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-sm text-gray-700">
-                      Approved by: {listing.reviewedBy.name} on {new Date(listing.reviewedAt || '').toLocaleDateString()}
+                      Approved by: {listing.reviewedBy.name} on {formatDateToDDMMYYYY(listing.reviewedAt || '')}
+
                     </p>
                   </div>
                 )}
@@ -420,6 +424,9 @@ const MarketplaceApprovals = () => {
 };
 
 export default MarketplaceApprovals;
+
+
+
 
 
 

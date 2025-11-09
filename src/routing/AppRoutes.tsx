@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { PrivateRoute } from './PrivateRoute';
 import { PublicRoute } from './PublicRoute';
 import { GuestRoute } from './GuestRoute';
+import { UserRoute } from './UserRoute';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { OtpPage } from '../pages/auth/OtpPage';
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
@@ -27,6 +28,10 @@ import MarketplaceApprovals from '../pages/admin/MarketplaceApprovals';
 import RoleChangeRequests from '../pages/admin/RoleChangeRequests';
 import PulseApprovals from '../pages/admin/PulseApprovals';
 
+// Manager Pages
+import ManagerPanel from '../pages/ManagerPanel';
+import ModerationDashboard from '../pages/manager/ModerationDashboard';
+
 /* current user roles */
 const getUserRoles = (): string[] => {
   try {
@@ -48,6 +53,7 @@ const getUserRoles = (): string[] => {
 const ROLE_DEFAULTS: Record<string, string> = {
   SuperAdmin: '/admin/users',
   Admin: '/admin/dashboard',
+  Manager: '/manager/dashboard'
 };
 
 /* ────── Main router ────── */
@@ -57,8 +63,8 @@ export const AppRoutes = () => {
       {/* ROOT - Show Landing Page with Hero Section */}
       <Route path="/" element={<LandingPage />} />
       
-      {/* USER DASHBOARD - Default page for authenticated users */}
-      <Route path="/dashboard" element={<UserDashboard />} />
+      {/* USER DASHBOARD - Default page for authenticated users (admin users cannot access) */}
+      <Route path="/dashboard" element={<UserRoute><UserDashboard /></UserRoute>} />
       
       {/* COMMUNITY DASHBOARD - Individual community view */}
       <Route path="/community/:communityId" element={<GuestRoute><CommunityDashboard /></GuestRoute>} />
@@ -79,6 +85,13 @@ export const AppRoutes = () => {
         <Route path="marketplace-approvals" element={<MarketplaceApprovals />} />
         <Route path="pulse-approvals" element={<PulseApprovals />} />
         <Route path="role-requests" element={<RoleChangeRequests />} />
+      </Route>
+
+      {/* MANAGER PANEL - For manager users with child routes */}
+      <Route path="/manager" element={<PrivateRoute requiredRole="manager"><ManagerPanel /></PrivateRoute>}>
+        <Route index element={<ModerationDashboard />} />
+        <Route path="moderation" element={<ModerationDashboard />} />
+        <Route path=":communityId/moderation" element={<ModerationDashboard />} />
       </Route>
 
       {/* PUBLIC COMMUNITY EVENTS PAGE */}
