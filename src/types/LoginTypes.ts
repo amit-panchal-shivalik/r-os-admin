@@ -1,5 +1,4 @@
 export interface LoginPayload {
-    countryCode: string;
-    phoneNumber: string;
+  //   countryCode: string;
+  mobile_number: string;
 }
-

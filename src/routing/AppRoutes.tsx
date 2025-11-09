@@ -5,6 +5,16 @@ import { LoginPage } from "../pages/auth/LoginPage";
 import { OtpPage } from "../pages/auth/OtpPage";
 import { RegisterPage } from "@/pages/auth/RegisterPage";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { TerritoryDashboardPage } from "@/pages/territory/Dashboard";
+import { TerritoryProjectsPage } from "@/pages/territory/Projects";
+import { TerritoryLandPage } from "@/pages/territory/Land";
+import { TerritoryVendorPage } from "@/pages/territory/Vendor";
+import { TerritoryStorePage } from "@/pages/territory/Store";
+import { TerritoryInstitutePage } from "@/pages/territory/Institute";
+import { TerritorySocietyAdminPage } from "@/pages/territory/SocietyAdmin";
+import { TerritoryOpportunityPage } from "@/pages/territory/Opportunity";
+import { TerritoryBlueCollarJobPage } from "@/pages/territory/BlueCollarJob";
+import { TerritoryEventPage } from "@/pages/territory/EventPage";
 
 /* current user roles */
 const getUserRoles = (): string[] => {
@@ -85,7 +95,32 @@ export const AppRoutes = () => {
         <Route index element={<RedirectByRole />} />
 
         {/* All private pages  */}
-        {/* <Route path="users" element={<PeoplePage />} /> */}
+        {/* Territory */}
+        <Route
+          path="territory/dashboard"
+          element={<TerritoryDashboardPage />}
+        />
+        <Route path="territory/project" element={<TerritoryProjectsPage />} />
+        <Route path="territory/land" element={<TerritoryLandPage />} />
+        <Route path="territory/vendor" element={<TerritoryVendorPage />} />
+        <Route path="territory/store" element={<TerritoryStorePage />} />
+        <Route
+          path="territory/institute"
+          element={<TerritoryInstitutePage />}
+        />
+        <Route
+          path="territory/society-admin"
+          element={<TerritorySocietyAdminPage />}
+        />
+        <Route
+          path="territory/opportunity"
+          element={<TerritoryOpportunityPage />}
+        />
+        <Route
+          path="territory/blue-collar-job"
+          element={<TerritoryBlueCollarJobPage />}
+        />
+        <Route path="territory/event" element={<TerritoryEventPage />} />
 
         {/* Catch-all inside private area (keeps the layout) */}
         <Route path="*" element={<RedirectByRole />} />

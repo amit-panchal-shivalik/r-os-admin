@@ -1,5 +1,7 @@
 import Swal from 'sweetalert2';
 
+export const DEFAULT_TERRITORY_ID = 'b588d491-7bcd-45af-b992-0068dd723c26';
+
 const userData = [
     {
         id: 1,

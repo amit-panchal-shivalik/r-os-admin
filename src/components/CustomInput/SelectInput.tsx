@@ -10,6 +10,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
   required,
   options,
   onChange,
+  onBlur,
   validate,
   value,
   mode = "create",
@@ -66,6 +67,15 @@ const SelectInput: React.FC<SelectInputProps> = ({
         value: value ?? "",
         onChange: handleChange,
       };
+
+  const combinedOnBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
+    // call RHF-provided onBlur first if present
+    const maybeBlur = (selectProps as any)?.onBlur as
+      | ((e: React.FocusEvent<HTMLSelectElement>) => void)
+      | undefined;
+    maybeBlur?.(e);
+    onBlur?.(e);
+  };
 
   return (
     <div className={`input-wrapper material-input-wrapper ${mergedError ? "has-error" : ""}`}>
@@ -139,6 +149,7 @@ const SelectInput: React.FC<SelectInputProps> = ({
         id={id}
         aria-label={label}
         {...selectProps}
+        onBlur={combinedOnBlur}
         disabled={disabled}
         className={`custom-input ${
           disabled ? "cursor-not-allowed bg-gray-100" : ""

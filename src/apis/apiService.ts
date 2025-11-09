@@ -10,11 +10,10 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use((config: any) => {
     const authToken = localStorage.getItem('auth_token');
     if (authToken) {
-        // Remove any surrounding quotes and trim whitespace
         const token = authToken.replace(/^"|"$/g, '').trim();
         config.headers = {
             ...config.headers,
-            Authorization: token,
+            Authorization: `Bearer ${token}`,
         };
     }
     return config;
@@ -37,7 +36,10 @@ apiClient.interceptors.response.use(
             // Navigate to the root page ("/")
             window.location.href = '/';
         }
-        return Promise.reject(new Error(errorMessage));
+        const enriched: any = new Error(errorMessage);
+        enriched.status = status;
+        enriched.response = error.response;
+        return Promise.reject(enriched);
     }
 );
 

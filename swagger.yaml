@@ -1,0 +1,745 @@
+openapi: 3.1.0
+info:
+  title: Shivalik Territory Backend
+  version: "1.0.0"
+  description: |
+    API surface for auth, territories, content, opportunities, projects, and governance services.
+servers:
+  - url: http://localhost:4000
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: Register a new user and assign roles.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Registered user with assigned roles.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+  /api/v1/auth/request-otp:
+    post:
+      summary: Generate/send an OTP for a registered mobile number.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpRequest"
+      responses:
+        "200":
+          description: Confirmation that OTP was issued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+  /api/v1/auth/verify-otp:
+    post:
+      summary: Verify OTP and issue JWT tokens.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyOtpRequest"
+      responses:
+        "200":
+          description: Access + refresh tokens and user profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OtpVerifyResponse"
+
+  /api/v1/users/me:
+    get:
+      summary: Returns the authenticated user's profile.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User info extracted from JWT.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: string
+                  mobile_number:
+                    type: string
+                  roles:
+                    type: array
+                    items:
+                      type: string
+
+  /api/v1/territories/map_data:
+    get:
+      summary: Fetch all territory polygons and summary metrics.
+      responses:
+        "200":
+          description: GeoJSON feature collection listing territories.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TerritoryFeatureCollection"
+
+  /api/v1/territories/{territory_id}/overview:
+    get:
+      summary: Return overview metrics for a territory.
+      parameters:
+        - name: territory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Territory overview.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TerritoryOverview"
+
+  /api/v1/territories/{territory_id}/professionals:
+    get:
+      summary: List professionals in a territory, optionally filtered by profession.
+      parameters:
+        - name: territory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: profession_type
+          in: query
+          schema:
+            type: string
+            enum: [cp_user, builder, architect]
+      responses:
+        "200":
+          description: Professionals inside the territory.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  professionals:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Professional"
+
+  /api/v1/territories/{territory_id}/projects:
+    get:
+      summary: List projects for a territory optionally filtered by status.
+      parameters:
+        - name: territory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Under Construction, Ready]
+      responses:
+        "200":
+          description: Projects inside the territory.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ProjectSummary"
+
+  /api/v1/territories/{territory_id}/pulses:
+    post:
+      summary: Publish a new Pulse inside a territory.
+      parameters:
+        - name: territory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePulse"
+      responses:
+        "201":
+          description: Created pulse object.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pulse"
+
+  /api/v1/pulses/{pulse_id}/comment:
+    post:
+      summary: Add a comment to an existing pulse.
+      parameters:
+        - name: pulse_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment_text:
+                  type: string
+      responses:
+        "201":
+          description: Created comment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+
+  /api/v1/territories/{territory_id}/follow:
+    post:
+      summary: Follow a territory.
+      parameters:
+        - name: territory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Follow confirmation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowResponse"
+    delete:
+      summary: Unfollow a territory.
+      parameters:
+        - name: territory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Unfollow confirmation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowResponse"
+
+  /api/v1/opportunities:
+    post:
+      summary: Create an opportunity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOpportunity"
+      responses:
+        "201":
+          description: Opportunity record.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Opportunity"
+
+  /api/v1/opportunities/{opportunity_id}/claim:
+    post:
+      summary: Claim an opportunity.
+      parameters:
+        - name: opportunity_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Claim status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClaimResponse"
+
+  /api/v1/projects:
+    post:
+      summary: Publish a project.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProject"
+      responses:
+        "201":
+          description: Project pending verification.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  verification_status:
+                    type: string
+                    enum: [pending, verified]
+
+  /api/v1/territories/{territory_id}/governance/moderation_queue:
+    get:
+      summary: List pending moderation items for a territory.
+      parameters:
+        - name: territory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Queue grouped by type.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pending_projects:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModerationItem"
+                  pending_professionals:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModerationItem"
+                  pending_opportunities:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModerationItem"
+
+  /api/v1/governance/verify/{entity_type}/{entity_id}:
+    patch:
+      summary: Approve an entity from the moderation queue.
+      parameters:
+        - name: entity_type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [project, professional, opportunity]
+        - name: entity_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [approve]
+      responses:
+        "200":
+          description: Verification result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_verified:
+                    type: boolean
+
+  /api/v1/admin/gis/territories:
+    post:
+      summary: Create a territory polygon.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminTerritory"
+      responses:
+        "201":
+          description: New territory record.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TerritoryDetail"
+
+  /api/v1/admin/gis/territories/{territory_id}:
+    patch:
+      summary: Update or merge territory metadata/geometry.
+      parameters:
+        - name: territory_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminTerritory"
+      responses:
+        "200":
+          description: Updated territory.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TerritoryDetail"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [full_name, mobile_number, user_type]
+      properties:
+        full_name:
+          type: string
+        mobile_number:
+          type: string
+        user_type:
+          type: string
+          enum: [registered_user, cp_user, builder]
+    RegisterResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+        mobile_number:
+          type: string
+        full_name:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    OtpRequest:
+      type: object
+      required: [mobile_number]
+      properties:
+        mobile_number:
+          type: string
+    VerifyOtpRequest:
+      type: object
+      required: [mobile_number, otp]
+      properties:
+        mobile_number:
+          type: string
+        otp:
+          type: string
+    OtpVerifyResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        user:
+          $ref: "#/components/schemas/RegisterResponse"
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    TerritoryFeatureCollection:
+      type: object
+      properties:
+        type:
+          type: string
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              geometry:
+                type: object
+              properties:
+                type:
+                  type: object
+    TerritoryOverview:
+      type: object
+      properties:
+        territory_id:
+          type: string
+        name:
+          type: string
+        pin_code:
+          type: string
+        coordinates:
+          type: object
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+        population:
+          type: number
+        area_sq_km:
+          type: number
+        snapshot:
+          type: object
+          properties:
+            active_projects:
+              type: number
+            registered_professionals:
+              type: number
+            hot_leads:
+              type: number
+            local_pulses:
+              type: number
+        statistics:
+          type: object
+    Professional:
+      type: object
+      properties:
+        user_id:
+          type: string
+        full_name:
+          type: string
+        profession:
+          type: string
+        is_verified:
+          type: boolean
+        contact_info:
+          type: object
+    ProjectSummary:
+      type: object
+      properties:
+        project_id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        developer_name:
+          type: string
+        price_range:
+          type: string
+        configuration:
+          type: string
+        brochure_url:
+          type: string
+        location:
+          type: object
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+    CreatePulse:
+      type: object
+      required: [content, media_type, media_upload_key]
+      properties:
+        content:
+          type: string
+        media_type:
+          type: string
+          enum: [image, video]
+        media_upload_key:
+          type: string
+    Pulse:
+      type: object
+      properties:
+        pulse_id:
+          type: string
+        territory_id:
+          type: string
+        content:
+          type: string
+        media_type:
+          type: string
+        media_upload_key:
+          type: string
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    Comment:
+      type: object
+      properties:
+        comment_id:
+          type: string
+        pulse_id:
+          type: string
+        comment_text:
+          type: string
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    FollowResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        territory_id:
+          type: string
+    CreateOpportunity:
+      type: object
+      required: [territory_id, type, title, description]
+      properties:
+        territory_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+    Opportunity:
+      type: object
+      properties:
+        opportunity_id:
+          type: string
+        territory_id:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        claimed_by:
+          type: string
+        claimed_at:
+          type: string
+          format: date-time
+    ClaimResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        claimed_by_user_id:
+          type: string
+    CreateProject:
+      type: object
+      required: [territory_id, name, status, price_range, configuration, brochure_url, location]
+      properties:
+        territory_id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [Under Construction, Ready]
+        price_range:
+          type: string
+        configuration:
+          type: string
+        brochure_url:
+          type: string
+        developer_name:
+          type: string
+        location:
+          type: object
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+    ModerationItem:
+      type: object
+      properties:
+        entity_id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        territory_id:
+          type: string
+        submitted_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+    AdminTerritory:
+      type: object
+      required: [name, city, zone, pin_code, geometry]
+      properties:
+        name:
+          type: string
+        city:
+          type: string
+        zone:
+          type: string
+        pin_code:
+          type: string
+        geometry:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [Polygon]
+            coordinates:
+              type: array
+              items:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: number
+    TerritoryDetail:
+      type: object
+      properties:
+        territory_id:
+          type: string
+        name:
+          type: string
+        city:
+          type: string
+        zone:
+          type: string
+        pin_code:
+          type: string
+        geometry:
+          type: object
+        active_projects:
+          type: number
+        registered_professionals:
+          type: number
+        hot_leads:
+          type: number

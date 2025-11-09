@@ -16,6 +16,7 @@ export interface SelectInputProps {
     options?: Option[];
     disabled?: boolean;
     onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLSelectElement>) => void;
     validate?: (value: string) => true | string;
     value?: string;
     mode?: 'create' | 'edit';

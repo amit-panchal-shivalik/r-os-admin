@@ -1,0 +1,276 @@
+import { useMemo, useState } from "react";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Button } from "@/components/ui/button";
+import {
+  Modal,
+  TextInput,
+  Select as MantineSelect,
+  NumberInput,
+  Textarea,
+  Group,
+  Paper,
+  Text,
+  Badge,
+} from "@mantine/core";
+import { useForm, Controller } from "react-hook-form";
+import { notifications } from "@mantine/notifications";
+import { Icon } from "@iconify/react";
+import type { Option } from "@/types/CustomInputTypes";
+
+type OpportunityFormValues = {
+  territoryId: string;
+  opportunityType:
+    | "Buyer Requirement"
+    | "Rental Requirement"
+    | "Land Parcel"
+    | "Joint Development"
+    | "";
+  title: string;
+  description: string;
+  budgetMin?: number | undefined;
+  budgetMax?: number | undefined;
+};
+
+const OPPORTUNITY_TYPES: Option[] = [
+  { value: "Buyer Requirement", label: "Buyer Requirement" },
+  { value: "Rental Requirement", label: "Rental Requirement" },
+  { value: "Land Parcel", label: "Land Parcel" },
+  { value: "Joint Development", label: "Joint Development" },
+];
+
+export const TerritoryOpportunityPage = () => {
+  const [open, setOpen] = useState<boolean>(false);
+  const [items, setItems] = useState<OpportunityFormValues[]>([]);
+
+  const territoryOptions: Option[] = useMemo(
+    () => [
+      { value: "t1", label: "North Territory" },
+      { value: "t2", label: "South Territory" },
+      { value: "t3", label: "East Territory" },
+      { value: "t4", label: "West Territory" },
+    ],
+    []
+  );
+
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    reset,
+    getValues,
+  } = useForm<OpportunityFormValues>({
+    defaultValues: {
+      territoryId: "",
+      opportunityType: "",
+      title: "",
+      description: "",
+      budgetMin: undefined,
+      budgetMax: undefined,
+    },
+    mode: "onChange", // show validation as user interacts
+    reValidateMode: "onBlur",
+  });
+
+  const openModal = () => {
+    reset({
+      territoryId: "",
+      opportunityType: "",
+      title: "",
+      description: "",
+      budgetMin: undefined,
+      budgetMax: undefined,
+    });
+    setOpen(true);
+  };
+
+  const closeModal = () => {
+    reset({
+      territoryId: "",
+      opportunityType: "",
+      title: "",
+      description: "",
+      budgetMin: undefined,
+      budgetMax: undefined,
+    });
+    setOpen(false);
+  };
+
+  const onSubmit = (data: OpportunityFormValues) => {
+    const { budgetMin, budgetMax } = data;
+    if (
+      typeof budgetMin === "number" &&
+      typeof budgetMax === "number" &&
+      budgetMax < budgetMin
+    ) {
+      notifications.show({
+        color: "red",
+        title: "Validation error",
+        message: "Max budget must be greater than or equal to min budget",
+      });
+      return;
+    }
+    setItems((prev) => [{ ...data }, ...prev]);
+    notifications.show({ title: "Opportunity added", message: data.title });
+    closeModal();
+  };
+
+  return (
+    <>
+      <div className="mt-5">
+        <div className="flex items-center justify-between">
+          <PageHeader
+            title="Opportunities"
+            description="Track buyer, rental and land opportunities"
+          />
+          <Button onClick={openModal}>
+            <Icon icon="fa:plus" />
+            Add New Opportunity
+          </Button>
+        </div>
+        <Paper p="md" mt="md">
+          {items.length === 0 ? (
+            <Text c="dimmed" size="sm">No opportunities yet. Add your first one.</Text>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {items.map((o, idx) => (
+                <div key={idx} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <Text fw={600}>{o.title}</Text>
+                    <Badge variant="light">{o.opportunityType}</Badge>
+                  </div>
+                  <Text size="sm" c="dimmed">{territoryOptions.find(t => t.value === o.territoryId)?.label || o.territoryId}</Text>
+                  <div className="mt-2 space-y-1">
+                    <Text size="sm">Budget: {o.budgetMin ?? '-'} – {o.budgetMax ?? '-'}</Text>
+                    {o.description && (
+                      <Text size="sm">{o.description}</Text>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Paper>
+      </div>
+
+      <Modal
+        opened={open}
+        onClose={closeModal}
+        title={<span className="font-semibold">Add Opportunity</span>}
+        centered
+      >
+        <div className="no-scrollbar max-h-[70vh] overflow-y-auto pr-1">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <Controller
+              control={control}
+              name="territoryId"
+              rules={{ required: "Territory is required" }}
+              render={({ field }) => (
+                <MantineSelect
+                  label="Territory"
+                  placeholder="Select territory"
+                  searchable
+                  data={territoryOptions}
+                  value={field.value}
+                  onChange={(val) => field.onChange(val || "")}
+                  withAsterisk
+                  error={errors.territoryId?.message}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="opportunityType"
+              rules={{ required: "Opportunity type is required" }}
+              render={({ field }) => (
+                <MantineSelect
+                  label="Opportunity Type"
+                  placeholder="Select type"
+                  data={OPPORTUNITY_TYPES}
+                  value={field.value}
+                  onChange={(val) => field.onChange(val || "")}
+                  withAsterisk
+                  error={errors.opportunityType?.message}
+                />
+              )}
+            />
+
+            <TextInput
+              label="Title"
+              placeholder="Corporate Client needs 10 rental flats"
+              withAsterisk
+              {...register("title", { required: "Title is required" })}
+              error={errors.title?.message}
+            />
+
+            <Textarea
+              label="Description"
+              placeholder="Add relevant details"
+              minRows={3}
+              withAsterisk
+              {...register("description", {
+                required: "Description is required",
+              })}
+              error={errors.description?.message}
+            />
+
+            <Group grow>
+              <Controller
+                control={control}
+                name="budgetMin"
+                render={({ field }) => (
+                  <NumberInput
+                    label="Budget Min (optional)"
+                    placeholder="0"
+                    min={0}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="budgetMax"
+                rules={{
+                  validate: (val) => {
+                    const min = getValues("budgetMin");
+                    if (typeof val === "number" && typeof min === "number") {
+                      return (
+                        val >= min ||
+                        "Max budget must be greater than or equal to min budget"
+                      );
+                    }
+                    return true;
+                  },
+                }}
+                render={({ field }) => (
+                  <NumberInput
+                    label="Budget Max (optional)"
+                    placeholder="0"
+                    min={0}
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.budgetMax?.message}
+                  />
+                )}
+              />
+            </Group>
+
+            <Group justify="flex-end" mt="md">
+              <Button type="button" variant="outline" onClick={closeModal}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!isValid}>
+                Add Opportunity
+              </Button>
+            </Group>
+          </form>
+        </div>
+      </Modal>
+    </>
+  );
+};
+
+export default TerritoryOpportunityPage;
+

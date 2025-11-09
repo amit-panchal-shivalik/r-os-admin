@@ -1,32 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { loginUser, resetLoginUser } from "@/store/slices/authSlice";
-import { setToLocalStorage } from "@/utils/localstorage";
-import { showMessage } from "@/utils/Constant";
-import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+import { authenticateUserApi } from "@/apis/auth";
+import { setToLocalStorage } from "@/utils/localstorage";
 
 export const LoginPage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const { status, error }: any = useSelector((state: any) => state.auth);
 
   const [phoneNumber, setPhoneNumber] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (status === "complete") {
-      showMessage("OTP sent successfully");
-      setSubmitting(false);
-      navigate("/otp");
-      dispatch(resetLoginUser());
-    } else if (status === "failed") {
-      showMessage(error, "error");
-      setSubmitting(false);
-    }
-  }, [status, navigate, dispatch, submitting]);
 
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
@@ -36,19 +19,25 @@ export const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    if (!phoneNumber) {
-      showMessage("Please enter your mobile number.", "error");
+
+    const phonePattern = /^[0-9]{10}$/;
+    if (!phonePattern.test(phoneNumber)) {
+      toast({ title: "Invalid number", description: "Enter a valid 10-digit mobile number.", variant: "destructive" });
+      setSubmitting(false);
       return;
     }
 
-    const phoneNumberPattern = /^[0-9]{10}$/;
-    if (!phoneNumberPattern.test(phoneNumber)) {
-      showMessage("Please enter a valid 10-digit mobile number.", "error");
-      return;
+    try {
+      await authenticateUserApi({ mobile_number: phoneNumber });
+      setToLocalStorage("user_mobile", phoneNumber);
+      toast({ title: "OTP sent", description: "Please check your phone for the OTP." });
+      navigate("/otp", { replace: true });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to request OTP. Please try again.";
+      toast({ title: "Login failed", description: message, variant: "destructive" });
+    } finally {
+      setSubmitting(false);
     }
-
-    await setToLocalStorage("user_mobile", phoneNumber);
-    dispatch(loginUser({ countryCode: "+91", phoneNumber }));
   };
 
   return (
@@ -85,22 +74,12 @@ export const LoginPage = () => {
               required
             />
           </div>
-          {error && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-              <p className="text-sm text-red-600 flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                {error}
-              </p>
-            </div>
-          )}
           <Button
             type="submit"
-            disabled={
-              status === "loading" || !(phoneNumber?.trim()?.length === 10)
-            }
+            disabled={submitting || !(phoneNumber?.trim()?.length === 10)}
             className="w-full h-12 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-sm font-medium flex items-center justify-center gap-2"
           >
-            {status === "loading" || submitting ? (
+            {submitting ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                 Sending OTP...
