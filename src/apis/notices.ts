@@ -5,7 +5,8 @@ export const createNotice = async (data: any) => {
     return response.data;
 };
 
-export const getNotices = async (params?: any) => {
+export const getNotices = async (buildingId?: string) => {
+    const params = buildingId ? { buildingId } : {};
     const queryString = new URLSearchParams(params).toString();
     const response = await apiClient.get(`/notices?${queryString}`);
     return response.data;

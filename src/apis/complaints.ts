@@ -21,6 +21,11 @@ export const updateComplaintStatus = async (id: string, data: any) => {
     return response.data;
 };
 
+export const addComplaintReply = async (id: string, data: any) => {
+    const response = await apiClient.post(`/complaints/${id}/reply`, data);
+    return response.data;
+};
+
 export const addComplaintFollowUp = async (id: string, data: any) => {
     const response = await apiClient.post(`/complaints/${id}/follow-up`, data);
     return response.data;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Card, Table, Button, Modal, Form, Input, Select, Space, message, Tag, Tabs, Upload, DatePicker, Timeline } from 'antd';
-import { PlusOutlined, UploadOutlined, CommentOutlined, EyeOutlined } from '@ant-design/icons';
-import { getComplaints, createComplaint, updateComplaintStatus, addComplaintFollowUp } from '../../apis/complaints';
+import { Card, Table, Button, Modal, Form, Input, Select, Space, message, Tag, Tabs, Upload, DatePicker, Timeline, Divider } from 'antd';
+import { PlusOutlined, UploadOutlined, CommentOutlined, EyeOutlined, SendOutlined } from '@ant-design/icons';
+import { getComplaints, createComplaint, updateComplaintStatus, addComplaintFollowUp, addComplaintReply, getComplaintById } from '../../apis/complaints';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
@@ -15,6 +15,8 @@ const ComplaintsPage = () => {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedComplaint, setSelectedComplaint] = useState<any>(null);
     const [activeTab, setActiveTab] = useState<string>('all');
+    const [replyText, setReplyText] = useState('');
+    const [sendingReply, setSendingReply] = useState(false);
     const [form] = Form.useForm();
     const [followUpForm] = Form.useForm();
 
@@ -62,7 +64,7 @@ const ComplaintsPage = () => {
             const data = {
                 ...values,
                 buildingId,
-                images: [] // Mock images
+                images: [] // Image upload to be implemented
             };
 
             await createComplaint(data);
@@ -107,9 +109,41 @@ const ComplaintsPage = () => {
         }
     };
 
-    const handleViewDetails = (complaint: any) => {
-        setSelectedComplaint(complaint);
-        setIsViewModalOpen(true);
+    const handleViewDetails = async (complaint: any) => {
+        try {
+            // Fetch fresh complaint details with replies
+            const response = await getComplaintById(complaint._id);
+            setSelectedComplaint(response.data);
+            setReplyText('');
+            setIsViewModalOpen(true);
+        } catch (error: any) {
+            message.error('Failed to load complaint details');
+        }
+    };
+
+    const handleSendReply = async () => {
+        if (!replyText.trim()) {
+            message.error('Please enter a message');
+            return;
+        }
+
+        setSendingReply(true);
+        try {
+            await addComplaintReply(selectedComplaint._id, {
+                message: replyText.trim(),
+                isAdminReply: true,
+            });
+            message.success('Reply sent successfully');
+            setReplyText('');
+            // Refresh complaint details
+            const response = await getComplaintById(selectedComplaint._id);
+            setSelectedComplaint(response.data);
+            fetchComplaints();
+        } catch (error: any) {
+            message.error('Failed to send reply');
+        } finally {
+            setSendingReply(false);
+        }
     };
 
     const getStatusColor = (status: string) => {
@@ -310,13 +344,13 @@ const ComplaintsPage = () => {
                         </Select>
                     </Form.Item>
                     <Form.Item
-                        label="Images (Mock)"
-                        tooltip="Image upload is mocked - not implemented yet"
+                        label="Images"
+                        tooltip="Image upload feature coming soon"
                     >
                         <Upload
                             listType="picture-card"
                             beforeUpload={() => {
-                                message.info('Image upload is mocked - not implemented yet');
+                                message.info('Image upload feature will be implemented soon');
                                 return false;
                             }}
                         >
@@ -370,58 +404,100 @@ const ComplaintsPage = () => {
                 </Form>
             </Modal>
 
-            {/* View Details Modal */}
+            {/* View Details Modal with Thread */}
             <Modal
                 title="Complaint Details"
                 open={isViewModalOpen}
                 onCancel={() => setIsViewModalOpen(false)}
-                footer={[
-                    <Button key="close" onClick={() => setIsViewModalOpen(false)}>
-                        Close
-                    </Button>
-                ]}
-                width={700}
+                footer={null}
+                width={800}
             >
                 {selectedComplaint && (
-                    <div className="space-y-4">
-                        <div>
-                            <h3 className="font-semibold">Complaint Number:</h3>
-                            <p>{selectedComplaint.complaintNumber}</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">Title:</h3>
-                            <p>{selectedComplaint.complaintTitle}</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">Description:</h3>
-                            <p>{selectedComplaint.complaintDescription}</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">Status:</h3>
-                            <Tag color={getStatusColor(selectedComplaint.complaintStatus)}>
-                                {selectedComplaint.complaintStatus?.replace('-', ' ').toUpperCase()}
-                            </Tag>
-                        </div>
-                        {selectedComplaint.followUps && selectedComplaint.followUps.length > 0 && (
+                    <div>
+                        {/* Header Info */}
+                        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                             <div>
-                                <h3 className="font-semibold mb-2">Follow-ups:</h3>
-                                <Timeline>
-                                    {selectedComplaint.followUps.map((followUp: any, index: number) => (
-                                        <Timeline.Item key={index}>
-                                            <p className="font-medium">{followUp.remarks}</p>
-                                            <p className="text-gray-500 text-sm">
-                                                {new Date(followUp.updatedAt).toLocaleString()}
-                                            </p>
-                                            {followUp.nextFollowUpDate && (
-                                                <p className="text-sm">
-                                                    Next Follow-up: {new Date(followUp.nextFollowUpDate).toLocaleDateString()}
-                                                </p>
-                                            )}
-                                        </Timeline.Item>
-                                    ))}
-                                </Timeline>
+                                <Space>
+                                    <Tag color={getStatusColor(selectedComplaint.complaintStatus)}>
+                                        {selectedComplaint.complaintStatus?.replace('-', ' ').toUpperCase()}
+                                    </Tag>
+                                    <Tag color={selectedComplaint.priority === 'high' ? 'red' : selectedComplaint.priority === 'medium' ? 'orange' : 'green'}>
+                                        {selectedComplaint.priority?.toUpperCase()}
+                                    </Tag>
+                                </Space>
                             </div>
-                        )}
+                            <div>
+                                <h3 style={{ marginBottom: 8, fontSize: '16px', fontWeight: 600 }}>{selectedComplaint.title}</h3>
+                                <p style={{ color: '#666', marginBottom: 4 }}>📋 {selectedComplaint.category}</p>
+                                <p style={{ fontSize: '12px', color: '#999' }}>
+                                    Submitted on {new Date(selectedComplaint.createdAt).toLocaleDateString()}
+                                </p>
+                            </div>
+                            <div>
+                                <strong>Description:</strong>
+                                <p style={{ marginTop: 8, color: '#555' }}>{selectedComplaint.description}</p>
+                            </div>
+
+                            <Divider style={{ margin: '12px 0' }} />
+
+                            {/* Thread/Replies */}
+                            <div>
+                                <h4 style={{ marginBottom: 12, fontWeight: 600 }}>
+                                    Conversation ({selectedComplaint.replies?.length || 0})
+                                </h4>
+                                <div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: 16 }}>
+                                    {selectedComplaint.replies && selectedComplaint.replies.length > 0 ? (
+                                        selectedComplaint.replies.map((reply: any, index: number) => (
+                                            <div
+                                                key={index}
+                                                style={{
+                                                    marginBottom: 12,
+                                                    padding: 12,
+                                                    backgroundColor: reply.isAdminReply ? '#e6f7ff' : '#f5f5f5',
+                                                    borderRadius: 8,
+                                                    borderLeft: reply.isAdminReply ? '3px solid #1890ff' : '3px solid #d9d9d9',
+                                                }}
+                                            >
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                                                    <strong style={{ color: reply.isAdminReply ? '#1890ff' : '#595959' }}>
+                                                        {reply.isAdminReply ? '👨‍💼 Admin' : '👤 ' + (reply.createdBy?.firstName || 'User')}
+                                                    </strong>
+                                                    <span style={{ fontSize: '12px', color: '#999' }}>
+                                                        {new Date(reply.createdAt).toLocaleString()}
+                                                    </span>
+                                                </div>
+                                                <p style={{ margin: 0, color: '#333' }}>{reply.message}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p style={{ textAlign: 'center', color: '#999', padding: 20 }}>No replies yet</p>
+                                    )}
+                                </div>
+
+                                {/* Reply Input */}
+                                {selectedComplaint.complaintStatus !== 'close' && selectedComplaint.complaintStatus !== 'dismiss' && (
+                                    <div>
+                                        <TextArea
+                                            rows={3}
+                                            value={replyText}
+                                            onChange={(e) => setReplyText(e.target.value)}
+                                            placeholder="Type your reply..."
+                                            maxLength={500}
+                                            style={{ marginBottom: 8 }}
+                                        />
+                                        <Button
+                                            type="primary"
+                                            icon={<SendOutlined />}
+                                            onClick={handleSendReply}
+                                            loading={sendingReply}
+                                            disabled={!replyText.trim()}
+                                        >
+                                            Send Reply
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </Space>
                     </div>
                 )}
             </Modal>

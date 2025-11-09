@@ -16,7 +16,9 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  BuildOutlined
+  BuildOutlined,
+  UserAddOutlined,
+  ToolOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -36,13 +38,19 @@ export const DashboardLayoutAntd = () => {
   const isSuperAdmin = userRoles.includes('SuperAdmin');
   const isBuildingAdmin = userRoles.includes('BuildingAdmin');
 
-  // Menu items for different roles
+  // Menu items for roles
   const superAdminMenuItems = [
     {
       key: '/buildings',
       icon: <BuildOutlined />,
       label: 'Buildings',
       onClick: () => navigate('/buildings')
+    },
+    {
+      key: '/dev/tools',
+      icon: <ToolOutlined />,
+      label: 'Developer Tools',
+      onClick: () => navigate('/dev/tools')
     }
   ];
 
@@ -52,6 +60,18 @@ export const DashboardLayoutAntd = () => {
       icon: <DashboardOutlined />,
       label: 'Dashboard',
       onClick: () => navigate('/dashboard')
+    },
+    {
+      key: '/members/pending',
+      icon: <UserAddOutlined />,
+      label: 'Pending Approvals',
+      onClick: () => navigate('/members/pending')
+    },
+    {
+      key: '/members/allocation',
+      icon: <UserAddOutlined />,
+      label: 'Members & Units',
+      onClick: () => navigate('/members/allocation')
     },
     {
       key: '/building-settings',
@@ -88,28 +108,22 @@ export const DashboardLayoutAntd = () => {
       onClick: () => navigate('/amenities')
     },
     {
+      key: '/amenity-bookings',
+      icon: <CalendarOutlined />,
+      label: 'Amenity Bookings',
+      onClick: () => navigate('/amenity-bookings')
+    },
+    {
       key: '/committee-members',
       icon: <TeamOutlined />,
       label: 'Committee Members',
       onClick: () => navigate('/committee-members')
     },
     {
-      key: '/employees',
-      icon: <UserOutlined />,
-      label: 'Employees',
-      onClick: () => navigate('/employees')
-    },
-    {
       key: '/complaints',
       icon: <AlertOutlined />,
       label: 'Complaints',
       onClick: () => navigate('/complaints')
-    },
-    {
-      key: '/parking',
-      icon: <CarOutlined />,
-      label: 'Parking',
-      onClick: () => navigate('/parking')
     },
     {
       key: '/events',
@@ -160,28 +174,47 @@ export const DashboardLayoutAntd = () => {
           left: 0,
           top: 0,
           bottom: 0,
+          backgroundColor: '#1f1f1f',
         }}
       >
-        <div className="flex items-center justify-center h-16 bg-blue-600 text-white font-bold text-xl">
+        <div
+          style={{
+            height: 64,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 700,
+            fontSize: 18,
+            color: '#f0f0f0',
+            backgroundColor: '#141414',
+          }}
+        >
           {collapsed ? 'SM' : 'Society Manager'}
         </div>
+
         <Menu
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
           defaultOpenKeys={['/building-settings']}
           items={menuItems}
+          style={{
+            backgroundColor: '#1f1f1f',
+            color: '#d9d9d9',
+            fontSize: 14,
+          }}
         />
       </Sider>
-      <Layout style={{ marginLeft: collapsed ? 80 : 250 }}>
+
+      <Layout style={{ marginLeft: collapsed ? 80 : 250, transition: 'all 0.3s ease' }}>
         <Header
           style={{
             padding: '0 24px',
-            background: colorBgContainer,
+            background: '#f5f5f5',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.08)'
+            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
           }}
         >
           <Button
@@ -189,21 +222,36 @@ export const DashboardLayoutAntd = () => {
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{
-              fontSize: '16px',
-              width: 64,
-              height: 64,
+              fontSize: 16,
+              width: 48,
+              height: 48,
+              color: '#333',
             }}
           />
+
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <span className="text-gray-700">{userInfo.firstName || 'User'}</span>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ color: '#333', fontWeight: 500 }}>
+                {userInfo.firstName || 'User'}
+              </span>
               <Avatar
-                style={{ backgroundColor: '#1890ff' }}
+                style={{
+                  backgroundColor: '#555',
+                  color: '#fff',
+                }}
                 icon={<UserOutlined />}
               />
             </div>
           </Dropdown>
         </Header>
+
         <Content
           style={{
             margin: '24px 16px',

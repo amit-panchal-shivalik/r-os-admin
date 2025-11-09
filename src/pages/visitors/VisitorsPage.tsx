@@ -68,7 +68,7 @@ const VisitorsPage = () => {
         setEditingVisitor(record);
         form.setFieldsValue({
             visitorName: record.visitorName,
-            visitorPhoneNumber: record.visitorPhoneNumber,
+            phoneNumber: record.phoneNumber,
             purpose: record.purpose,
             visitorType: record.visitorType,
             vehicleNumber: record.vehicleNumber,
@@ -151,8 +151,8 @@ const VisitorsPage = () => {
         },
         {
             title: 'Phone',
-            dataIndex: 'visitorPhoneNumber',
-            key: 'visitorPhoneNumber',
+            dataIndex: 'phoneNumber',
+            key: 'phoneNumber',
         },
         {
             title: 'Unit',
@@ -229,48 +229,7 @@ const VisitorsPage = () => {
                 <p className="text-gray-500">Track and manage building visitors</p>
             </div>
 
-            {stats && (
-                <Row gutter={[16, 16]} className="mb-6">
-                    <Col xs={24} sm={12} md={6}>
-                        <Card>
-                            <Statistic
-                                title="Today's Visitors"
-                                value={stats.todayCount}
-                                prefix={<UserOutlined />}
-                                valueStyle={{ color: '#1890ff' }}
-                            />
-                        </Card>
-                    </Col>
-                    <Col xs={24} sm={12} md={6}>
-                        <Card className="bg-green-50 border-green-200">
-                            <Statistic
-                                title="Currently Inside"
-                                value={stats.currentlyInside}
-                                prefix={<ClockCircleOutlined />}
-                                valueStyle={{ color: '#52c41a' }}
-                            />
-                        </Card>
-                    </Col>
-                    <Col xs={24} sm={12} md={6}>
-                        <Card>
-                            <Statistic
-                                title="This Week"
-                                value={stats.weekCount}
-                                valueStyle={{ color: '#722ed1' }}
-                            />
-                        </Card>
-                    </Col>
-                    <Col xs={24} sm={12} md={6}>
-                        <Card>
-                            <Statistic
-                                title="This Month"
-                                value={stats.monthCount}
-                                valueStyle={{ color: '#fa8c16' }}
-                            />
-                        </Card>
-                    </Col>
-                </Row>
-            )}
+
 
             <Card>
                 <div className="flex justify-between items-center mb-4">
@@ -317,7 +276,7 @@ const VisitorsPage = () => {
                         <Input placeholder="Enter visitor name" />
                     </Form.Item>
                     <Form.Item
-                        name="visitorPhoneNumber"
+                        name="phoneNumber"
                         label="Phone Number"
                         rules={[{ required: true, message: 'Please enter phone number' }]}
                     >

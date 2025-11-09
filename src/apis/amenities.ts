@@ -52,3 +52,15 @@ export const deleteAmenitySlot = async (id: string) => {
     const response = await apiClient.delete(`/amenities/slots/${id}`);
     return response.data;
 };
+
+// Amenity Bookings
+export const getAllBookings = async (params?: any) => {
+    const queryString = params ? `?${new URLSearchParams(params).toString()}` : '';
+    const response = await apiClient.get(`/amenities/bookings/all${queryString}`);
+    return response.data;
+};
+
+export const updateBookingStatus = async (id: string, data: any) => {
+    const response = await apiClient.put(`/amenities/bookings/${id}/status`, data);
+    return response.data;
+};

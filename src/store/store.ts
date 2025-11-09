@@ -15,6 +15,7 @@ import eventSlice from './slices/eventSlice';
 import visitorSlice from './slices/visitorSlice';
 import maintenanceSlice from './slices/maintenanceSlice';
 import parkingSlice from './slices/parkingSlice';
+import memberSlice from './slices/memberSlice';
 import rootSaga from './sagas/rootSaga';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -36,6 +37,7 @@ export const store = configureStore({
     visitor: visitorSlice,
     maintenance: maintenanceSlice,
     parking: parkingSlice,
+    member: memberSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Card, Table, Button, Modal, Form, Input, Select, Space, message, Popconfirm, Tag, DatePicker, Row, Col } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, PhoneOutlined, MailOutlined } from '@ant-design/icons';
+import { Card, Table, Button, Modal, Form, Input, Select, Space, message, Popconfirm, Tag, DatePicker, Row, Col, Tooltip, Alert } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, PhoneOutlined, MailOutlined, CheckCircleOutlined, UserOutlined } from '@ant-design/icons';
 import { getCommitteeMembers, createCommitteeMember, updateCommitteeMember, deleteCommitteeMember } from '../../apis/committeeMembers';
 import dayjs from 'dayjs';
 
@@ -78,8 +78,8 @@ const CommitteeMembersPage = () => {
                 await updateCommitteeMember(editingMember._id, data);
                 message.success('Committee member updated successfully');
             } else {
-                await createCommitteeMember(data);
-                message.success('Committee member created successfully');
+                const response = await createCommitteeMember(data);
+                message.success('Committee member and app login created successfully! They can now login using their phone number.');
             }
 
             setIsModalOpen(false);
@@ -97,6 +97,8 @@ const CommitteeMembersPage = () => {
                 return 'blue';
             case 'Treasurer':
                 return 'green';
+            case 'SecurityGuard':
+                return 'purple';
             case 'Member':
                 return 'default';
             default:
@@ -141,6 +143,17 @@ const CommitteeMembersPage = () => {
             dataIndex: 'endDate',
             key: 'endDate',
             render: (date: string) => date ? new Date(date).toLocaleDateString() : '-'
+        },
+        {
+            title: 'App Access',
+            key: 'appAccess',
+            render: (_: any, record: any) => (
+                <Tooltip title="This member can login to the mobile app using their phone number">
+                    <Tag color="green" icon={<CheckCircleOutlined />}>
+                        <UserOutlined /> Enabled
+                    </Tag>
+                </Tooltip>
+            )
         },
         {
             title: 'Status',
@@ -195,6 +208,15 @@ const CommitteeMembersPage = () => {
                 </Button>
             </div>
 
+            <Alert
+                message="Committee Member App Access"
+                description="When you add a committee member, a user account is automatically created for them. They can login to the mobile app using their phone number to access building information and features."
+                type="info"
+                showIcon
+                icon={<UserOutlined />}
+                className="mb-4"
+            />
+
             <Card>
                 <Table
                     loading={loading}
@@ -241,7 +263,7 @@ const CommitteeMembersPage = () => {
                                 label="Country Code"
                                 initialValue="+91"
                             >
-                                <Input placeholder="+91" />
+                                <Input placeholder="+91" disabled />
                             </Form.Item>
                         </Col>
                         <Col span={16}>
@@ -254,6 +276,14 @@ const CommitteeMembersPage = () => {
                             </Form.Item>
                         </Col>
                     </Row>
+                    <Form.Item
+                        name="countryCodeName"
+                        label="Country Code Name"
+                        initialValue="IN"
+                        hidden
+                    >
+                        <Input />
+                    </Form.Item>
                     <Form.Item
                         name="email"
                         label="Email"
@@ -273,6 +303,7 @@ const CommitteeMembersPage = () => {
                             <Select.Option value="Chairman">Chairman</Select.Option>
                             <Select.Option value="Secretary">Secretary</Select.Option>
                             <Select.Option value="Treasurer">Treasurer</Select.Option>
+                            <Select.Option value="SecurityGuard">Security Guard</Select.Option>
                             <Select.Option value="Member">Member</Select.Option>
                         </Select>
                     </Form.Item>

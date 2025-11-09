@@ -6,6 +6,7 @@ import blockSaga from './blockSaga';
 import floorSaga from './floorSaga';
 import unitSaga from './unitSaga';
 import noticeSaga from './noticeSaga';
+import memberSaga from './memberSaga';
 
 export default function* rootSaga() {
   yield all([
@@ -16,5 +17,6 @@ export default function* rootSaga() {
     floorSaga(),
     unitSaga(),
     noticeSaga(),
+    memberSaga(),
   ]);
 }

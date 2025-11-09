@@ -115,13 +115,15 @@ const UnitsPage = () => {
     const handleSubmit = async () => {
         try {
             const values = await form.validateFields();
-            const { blockId, ...unitData } = values;
 
             if (editingUnit) {
+                // For update, we don't need blockId in the payload (it's immutable)
+                const { blockId, ...unitData } = values;
                 await updateUnit(editingUnit._id, unitData);
                 message.success('Unit updated successfully');
             } else {
-                await createUnit(unitData);
+                // For create, we need ALL fields including blockId
+                await createUnit(values);
                 message.success('Unit created successfully');
             }
 

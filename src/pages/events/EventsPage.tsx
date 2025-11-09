@@ -100,7 +100,7 @@ const EventsPage = () => {
                 eventDate: values.eventDate ? values.eventDate.format('YYYY-MM-DD') : null,
                 startTime: values.startTime ? values.startTime.format('HH:mm') : null,
                 endTime: values.endTime ? values.endTime.format('HH:mm') : null,
-                banner: '' // Mock banner
+                banner: '' // Image upload to be implemented
             };
 
             if (editingEvent) {
@@ -366,13 +366,13 @@ const EventsPage = () => {
                         </Select>
                     </Form.Item>
                     <Form.Item
-                        label="Event Banner (Mock)"
-                        tooltip="Image upload is mocked - not implemented yet"
+                        label="Event Banner"
+                        tooltip="Image upload feature coming soon"
                     >
                         <Upload
                             listType="picture-card"
                             beforeUpload={() => {
-                                message.info('Image upload is mocked - not implemented yet');
+                                message.info('Image upload feature will be implemented soon');
                                 return false;
                             }}
                         >

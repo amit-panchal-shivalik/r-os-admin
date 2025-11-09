@@ -44,15 +44,16 @@ const AmenitiesPage = () => {
     const handleEdit = (record: any) => {
         setEditingAmenity(record);
         form.setFieldsValue({
-            amenityName: record.amenityName,
-            amenityType: record.amenityType,
+            name: record.name,
             description: record.description,
-            location: record.location,
+            imageUrl: record.images?.[0] || '',
             capacity: record.capacity,
+            amenityType: record.amenityType,
+            bookingCharge: record.bookingCharge,
             bookingType: record.bookingType,
-            pricePerSlot: record.pricePerSlot,
             advanceBookingDays: record.advanceBookingDays,
-            status: record.status
+            requiresApproval: record.requiresApproval,
+            amenityStatus: record.amenityStatus
         });
         setIsModalOpen(true);
     };
@@ -71,9 +72,19 @@ const AmenitiesPage = () => {
         try {
             const values = await form.validateFields();
             const data = {
-                ...values,
+                name: values.name,
+                description: values.description,
+                images: values.imageUrl ? [values.imageUrl] : [],
+                capacity: values.capacity,
+                amenityType: values.amenityType,
+                bookingCharge: values.bookingCharge || 0,
+                bookingType: values.bookingType,
+                paymentGateway: 'none',
+                advanceBookingDays: values.advanceBookingDays || 7,
+                requiresApproval: values.requiresApproval !== undefined ? values.requiresApproval : false,
                 buildingId,
-                images: [] // Mock images
+                amenityStatus: values.amenityStatus || 'available',
+                status: 'active'
             };
 
             if (editingAmenity) {
@@ -97,50 +108,37 @@ const AmenitiesPage = () => {
 
     const columns = [
         {
-            title: 'Amenity Name',
-            dataIndex: 'amenityName',
-            key: 'amenityName',
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name'
         },
         {
             title: 'Type',
             dataIndex: 'amenityType',
             key: 'amenityType',
             render: (type: string) => (
-                <Tag color="blue">{type?.toUpperCase()}</Tag>
-            )
-        },
-        {
-            title: 'Location',
-            dataIndex: 'location',
-            key: 'location',
-        },
-        {
-            title: 'Capacity',
-            dataIndex: 'capacity',
-            key: 'capacity',
-        },
-        {
-            title: 'Booking Type',
-            dataIndex: 'bookingType',
-            key: 'bookingType',
-            render: (type: string) => (
-                <Tag color={type === 'slot' ? 'green' : 'orange'}>
-                    {type?.toUpperCase()}
+                <Tag color={type === 'paid' ? 'green' : 'blue'}>
+                    {type === 'paid' ? 'PAID' : 'FREE'}
                 </Tag>
             )
         },
         {
-            title: 'Price/Slot',
-            dataIndex: 'pricePerSlot',
-            key: 'pricePerSlot',
-            render: (price: number) => `₹${price || 0}`
+            title: 'Charge',
+            dataIndex: 'bookingCharge',
+            key: 'bookingCharge',
+            render: (charge: number) => `₹${charge || 0}`
+        },
+        {
+            title: 'Capacity',
+            dataIndex: 'capacity',
+            key: 'capacity'
         },
         {
             title: 'Status',
-            dataIndex: 'status',
-            key: 'status',
+            dataIndex: 'amenityStatus',
+            key: 'amenityStatus',
             render: (status: string) => (
-                <Tag color={status === 'active' ? 'green' : 'red'}>
+                <Tag color={status === 'available' ? 'green' : status === 'maintenance' ? 'orange' : 'red'}>
                     {status?.toUpperCase()}
                 </Tag>
             )
@@ -228,43 +226,32 @@ const AmenitiesPage = () => {
             >
                 <Form form={form} layout="vertical" className="mt-4">
                     <Form.Item
-                        name="amenityName"
+                        name="name"
                         label="Amenity Name"
                         rules={[{ required: true, message: 'Please enter amenity name' }]}
                     >
-                        <Input placeholder="Enter amenity name (e.g., Swimming Pool)" />
+                        <Input placeholder="E.g., Swimming Pool, Gym, Club House" />
                     </Form.Item>
-                    <Form.Item
-                        name="amenityType"
-                        label="Amenity Type"
-                        rules={[{ required: true, message: 'Please select amenity type' }]}
-                    >
-                        <Select placeholder="Select amenity type">
-                            <Select.Option value="gym">Gym</Select.Option>
-                            <Select.Option value="pool">Swimming Pool</Select.Option>
-                            <Select.Option value="clubhouse">Clubhouse</Select.Option>
-                            <Select.Option value="hall">Community Hall</Select.Option>
-                            <Select.Option value="playground">Playground</Select.Option>
-                            <Select.Option value="park">Park</Select.Option>
-                            <Select.Option value="other">Other</Select.Option>
-                        </Select>
-                    </Form.Item>
+
                     <Form.Item
                         name="description"
                         label="Description"
+                        rules={[{ required: true, message: 'Please enter description' }]}
                     >
                         <TextArea
                             rows={3}
-                            placeholder="Enter description"
+                            placeholder="Enter amenity description"
                         />
                     </Form.Item>
+
                     <Form.Item
-                        name="location"
-                        label="Location"
-                        rules={[{ required: true, message: 'Please enter location' }]}
+                        name="imageUrl"
+                        label="Image URL"
+                        tooltip="Paste an image URL from the internet"
                     >
-                        <Input placeholder="Enter location (e.g., Ground Floor, Block A)" />
+                        <Input placeholder="https://example.com/image.jpg" />
                     </Form.Item>
+
                     <Form.Item
                         name="capacity"
                         label="Capacity"
@@ -272,31 +259,48 @@ const AmenitiesPage = () => {
                     >
                         <InputNumber
                             min={1}
-                            placeholder="Enter capacity"
+                            placeholder="Maximum number of people"
                             style={{ width: '100%' }}
                         />
                     </Form.Item>
+
                     <Form.Item
-                        name="bookingType"
-                        label="Booking Type"
-                        rules={[{ required: true, message: 'Please select booking type' }]}
+                        name="amenityType"
+                        label="Payment Type"
+                        rules={[{ required: true, message: 'Please select payment type' }]}
+                        initialValue="free"
                     >
-                        <Select placeholder="Select booking type">
-                            <Select.Option value="slot">Slot-based Booking</Select.Option>
-                            <Select.Option value="full_day">Full Day Booking</Select.Option>
+                        <Select placeholder="Select payment type">
+                            <Select.Option value="free">Free</Select.Option>
+                            <Select.Option value="paid">Paid</Select.Option>
                         </Select>
                     </Form.Item>
+
                     <Form.Item
-                        name="pricePerSlot"
-                        label="Price Per Slot (₹)"
+                        name="bookingCharge"
+                        label="Booking Charge (₹)"
                         initialValue={0}
                     >
                         <InputNumber
                             min={0}
-                            placeholder="Enter price"
+                            placeholder="Enter booking charge"
                             style={{ width: '100%' }}
+                            prefix="₹"
                         />
                     </Form.Item>
+
+                    <Form.Item
+                        name="bookingType"
+                        label="Booking Type"
+                        rules={[{ required: true, message: 'Please select booking type' }]}
+                        initialValue="one-time"
+                    >
+                        <Select placeholder="Select booking type">
+                            <Select.Option value="one-time">One-time Booking</Select.Option>
+                            <Select.Option value="recurring">Recurring Booking</Select.Option>
+                        </Select>
+                    </Form.Item>
+
                     <Form.Item
                         name="advanceBookingDays"
                         label="Advance Booking Days"
@@ -305,35 +309,31 @@ const AmenitiesPage = () => {
                         <InputNumber
                             min={1}
                             max={90}
-                            placeholder="Enter advance booking days"
+                            placeholder="How many days in advance can residents book?"
                             style={{ width: '100%' }}
                         />
                     </Form.Item>
+
                     <Form.Item
-                        label="Images (Mock)"
-                        tooltip="Image upload is mocked - not implemented yet"
+                        name="requiresApproval"
+                        label="Requires Admin Approval"
+                        initialValue={false}
                     >
-                        <Upload
-                            listType="picture-card"
-                            beforeUpload={() => {
-                                message.info('Image upload is mocked - not implemented yet');
-                                return false;
-                            }}
-                        >
-                            <div>
-                                <UploadOutlined />
-                                <div style={{ marginTop: 8 }}>Upload</div>
-                            </div>
-                        </Upload>
+                        <Select placeholder="Select approval requirement">
+                            <Select.Option value={true}>Yes - Requires Approval</Select.Option>
+                            <Select.Option value={false}>No - Auto Approve</Select.Option>
+                        </Select>
                     </Form.Item>
+
                     <Form.Item
-                        name="status"
-                        label="Status"
-                        initialValue="active"
+                        name="amenityStatus"
+                        label="Amenity Status"
+                        initialValue="available"
                     >
                         <Select placeholder="Select status">
-                            <Select.Option value="active">Active</Select.Option>
-                            <Select.Option value="inactive">Inactive</Select.Option>
+                            <Select.Option value="available">Available</Select.Option>
+                            <Select.Option value="maintenance">Under Maintenance</Select.Option>
+                            <Select.Option value="unavailable">Unavailable</Select.Option>
                         </Select>
                     </Form.Item>
                 </Form>
