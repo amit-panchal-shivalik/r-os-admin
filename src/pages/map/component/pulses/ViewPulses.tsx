@@ -4,7 +4,7 @@ import { getNewsByTerritory } from '@/apis/apiService';
 
 type Props = {}
 
-const ViewPulses = ({newsData}: Props) => {
+const ViewPulses = ({newsData}) => {
 
   const [selectedPulses, setSelectedPulses] = React.useState(null);
  

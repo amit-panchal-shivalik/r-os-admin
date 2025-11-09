@@ -9,7 +9,7 @@ const InfoItem = ({ label, value }: { label: string; value: React.ReactNode }) =
   </div>
 );
 
-export default function TPTab({ territory, map }: { territory: any; map: any }) {
+export default function TPTab({ territory }) {
   const [selectedTP, setSelectedTP] = useState<any>(null);
   const tpData = territory.tp;
 
@@ -25,13 +25,7 @@ export default function TPTab({ territory, map }: { territory: any; map: any }) 
     setSelectedTP(tp);
 
     // Fit the map to the bounding box of the selected TP
-    if (tp.boundingBox && map) {
-      const bounds = tp.boundingBox.coordinates[0].reduce(
-        (acc: any, coord: any) => acc.extend(coord),
-        new maplibregl.LngLatBounds()
-      );
-      map.fitBounds(bounds, { padding: 40, duration: 500 });
-    }
+  
   };
 
   return (

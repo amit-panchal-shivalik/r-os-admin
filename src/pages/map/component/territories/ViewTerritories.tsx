@@ -26,7 +26,7 @@ const tabs = [
 
 ]
 
-export function ViewTerritories({ territory, project }: any) {
+export function ViewTerritories({ territory, project }) {
   if(!territory){
     return <div className="flex items-center justify-center h-32 rounded-md border border-dashed">
       <p className="text-muted-foreground">No Territory selected.</p>
