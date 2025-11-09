@@ -386,7 +386,7 @@ export const CommitteeMembersPage = () => {
 
   return (
     <div className="min-h-screen bg-[#f9fafb]">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Page Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>

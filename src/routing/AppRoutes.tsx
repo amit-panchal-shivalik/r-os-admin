@@ -18,6 +18,7 @@ import SocietyManagement from '../pages/society-management/SocietyManagement';
 import { MembersPage } from '../pages/users/MembersPage';
 import {CommitteeMembersPage} from '../pages/users/CommitteeMembersPage';
 import {EmployeesPage} from '../pages/users/EmployeesPage';
+import { UserRequestPage } from '../pages/users/UserRequestPage';
 import { SelectTypePage } from '../pages/user-registration/SelectTypePage';
 import { SelectSocietyPage } from '../pages/user-registration/SelectSocietyPage';
 import { SelectBlockPage } from '../pages/user-registration/SelectBlockPage';
@@ -202,6 +203,7 @@ export const AppRoutes = () => {
         <Route path="users/members" element={<MembersPage />} />
         <Route path="users/society-employee" element={<EmployeesPage />} />
         <Route path="users/committee-member" element={<CommitteeMembersPage />} />
+        <Route path="users/user-request" element={<UserRequestPage />} />
         
         {/* Maintenance & Bills Routes */}
         <Route path="maintenance-bill/add-bill" element={<AddBillPage />} />
