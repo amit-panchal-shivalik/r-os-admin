@@ -138,9 +138,9 @@ const BaseMap = () => {
 
     if (territoryData.projects && territoryData.projects.length > 0) {
       plotProjectPolygons(territoryData.projects);
-      plotProjectMarkers(territoryData.projects);
+      // plotProjectMarkers(territoryData.projects);
     }
-
+    plotProjectMarkers
     setSearchResults([]);
     dispatch(setSearchQuery(''));
 
@@ -218,6 +218,57 @@ const BaseMap = () => {
         type: "FeatureCollection",
         features
       });
+    }
+
+    // Add hover popup handlers only once
+    if (!(m as any)._projectsHoverAdded) {
+      const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: "projects-hover-popup"
+      });
+
+      const onMove = (e: any) => {
+        const feat = e.features?.[0];
+        if (!feat || !feat.properties) {
+          popup.remove();
+          return;
+        }
+
+        // properties can be stringified; ensure we can read typical fields
+        let props: any = feat.properties;
+        try {
+          // attempt parse if properties are strings containing JSON
+          Object.keys(props).forEach((k) => {
+            const v = props[k];
+            if (typeof v === "string" && v.startsWith("{") && v.endsWith("}")) {
+              try { props[k] = JSON.parse(v); } catch { /* ignore */ }
+            }
+          });
+        } catch { }
+
+        const title = props.name || props.title || props.projectName || "Project";
+        const desc = props.description || props.city || props.type || "";
+
+        const html = `<div style="min-width:150px">
+                        <div style="font-weight:600;margin-bottom:4px">${title}</div>
+                        <div style="font-size:12px;color:#444">${desc}</div>
+                      </div>`;
+
+        popup.setLngLat(e.lngLat).setHTML(html).addTo(m);
+      };
+
+      const onLeave = () => {
+        popup.remove();
+      };
+
+      m.on("mousemove", "projects-fill", onMove);
+      m.on("mouseleave", "projects-fill", onLeave);
+
+      // store references to avoid duplicate binding on subsequent calls
+      (m as any)._projectsHoverAdded = true;
+      (m as any)._projectsHoverPopup = popup;
+      (m as any)._projectsHoverHandlers = { onMove, onLeave };
     }
   };
 

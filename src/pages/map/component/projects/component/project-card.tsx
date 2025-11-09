@@ -9,6 +9,7 @@ interface ProjectDetailsProps {
   project: {
     _id: string
     mid: string
+    builder: string
     name: string
     type: string
     status: string
@@ -23,7 +24,7 @@ interface ProjectDetailsProps {
   setSelectedProject: (project: null) => void
 }
 
-export default function ProjectCard({ project,setSelectedProject }: ProjectDetailsProps) {
+export default function ProjectCard({ project, setSelectedProject }: ProjectDetailsProps) {
   const statusColor = {
     New: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
     Active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
@@ -35,11 +36,11 @@ export default function ProjectCard({ project,setSelectedProject }: ProjectDetai
   return (
     <div className="space-y-6 p-8">
       {/* Hero Image */}
-      
+
       <div className="aspect-video overflow-hidden rounded-lg bg-muted">
         <div>
-        <IconArrowLeftToArc onClick={()=>setSelectedProject(null)}/>
-      </div>
+          <IconArrowLeftToArc onClick={() => setSelectedProject(null)} />
+        </div>
         <img
           src={project.image || "/placeholder.svg?height=400&width=800&query=project-detail"}
           alt={project.name}
@@ -54,7 +55,7 @@ export default function ProjectCard({ project,setSelectedProject }: ProjectDetai
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="text-xl font-bold text-foreground">{project.name}</h1>
-            <p className="mt-2 text-base text-muted-foreground">Project ID: {project.mid}</p>
+            <p className="mt-2 text-base text-muted-foreground">Builder: {project.builder}</p>
           </div>
           <Badge className={` px-4 py-2 ${currentStatusColor}`}>{project.status}</Badge>
         </div>
