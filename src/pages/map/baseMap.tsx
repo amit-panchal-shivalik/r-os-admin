@@ -37,16 +37,16 @@ const BaseMap = () => {
   const [loading, setLoading] = useState(false);
   const [territory, setTerritory] = useState<Territory | null>(null);
   const [allTerritories, setAllTerritories] = useState<Territory[]>([]);
-const navigation = useNavigate();
+  const navigation = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { style: mapStyle, isLayerMenuOpen: showLayerMenu, searchQuery } = useSelector((s: RootState) => s.map);
   const [showPulses, setShowPulses] = useState(false);
   const [showTerritories, setShowTerritories] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedProject, setSelectedProject] = useState<any | null>(null);
-
- const { user, logout }: any = useAuth();
- const navigate = useNavigate();
+  const [marker, setMarker] = useState<maplibregl.Marker | null>(null);
+  const { user, logout }: any = useAuth();
+  const navigate = useNavigate();
 
   let userInfo;
   // Retrieve user roles from localStorage, fallback to user?.role
@@ -64,45 +64,86 @@ const navigation = useNavigate();
     terrain: { name: 'Terrain', url: 'https://api.maptiler.com/maps/outdoor/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL' }
   };
 
-const handleDrawerState = (open: boolean) => {
-  setDrawerOpen(open);
-
-  if (!open) {
-    if (map.current) {
-      clearPolygon();
-      clearProjectPolygons();
+  const handleLocateUser = async () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
     }
-    setSelectedProject(null);
-    setTerritory(null);
-  }
-};
+
+    setLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        // Add or update the marker at the user's location
+        if (marker) {
+          marker.setLngLat([longitude, latitude]);
+        } else {
+          const el = document.createElement('div');
+          el.className = 'marker-blue';
+          const newMarker = new maplibregl.Marker({ element: el, className: 'marker-blue' })
+            .setLngLat([longitude, latitude])
+            .addTo(map.current!);
+          setMarker(newMarker);
+        }
+
+        // Fetch the territory for the user's location
+        try {
+          const territory = await getTerritoryByLatLng(longitude, latitude);
+          handleTerritorySelect(territory);
+        } catch (error) {
+          console.error('Error fetching territory:', error);
+          alert('Failed to fetch territory for your location.');
+        } finally {
+          setLoading(false);
+        }
+      },
+      (error) => {
+        console.error('Error getting location:', error);
+        setLoading(false);
+      }
+    );
+  };
+
+  const handleDrawerState = (open: boolean) => {
+    setDrawerOpen(open);
+
+    if (!open) {
+      if (map.current) {
+        clearPolygon();
+        clearProjectPolygons();
+      }
+      setSelectedProject(null);
+      setTerritory(null);
+    }
+  };
 
 
 
-const handleTerritorySelect = (territoryData: Territory | null) => {
-  clearProjectPolygons(); // reset any previous territory's projects
+  const handleTerritorySelect = (territoryData: Territory | null) => {
+    clearProjectPolygons(); // reset any previous territory's projects
 
-  if (!territoryData) {
-    clearPolygon();
-    setDrawerOpen(false);
-    return;
-  }
+    if (!territoryData) {
+      clearPolygon();
+      setDrawerOpen(false);
+      return;
+    }
 
-  setTerritory(territoryData);
+    setTerritory(territoryData);
 
-  if (territoryData.geometry) {
-    plotPolygon(territoryData.geometry);
-  }
+    if (territoryData.geometry) {
+      plotPolygon(territoryData.geometry);
+    }
 
-  if (territoryData.projects && territoryData.projects.length > 0) {
-    plotProjectPolygons(territoryData.projects);
-  }
+    if (territoryData.projects && territoryData.projects.length > 0) {
+      plotProjectPolygons(territoryData.projects);
+    }
 
-  setSearchResults([]);
-  dispatch(setSearchQuery(''));
+    setSearchResults([]);
+    dispatch(setSearchQuery(''));
 
-  setDrawerOpen(true);
-};
+    setDrawerOpen(true);
+  };
 
 
   const removeDefaultLabels = () => {
@@ -117,17 +158,17 @@ const handleTerritorySelect = (territoryData: Territory | null) => {
   };
 
   const clearProjectPolygons = () => {
-  const m = map.current;
-  if (!m) return;
+    const m = map.current;
+    if (!m) return;
 
-  const src = m.getSource("projects-source");
-  if (!src) return;  // prevents crash
+    const src = m.getSource("projects-source");
+    if (!src) return;  // prevents crash
 
-  (src as maplibregl.GeoJSONSource).setData({
-    type: "FeatureCollection",
-    features: []
-  });
-};
+    (src as maplibregl.GeoJSONSource).setData({
+      type: "FeatureCollection",
+      features: []
+    });
+  };
 
   const plotProjectPolygons = (projects: any[]) => {
     const m = map.current;
@@ -183,7 +224,7 @@ const handleTerritorySelect = (territoryData: Territory | null) => {
       center: [72.5714, 23.0225],
       zoom: 12,
       attributionControl: false,
-      
+
     });
 
     map.current.on('styledata', () => {
@@ -194,7 +235,7 @@ const handleTerritorySelect = (territoryData: Territory | null) => {
     map.current.on('load', () => {
       const m = map.current;
       if (!m) return;
-    
+
       // territory points
       m.addSource('territories', {
         type: 'geojson',
@@ -365,18 +406,18 @@ const handleTerritorySelect = (territoryData: Territory | null) => {
   const handleFullscreen = () => { const el = mapContainer.current; if (!el) return; if (!document.fullscreenElement) el.requestFullscreen?.(); else document.exitFullscreen(); };
 
   const clearPolygon = () => {
-  const m = map.current;
-  if (!m) return;
+    const m = map.current;
+    if (!m) return;
 
-  const src = m.getSource('selected-territory');
-  if (!src) return;   // prevents crash
+    const src = m.getSource('selected-territory');
+    if (!src) return;   // prevents crash
 
-  (src as maplibregl.GeoJSONSource).setData({
-    type: 'FeatureCollection',
-    features: []
-  });
-};
-  
+    (src as maplibregl.GeoJSONSource).setData({
+      type: 'FeatureCollection',
+      features: []
+    });
+  };
+
   const handleLogout = () => {
     logout();
     localStorage.removeItem('lastActivePath');
@@ -531,8 +572,14 @@ const handleTerritorySelect = (territoryData: Territory | null) => {
           <ZoomOut size={20} className="text-gray-700" />
         </button>
       </div>
-
-
+      Hello
+      <button
+        onClick={handleLocateUser}
+        className="absolute bottom-7 right-4 z-[100000] bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+        disabled={loading}
+      >
+        <LocateFixedIcon size={20} />
+      </button>
       {/* Fullscreen Button */}
       <button onClick={handleFullscreen} className="absolute bottom-20 right-4 z-10 bg-white p-3 rounded-lg shadow-lg hover:bg-gray-50 transition-colors">
         <Maximize2 size={20} className="text-gray-700" />

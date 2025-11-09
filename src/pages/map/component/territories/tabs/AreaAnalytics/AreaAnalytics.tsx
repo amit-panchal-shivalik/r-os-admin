@@ -14,7 +14,7 @@ export default function AreaAnalytics({ projects = [] }: any){
   }
 
 
-  const COLORS = ["#00008B", "#355E3B", "#ffc658"];
+  const COLORS = ["#219ebc", "#023047", "#fb8500"];
 
   const projectStatusMap: Record<string, { count: number; totalUnits: number }> = {};
     for (const p of projects) {
