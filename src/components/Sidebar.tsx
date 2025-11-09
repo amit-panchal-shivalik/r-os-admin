@@ -16,9 +16,10 @@ interface SidebarProps {
   // optional client-side tab selector: if provided, sidebar will invoke this instead of navigating
   onSelect?: (tab: 'overview' | 'directory' | 'events' | 'marketplace' | 'pulses') => void;
   activeTab?: 'overview' | 'directory' | 'events' | 'marketplace' | 'pulses';
+  hideTabs?: boolean;
 }
 
-export default function Sidebar({ communityId, onSelect, activeTab }: SidebarProps) {
+export default function Sidebar({ communityId, onSelect, activeTab, hideTabs }: SidebarProps) {
   const location = useLocation();
   const pathname = location.pathname;
   const [collapsed, setCollapsed] = useState(false);
@@ -55,6 +56,7 @@ export default function Sidebar({ communityId, onSelect, activeTab }: SidebarPro
       tab: 'events' as const,
     },
   ];
+  const filteredNavItems = hideTabs ? navItems.filter((item) => item.tab === 'overview') : navItems;
 
   return (
     <aside
@@ -79,7 +81,7 @@ export default function Sidebar({ communityId, onSelect, activeTab }: SidebarPro
       </div>
 
       <nav className="space-y-2 flex-1 overflow-auto">
-        {navItems.map((item) => {
+        {filteredNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = onSelect ? activeTab === item.tab : (pathname === item.href || pathname?.startsWith(item.href + '/'));
           // If onSelect is provided, call it instead of navigating.

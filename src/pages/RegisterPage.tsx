@@ -32,21 +32,37 @@ export default function RegisterPage() {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    getValues,
+    formState: { errors, isSubmitted },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
     defaultValues: {
       name: '',
       email: '',
       mobile: '',
-      jobTitle: '',
+      jobTitle: undefined,
       companyName: '',
       interestedLocality: [],
       interestedCategory: [],
     },
   });
 
+  // Debug: Log errors when they change
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log('Form errors:', errors);
+      console.log('Current form values:', getValues());
+    }
+  }, [errors, getValues]);
+
+  const nameValue = watch('name');
+  const emailValue = watch('email');
+  const mobileValue = watch('mobile');
   const jobTitleValue = watch('jobTitle');
+  const companyNameValue = watch('companyName');
+  
   const [jobTitleOptions, setJobTitleOptions] = useState<{ value: string; label: string }[]>([]);
   const [localityOptions, setLocalityOptions] = useState<{ value: string; label: string }[]>([]);
   const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
@@ -85,11 +101,24 @@ export default function RegisterPage() {
     const newOtp = [...otp];
     newOtp[idx] = value;
     setOtp(newOtp);
-    if (value && idx < 5) {
-      otpRefs[idx + 1].current?.focus();
-    }
-    if (!value && idx > 0) {
-      otpRefs[idx - 1].current?.focus();
+  };
+
+  // Handle OTP key events for auto-focus
+  const handleOtpKeyUp = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    const value = e.currentTarget.value;
+
+    if (e.key >= '0' && e.key <= '9' && value && idx < 5) {
+      // Auto-focus next field when a digit is entered
+      setTimeout(() => {
+        otpRefs[idx + 1].current?.focus();
+      }, 10);
+    } else if (e.key === 'Backspace') {
+      if (!value && idx > 0) {
+        // Move to previous field if current is empty
+        setTimeout(() => {
+          otpRefs[idx - 1].current?.focus();
+        }, 10);
+      }
     }
   };
 
@@ -115,6 +144,7 @@ export default function RegisterPage() {
 
 
   const handleSubmitForm = async (data: RegisterFormData) => {
+    console.log('Form submitted with data:', data);
     setIsLoading(true);
 
     try {
@@ -124,30 +154,44 @@ export default function RegisterPage() {
         name: data.name,
         company_name: data.companyName || '',
         mobile_number: data.mobile,
-        job_title_id: data.jobTitle,
+        job_title_id: data.jobTitle || '',
         interested_localities: data.interestedLocality?.map(id => parseInt(id)) || [],
         interested_categories: data.interestedCategory?.map(id => parseInt(id)) || [],
       };
 
+      console.log('Sending payload:', payload);
       const response = await api.post('/auth/signup', payload);
       if (response.data.message === 'otp_send_success') {
         setOtpId(response.data.data.otp_id);
         setMobileSent(data.mobile);
         setOtpDialogOpen(true);
-        setTimeout(() => otpRefs[0].current?.focus(), 100);
         toast.success('OTP sent! Please verify.');
+        setTimeout(() => otpRefs[0].current?.focus(), 100);
       }
     } catch (error: any) {
+      console.error('Registration error:', error);
       toast.error(error.response?.data?.message || 'Registration failed');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Controlled handler for mobile input
+  // Controlled handlers for inputs
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue('name', e.target.value, { shouldValidate: isSubmitted, shouldDirty: true });
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue('email', e.target.value, { shouldValidate: isSubmitted, shouldDirty: true });
+  };
+
   const handleMobileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-    setValue('mobile', value, { shouldValidate: true });
+    setValue('mobile', value, { shouldValidate: isSubmitted, shouldDirty: true });
+  };
+
+  const handleCompanyNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue('companyName', e.target.value, { shouldValidate: isSubmitted, shouldDirty: true });
   };
 
   return (
@@ -165,8 +209,10 @@ export default function RegisterPage() {
                 <Input
                   id="name"
                   type="text"
-                  placeholder="John Doe"
-                  {...register('name')}
+                  placeholder="Your name"
+                  value={nameValue || ''}
+                  onChange={handleNameChange}
+                  className="border border-gray-300"
                 />
                 {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
               </div>
@@ -176,7 +222,9 @@ export default function RegisterPage() {
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  {...register('email')}
+                  value={emailValue || ''}
+                  onChange={handleEmailChange}
+                  className="border border-gray-300"
                 />
                 {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
               </div>
@@ -191,20 +239,20 @@ export default function RegisterPage() {
                   <Input
                     id="mobile"
                     type="text"
-                    placeholder="71XXXXXXXX"
+                    placeholder="XXXXXXXXXX"
                     maxLength={10}
-                    {...register('mobile')}
+                    value={mobileValue || ''}
                     onChange={handleMobileInput}
-                    className="rounded-l-none"
+                    className="rounded-l-none border border-gray-300"
                   />
                 </div>
                 {errors.mobile && <p className="text-red-500 text-sm">{errors.mobile.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="jobTitle">Job Title</Label>
-                <Select value={jobTitleValue} onValueChange={(value) => setValue('jobTitle', value)}>
-                  <SelectTrigger className='w-full'>
-                    <SelectValue  placeholder="Select job title" />
+                <Select  value={jobTitleValue || ''} onValueChange={(value) => setValue('jobTitle', value, { shouldValidate: isSubmitted, shouldDirty: true })}>
+                  <SelectTrigger className='w-full border border-gray-300'>
+                    <SelectValue placeholder="Select job title" />
                   </SelectTrigger>
                   <SelectContent>
                     {jobTitleOptions.map((option) => (
@@ -221,7 +269,9 @@ export default function RegisterPage() {
                 id="companyName"
                 type="text"
                 placeholder="Your Company"
-                {...register('companyName')}
+                value={companyNameValue || ''}
+                onChange={handleCompanyNameChange}
+                className="border border-gray-300"
               />
               {errors.companyName && <p className="text-red-500 text-sm">{errors.companyName.message}</p>}
             </div>
@@ -232,7 +282,7 @@ export default function RegisterPage() {
                 instanceId="interestedLocality"
                 styles={customStyles}
                 options={localityOptions}
-                onChange={(selected) => setValue('interestedLocality', selected ? selected.map(s => s.value) : [])}
+                onChange={(selected) => setValue('interestedLocality', selected ? selected.map(s => s.value) : [], { shouldValidate: isSubmitted, shouldDirty: true })}
                 placeholder="Select localities"
               />
               {errors.interestedLocality && <p className="text-red-500 text-sm">{errors.interestedLocality.message}</p>}
@@ -244,7 +294,7 @@ export default function RegisterPage() {
                 instanceId="interestedCategory"
                 styles={customStyles}
                 options={categoryOptions}
-                onChange={(selected) => setValue('interestedCategory', selected ? selected.map(s => s.value) : [])}
+                onChange={(selected) => setValue('interestedCategory', selected ? selected.map(s => s.value) : [], { shouldValidate: isSubmitted, shouldDirty: true })}
                 placeholder="Select categories"
               />
               {errors.interestedCategory && <p className="text-red-500 text-sm">{errors.interestedCategory.message}</p>}
@@ -276,14 +326,10 @@ export default function RegisterPage() {
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
-                className="w-10 h-12 text-center text-lg font-bold"
+                className="w-12 h-12 text-center text-lg font-bold border border-gray-300 rounded-md "
                 value={digit}
                 onChange={e => handleOtpChange(idx, e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
-                    otpRefs[idx - 1].current?.focus();
-                  }
-                }}
+                onKeyUp={e => handleOtpKeyUp(idx, e)}
                 autoFocus={idx === 0}
               />
             ))}

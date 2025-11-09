@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/Navbar';
 import { useAuthStore } from '@/store/authStore';
@@ -19,6 +19,26 @@ export default function ProfilePage() {
     email: user?.email || '',
     image: user?.image || '',
   });
+  // State to store profile API data
+  const [profileApiData, setProfileApiData] = useState<any>(null);
+  // Fetch profile data from /profile API on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get('/user/profile');
+        setProfileApiData(response.data);
+        // Optionally update profileData if you want to show API data
+        // setProfileData({
+        //   name: response.data.name,
+        //   email: response.data.email,
+        //   image: response.data.image,
+        // });
+      } catch (error) {
+        // Optionally handle error
+      }
+    };
+    fetchProfile();
+  }, []);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',

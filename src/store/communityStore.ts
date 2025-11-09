@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
+import { fetchFeaturedCommunities } from '@/lib/fetchFeaturedCommunities';
+import { fetchCommunityDetails } from '@/lib/communityApi';
 
 export interface Community {
   id: string;
@@ -74,10 +76,15 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   fetchCommunities: async () => {
     set({ loading: true, error: null });
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      // Use dummy data for now
-      set({ communities: dummyCommunities, loading: false });
+      const data = await fetchFeaturedCommunities();
+      // Fallback image if missing/corrupt
+      const fallback = 'https://images.unsplash.com/photo-1519389950473-47ba0277781c';
+      const communities = (data || []).slice(0, 3).map((c: any) => ({
+        ...c,
+        banner: c.banner || (c.images && c.images[0]) || fallback,
+        images: c.images && c.images.length > 0 ? c.images : [fallback],
+      }));
+      set({ communities, loading: false });
     } catch (error: any) {
       set({ error: error.message, loading: false });
     }
@@ -85,11 +92,23 @@ export const useCommunityStore = create<CommunityState>((set, get) => ({
   fetchCommunityById: async (id: string) => {
     set({ loading: true, error: null });
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 600));
-      // Find community in dummy data
-      const community = dummyCommunities.find(c => c.id === id);
-      if (!community) throw new Error('Community not found');
+      const data = await fetchCommunityDetails(id);
+      const c = data?.community || data;
+      if (!c) throw new Error('Community not found');
+      // Map API response to Community type used in UI
+      const community = {
+        id: c.community_id,
+        name: c.community_name,
+        description: c.community_description,
+        category: c.category_id || '',
+        banner: '', // No image in response, fallback handled in UI
+        images: [],
+        memberCount: Number(c.member_count) || 0,
+        isJoined: false,
+        status: c.status_enum,
+        postCount: Number(c.post_count) || 0,
+        createdAt: c.created_at,
+      };
       set({ currentCommunity: community, loading: false });
     } catch (error: any) {
       set({ error: error.message, loading: false });

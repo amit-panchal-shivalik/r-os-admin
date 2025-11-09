@@ -2,6 +2,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { LogOut, User as UserIcon, Menu, X } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
@@ -12,7 +20,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/auth/login');
+    navigate('/');
   };
 
   useEffect(() => {
@@ -33,12 +41,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-40 backdrop-blur-sm bg-card/70 border-b shadow-sm">
+    <nav className="sticky top-0 z-40 bg-white bg-card/70 border-b shadow-sm">
       <div className="container mx-auto px-16 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-3 text-lg font-bold md:text-xl">
-              <span className="text-2xl font-extrabold">R-OS</span>
+              <span className="text-3xl font-extrabold">R-OS</span>
               {/* <span className="hidden md:inline-block text-sm text-muted-foreground"></span> */}
             </Link>
           </div>
@@ -46,20 +54,19 @@ export default function Navbar() {
           {/* Desktop / md+ controls */}
           <div className="hidden md:flex items-center gap-4">
             {isAuthenticated ? (
-              <>
-                <Link to="/profile">
-                  <Button variant="ghost" size="sm">
-                    <span className="mr-2 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
-                      {getInitials(user?.name)}
-                    </span>
-                    <span className="truncate max-w-[10rem]">{user?.name}</span>
-                  </Button>
-                </Link>
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </Button>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground focus:outline-none border">
+                    <span className="text-base font-bold">{getInitials(user?.name)}</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Hello, {user?.name}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>Dashboard</DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive"><LogOut className="mr-2 h-4 w-4" />Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <div className="flex items-center gap-2">
                 <Link to="/auth/login" aria-label="Login">

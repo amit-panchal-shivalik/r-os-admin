@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface User {
   id: string;
@@ -37,34 +38,31 @@ const getStoredAuth = () => {
   return { user, token };
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-  setToken: (token) => {
-    set({ token, isAuthenticated: !!token });
-    if (token) {
-      localStorage.setItem('token', token);
-    } else {
-      localStorage.removeItem('token');
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      setUser: (user) => set((state) => ({ user, isAuthenticated: !!user && !!state.token })),
+      setToken: (token) => set((state) => ({ token, isAuthenticated: !!token && !!state.user })),
+      login: (user, token) => {
+        // Persist token and user to localStorage for API interceptor
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        set({ user, token, isAuthenticated: true });
+      },
+      logout: () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        set({ user: null, token: null, isAuthenticated: false });
+      },
+      initialize: () => {}, // No longer needed with persist
+    }),
+    {
+      name: 'auth-storage', // name of item in storage
+      partialize: (state) => ({ user: state.user, token: state.token, isAuthenticated: state.isAuthenticated }),
     }
-  },
-  login: (user, token) => {
-    set({ user, token, isAuthenticated: true });
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
-  },
-  logout: () => {
-    set({ user: null, token: null, isAuthenticated: false });
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-  },
-  initialize: () => {
-    const { user, token } = getStoredAuth();
-    if (user && token) {
-      set({ user, token, isAuthenticated: true });
-    }
-  },
-}));
+  )
+);
 

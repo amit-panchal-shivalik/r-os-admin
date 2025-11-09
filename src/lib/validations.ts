@@ -27,10 +27,10 @@ const passwordSchema = z
 // Role validation
 const roleSchema = z.enum(['member', 'manager']);
 
-// Job title validation (string ID)
+// Job title validation (string ID) - optional
 const jobTitleSchema = z
   .string()
-  .min(1, 'Job title is required');
+  .optional();
 
 // Company name validation
 const companyNameSchema = z

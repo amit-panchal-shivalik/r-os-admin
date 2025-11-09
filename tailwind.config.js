@@ -1,8 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // Disable Tailwind's dark mode since the app will use a single
-  // black/white palette instead of theme switching.
-  darkMode: false,
+  darkMode: ["class"],
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
     "./public/index.html"

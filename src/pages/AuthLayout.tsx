@@ -6,7 +6,7 @@ export default function AuthLayout() {
       <header className="border-b bg-card">
   <div className="container mx-auto px-4 md:px-12 py-4">
           <Link to="/" className="text-xl font-bold">
-            Community Platform
+            R-OS
           </Link>
         </div>
       </header>

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-// ThemeToggle removed; using static black/white palette
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, LoginFormData } from '@/lib/validations';
@@ -19,7 +18,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const otpRefs = Array.from({ length: 6 }, () => useRef<HTMLInputElement>(null));
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   const [mobileSent, setMobileSent] = useState('');
   const [otpId, setOtpId] = useState<number | null>(null);
 
@@ -40,19 +40,91 @@ export default function LoginPage() {
     setValue('mobile', value);
   };
 
-  // Handle OTP input
+  // Handle OTP input with auto-focus
   const handleOtpChange = (idx: number, value: string) => {
     if (!/^[0-9]?$/.test(value)) return;
+    
     const newOtp = [...otp];
     newOtp[idx] = value;
     setOtp(newOtp);
+
+    // Auto-focus next input when a digit is entered
     if (value && idx < 5) {
-      otpRefs[idx + 1].current?.focus();
+      setTimeout(() => {
+        otpRefs.current[idx + 1]?.focus();
+      }, 10);
     }
-    if (!value && idx > 0) {
-      otpRefs[idx - 1].current?.focus();
+
+    // Auto-submit when all fields are filled
+    if (newOtp.every(digit => digit !== '') && newOtp.length === 6) {
+      const otpValue = newOtp.join('');
+      if (otpValue.length === 6) {
+        onVerifyOtp();
+      }
     }
   };
+
+  // Handle OTP paste
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pastedData.length === 6) {
+      const newOtp = pastedData.split('');
+      setOtp(newOtp);
+      
+      // Focus the last input after paste
+      setTimeout(() => {
+        otpRefs.current[5]?.focus();
+      }, 10);
+      
+      // Auto-submit after paste if all digits are present
+      setTimeout(() => {
+        onVerifyOtp();
+      }, 100);
+    }
+  };
+
+  // Handle backspace and arrow key navigation
+  const handleOtpKeyDown = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      if (!otp[idx] && idx > 0) {
+        // Move to previous input if current is empty
+        const newOtp = [...otp];
+        newOtp[idx - 1] = '';
+        setOtp(newOtp);
+        otpRefs.current[idx - 1]?.focus();
+      } else if (otp[idx]) {
+        // Clear current input but stay focused
+        const newOtp = [...otp];
+        newOtp[idx] = '';
+        setOtp(newOtp);
+      }
+    } else if (e.key === 'ArrowLeft' && idx > 0) {
+      e.preventDefault();
+      otpRefs.current[idx - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && idx < 5) {
+      e.preventDefault();
+      otpRefs.current[idx + 1]?.focus();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      // Submit when Enter is pressed and OTP is complete
+      if (otp.join('').length === 6) {
+        onVerifyOtp();
+      }
+    }
+  };
+
+  // Reset OTP when dialog opens
+  useEffect(() => {
+    if (otpDialogOpen) {
+      setOtp(['', '', '', '', '', '']);
+      // Focus first input after a short delay
+      setTimeout(() => {
+        otpRefs.current[0]?.focus();
+      }, 100);
+    }
+  }, [otpDialogOpen]);
 
   // Send OTP API
   const onSendOtp = async (data: LoginFormData) => {
@@ -67,7 +139,6 @@ export default function LoginPage() {
         setOtpId(response.data.data.otp_id);
         setMobileSent(data.mobile);
         setOtpDialogOpen(true);
-        setTimeout(() => otpRefs[0].current?.focus(), 100);
         toast.success('OTP sent successfully!');
       }
     } catch (error: any) {
@@ -85,21 +156,25 @@ export default function LoginPage() {
   const onVerifyOtp = async () => {
     const otpValue = otp.join('');
     if (otpValue.length !== 6 || !otpId) return;
+    
     setIsLoading(true);
     try {
       const payload = {
         otp: otpValue
       };
       const response = await api.post(`/auth/verifyOtp/${otpId}`, payload);
-      // Response: { token, user_id, user_name }
       const { token, user_id, user_name } = response.data.data;
-      // Store in zustand and localStorage
       login({ id: user_id, name: user_name, email: '', role: '', image: undefined }, token);
       setOtpDialogOpen(false);
       toast.success('Login successful!');
       navigate('/dashboard');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Invalid OTP');
+      // Clear OTP on error for better UX
+      setOtp(['', '', '', '', '', '']);
+      setTimeout(() => {
+        otpRefs.current[0]?.focus();
+      }, 100);
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +182,6 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br p-4">
-      {/* theme toggle removed */}
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Login</CardTitle>
@@ -124,7 +198,7 @@ export default function LoginPage() {
                 <Input
                   id="mobile"
                   type="text"
-                  placeholder="71XXXXXXXX"
+                  placeholder="XXXXXXXXXX"
                   maxLength={10}
                   {...register('mobile', { onChange: handleMobileInput })}
                   className="rounded-l-none"
@@ -147,32 +221,37 @@ export default function LoginPage() {
           </CardFooter>
         </form>
       </Card>
+      
       <Dialog open={otpDialogOpen} onOpenChange={setOtpDialogOpen}>
         <DialogContent showCloseButton>
           <DialogHeader>
             <DialogTitle>Enter OTP</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              Enter the 6-digit OTP sent to +91{mobileSent}
+            </p>
           </DialogHeader>
-          <div className="flex justify-center gap-2 mt-4">
+          <div className="flex justify-center gap-2 mt-4" onPaste={handleOtpPaste}>
             {otp.map((digit, idx) => (
               <Input
                 key={idx}
-                ref={otpRefs[idx]}
+                ref={(el) => (otpRefs.current[idx] = el)}
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
-                className="w-10 h-12 text-center text-lg font-bold"
+                className="w-12 h-12 text-center text-lg font-bold border border-gray-300 rounded-md "
                 value={digit}
-                onChange={e => handleOtpChange(idx, e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
-                    otpRefs[idx - 1].current?.focus();
-                  }
-                }}
-                autoFocus={idx === 0}
+                onChange={(e) => handleOtpChange(idx, e.target.value)}
+                onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                autoFocus={idx === 0 && otpDialogOpen}
+                disabled={isLoading}
               />
             ))}
           </div>
-          <Button className="w-full mt-4" disabled={otp.join('').length !== 6 || isLoading} onClick={onVerifyOtp}>
+          <Button 
+            className="w-full mt-4" 
+            disabled={otp.join('').length !== 6 || isLoading} 
+            onClick={onVerifyOtp}
+          >
             {isLoading ? 'Verifying...' : 'Verify OTP'}
           </Button>
         </DialogContent>
