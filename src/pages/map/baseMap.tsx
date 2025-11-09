@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { Layers, Search, ZoomIn, ZoomOut, Maximize2, Sidebar } from 'lucide-react';
+import { Layers, Search, ZoomIn, ZoomOut, Maximize2, Sidebar, LocateFixedIcon, Map, MapPin } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import apiClient, { Latlng, Territory, getMapLocations, getTerritoryByLatLng, searchTerritory } from '../../apis/apiService';
+import { Latlng, Territory, getMapLocations, getTerritoryByLatLng, getUnderServedAreas, searchTerritory } from '../../apis/apiService';
 import {
   setCenter,
   setZoom,
@@ -22,6 +22,7 @@ import GlobalLoader from '@/components/shared/GlobalLoader';
 import ViewProjects from './component/projects/ViewProjects';
 import ViewPulses from './component/pulses/ViewPulses';
 import { ViewTerritories } from './component/territories/ViewTerritories';
+import { set } from 'date-fns';
 
 
 
@@ -29,6 +30,7 @@ const BaseMap = () => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [openSidebar, setOpenSidebar] = useState(false);
   const [loading, setLoading] = useState(false);
   const [territory, setTerritory] = useState<Territory | null>(null);
 
@@ -38,6 +40,7 @@ const BaseMap = () => {
   const [showPulses, setShowPulses] = useState(false);
   const [showTerritories, setShowTerritories] = useState(false);
   const [showProjects, setShowProjects] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const mapStyles: Record<string, { name: string; url: string }> = {
     streets: { name: 'Streets', url: 'https://demotiles.maplibre.org/style.json' },
@@ -156,6 +159,7 @@ const BaseMap = () => {
 
       loadAllTerritoryPoints();
       addMapClickListener();
+      // getUnderServedAreas();
     });
 
     // controls
@@ -209,7 +213,7 @@ const BaseMap = () => {
   const plotPolygon = (geometry: any) => {
     const m = map.current;
     if (!m || !geometry) return;
-
+    console.log('geometry', geometry);
     const src = m.getSource('selected-territory') as maplibregl.GeoJSONSource;
     src.setData({
       type: 'FeatureCollection',
@@ -249,16 +253,17 @@ const BaseMap = () => {
 
 
   const handleSearch = async (query: string) => {
-    if (!query.trim()) return;
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
 
     try {
       const response = await searchTerritory(query);
-      console.log(response);
-
-      if (response.results && response.results.length > 0) {
-        
-
-      }     } catch (error) {
+      if (response && response.length > 0) {
+        setSearchResults(response || []);
+      }
+    } catch (error) {
       console.error('Error during geocoding:', error);
       alert('Failed to fetch location. Please try again.');
     }
@@ -270,11 +275,40 @@ const BaseMap = () => {
       <div className="absolute top-4 left-16 z-20  px-4 flex gap-2 ">
         <div className='w-fit md:w-[400px]'>
           <Searchinput onSearch={handleSearch} /><GlobalLoader active={loading} />
+          {
+            searchResults.length > 0 && (<div className='mt-2 z-40 max-h-60 overflow-y-auto bg-white rounded-md shadow-lg border'>
+              {searchResults.map((result, index) => (
+                <div
+                  key={index}
+                  className='px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2'
+                  onClick={async () => {
+                    setLoading(true);
+                    const territory = await getTerritoryByLatLng(result.center.coordinates[0], result.center.coordinates[1]);
+                    if (!territory) {
+                      clearPolygon();
+                      setDrawerOpen(false);
+                      return;
+                    }
+                    setTerritory(territory);
+
+                    if (territory.geometry) {
+                      plotPolygon(territory.geometry);
+                    }
+                    setSearchResults([]);
+                    setLoading(false);
+                  }}
+                >
+                  <MapPin />  {result.name}, {result.city}
+                </div>
+              ))}
+            </div>
+            )
+          }
         </div>
       </div>
 
       <div className='absolute top-4 left-4  w-full max-w-xs px-4 '>
-        <Badge className='bg-white hover:bg-slate-200 text-gray-800 px-2 py-2 rounded-lg shadow-lg border-0' onClick={() => setDrawerOpen(!drawerOpen)}>
+        <Badge className='bg-white hover:bg-slate-200 text-gray-800 px-2 py-2 rounded-lg shadow-lg border-0' onClick={() => setOpenSidebar(!openSidebar)}>
           <Sidebar />
         </Badge>
       </div>
@@ -374,7 +408,11 @@ const BaseMap = () => {
         <Maximize2 size={20} className="text-gray-700" />
       </button>
 
-
+      <CustomDrawer open={openSidebar} onOpenChange={setOpenSidebar} handleSearch={handleSearch} direction="left">
+        <div>
+          <h1>Side Bar</h1>
+        </div>
+      </CustomDrawer>
       <CustomDrawer open={drawerOpen} onOpenChange={setDrawerOpen} handleSearch={handleSearch} direction="left">
         <div>
           <ViewTerritories territory={territory} />

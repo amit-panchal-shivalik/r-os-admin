@@ -26,22 +26,22 @@ const CustomDrawer: React.FC<CustomDrawerProps> = ({ open, onOpenChange, childre
       <Drawer.Portal>
        
         <Drawer.Content
-          className={`bg-gray-100 flex flex-col z-40 overflow-y-auto ${
+          className={`bg-gray-100 flex flex-col z-20 overflow-y-auto ${
             isSideDrawer && !isMobile ? 'h-full w-[450px]' : 'h-full w-full'
           } fixed ${direction === 'left' ? 'left-0 top-0' : ''} ${
             direction === 'right' ? 'right-0 top-0' : ''
           } ${direction === 'bottom' ? 'bottom-0 left-0 right-0 w-full' : ''} outline-none`}
         >
-          <div className="p-4 bg-gray-100 border-t border-gray-200 mt-auto">
+          <div className="px-4 absolute right-0  top-1 my-4 mt-auto">
               <div className="flex gap-6 mx-auto">
                <div className='w-[90%]'>
-                <Searchinput onSearch={handleSearch}/>
+                {/* <Searchinput onSearch={handleSearch}/> */}
                </div>
                 <button
                   className="text-sm text-blue-600 hover:underline"
                   onClick={() => onOpenChange(false)}
                 >
-                 <X/>
+                 <X color='white'/>
                 </button>
               </div>
             </div>
@@ -49,7 +49,7 @@ const CustomDrawer: React.FC<CustomDrawerProps> = ({ open, onOpenChange, childre
             <div
 
             />
-            <div className="max-w-md mx-auto">{children}</div>
+            <div className="max-w-md mx-auto ">{children}</div>
           </div>  
         </Drawer.Content>
       </Drawer.Portal>
