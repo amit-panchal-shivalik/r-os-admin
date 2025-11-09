@@ -20,6 +20,7 @@ interface Project {
     image?: string
     area?: number
     population?: number
+    builder?: string
 }
 
 interface ProjectSidebarProps {
@@ -156,7 +157,7 @@ export default function ProjectSidebar() {
 
                                         {/* Project Info */}
                                         <h3 className="mb-1 font-semibold text-sidebar-foreground line-clamp-2">{project.name}</h3>
-                                        <p className="mb-2 text-xs text-muted-foreground">{project.mid}</p>
+                                        <p className="mb-2 text-xs text-muted-foreground">{project?.builder}</p>
 
                                         {/* Location */}
                                         <div className="mb-2 flex items-center gap-1 text-xs text-muted-foreground">

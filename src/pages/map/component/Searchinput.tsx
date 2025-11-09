@@ -22,19 +22,37 @@ const Searchinput = ({ onSearch }: Props) => {
   return (
     <div className="relative">
       <Input
-        type="text"
-        value={searchQuery}
-        onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-        onKeyPress={handleSearchKeyPress}
-        placeholder="Search for places..."
-        className="w-full px-4 py-3 pl-10 pr-4 rounded-lg shadow-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      type="text"
+      value={searchQuery}
+      onChange={(e) => {  dispatch(setSearchQuery(e.target.value));
+        onSearch(e.target.value);
+      }}
+      onKeyPress={handleSearchKeyPress}
+      placeholder="Search for places..."
+      className="w-full px-4 py-3 pl-10 pr-10 rounded-lg shadow-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
-        onClick={() => onSearch(searchQuery)}
-        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      type="button"
+      onClick={() => onSearch(searchQuery)}
+      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      aria-label="Search"
       >
-        <Search size={20} />
+      <Search size={20} />
       </button>
+
+      {searchQuery && (
+      <button
+        type="button"
+        onClick={() => {
+        dispatch(setSearchQuery(''));
+        onSearch(''); // notify parent that search was cleared (optional)
+        }}
+        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        aria-label="Clear search"
+      >
+        ×
+      </button>
+      )}
     </div>
   );
 };

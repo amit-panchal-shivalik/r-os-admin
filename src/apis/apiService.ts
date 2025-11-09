@@ -10,6 +10,7 @@ export interface Territory {
     type: "Point";
     coordinates: Latlng;
   };
+  geometry: any
 }
 
 // Create an Axios instance with a base URL and common settings
@@ -89,6 +90,17 @@ export const searchTerritory = async (
   }
 };
 
+
+export const getsocietiesData = async (territory_id: string): Promise<any[]> => {
+  const response = await apiClient.get(`/api/v1/geodata/territory/societies?territory_id=${territory_id}`);
+  return response.data; 
+}
+
+
+export const getUnderServedAreas = async (): Promise<any[]> => {
+  const response = await apiClient.get("/api/v1/geodata/analytics/underserved");
+  return response.data; 
+}
 
 
 export default apiClient;

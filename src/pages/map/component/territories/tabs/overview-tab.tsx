@@ -1,10 +1,24 @@
 "use client"
 
+import { useEffect } from "react";
+import AreaAnalytics from "./AreaAnalytics/AreaAnalytics"
 import { BarChart2, Compass, Map, Pin, Ruler, Shapes } from "lucide-react"
+import { getsocietiesData } from "@/apis/apiService";
 
 export default function OverviewTab({ territory }: any) {
+  
+  
   const projects = territory.projects || []
+  console.log(territory);
 
+  useEffect(() => {
+   if(territory){
+    getsocietiesData(territory._id).then((data) => {
+      console.log("Societies Data:", data);
+    });
+   }
+  }, [territory]);
+  
   const totalProjects = projects.length
   const types = countBy(projects, "type")
   const statuses = countBy(projects, "status")
@@ -57,6 +71,17 @@ export default function OverviewTab({ territory }: any) {
           ))}
         </div>
       </Section>
+
+      <div className=" bg-gray-50 px-2">
+       <div>
+         <h1 className="text-lg font-bold text-gray-800 mt-2">Real Estate Analytics Dashboard</h1>
+        <AreaAnalytics projects={projects} />
+       </div>
+        <div>
+         <h1 className="text-lg font-bold text-gray-800 mt-2">Real Estate Analytics Dashboard</h1>
+        <AreaAnalytics projects={projects} />
+       </div>
+      </div>
 
       {/* ---- PROJECT STATUS BREAKDOWN ---- */}
       <Section title="Project Status">
