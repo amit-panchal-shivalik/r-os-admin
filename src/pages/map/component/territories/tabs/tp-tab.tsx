@@ -32,9 +32,11 @@ export default function TPTab({ territory }: any) {
         <Accordion type="single" collapsible className="w-full space-y-4">
             {tpData.map((tp: any) => (
                 <AccordionItem key={tp._id} value={tp.tpNumber}>
-                    <AccordionTrigger>
-                        <span className="font-semibold px-4">TP {tp.tpNumber} - {tp.villageName}</span>  
+                    <AccordionTrigger className="flex items-center p-2">
+                        <span className="font-semibold text-left flex-1">{`TP ${tp.tpNumber}`}</span>
+                        <span className="font-semibold text-left flex-1">{tp.villageName}</span>
                     </AccordionTrigger>
+
                     <AccordionContent>
                         <div className="flex flex-col gap-6 p-2">
 

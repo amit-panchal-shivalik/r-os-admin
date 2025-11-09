@@ -23,6 +23,7 @@ import ViewProjects from './component/projects/ViewProjects';
 import ViewPulses from './component/pulses/ViewPulses';
 import { ViewTerritories } from './component/territories/ViewTerritories';
 import { set } from 'date-fns';
+import "../../styles/markers.css"
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import ProfileMenu from './component/profile/ProfileMenu';
@@ -137,6 +138,7 @@ const BaseMap = () => {
 
     if (territoryData.projects && territoryData.projects.length > 0) {
       plotProjectPolygons(territoryData.projects);
+      plotProjectMarkers(territoryData.projects);
     }
 
     setSearchResults([]);
@@ -167,6 +169,31 @@ const BaseMap = () => {
     (src as maplibregl.GeoJSONSource).setData({
       type: "FeatureCollection",
       features: []
+    });
+  };
+
+  const plotProjectMarkers = (projects: any[]) => {
+    const m = map.current;
+    if (!m || !projects?.length) return;
+
+    projects.forEach(project => {
+      const el = document.createElement('div');
+      el.className = 'custom-marker';
+
+      const body = document.createElement('div');
+      body.className = 'marker-body';
+      el.appendChild(body);
+
+      const img = document.createElement('img');
+      img.alt = 'Marker Logo';
+      img.src = "https://imgs.search.brave.com/ZR64T8UvnCixvhH621s3y3feRUCKx2UM7Qf9pV2a6tE/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvN2UyMDM1MTlm/MzI0ZDQyMmQzZmRh/YjJkNzA0NGE2ZTRl/YTI0NTNhZGU4NTJh/ZjFhOGFhMjJlN2Vk/NmU1NWY1ZS93d3cu/c2hpdmFsaWt2ZW50/dXJlcy5jb20v"
+      body.appendChild(img);
+      const marker = new maplibregl.Marker({
+        className: "marker-el",
+        element: el,
+        anchor: 'center'
+      }).setLngLat(project.center.coordinates)
+        .addTo(m);
     });
   };
 
