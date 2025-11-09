@@ -27,6 +27,7 @@ const tabs = [
 ]
 
 export function ViewTerritories({ territory, project }: any) {
+  if (!territory || !territory.name) return null;
 
   const [activeTab, setActiveTab] = useState("overview")
   useEffect(() => {
@@ -35,7 +36,7 @@ export function ViewTerritories({ territory, project }: any) {
     }else{
       setActiveTab("overview")
     }
-  }, [territory])
+  }, [territory, project])
 
 
   const renderContent = () => {

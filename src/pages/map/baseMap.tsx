@@ -64,6 +64,21 @@ const navigation = useNavigate();
     terrain: { name: 'Terrain', url: 'https://api.maptiler.com/maps/outdoor/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL' }
   };
 
+const handleDrawerState = (open: boolean) => {
+  setDrawerOpen(open);
+
+  if (!open) {
+    if (map.current) {
+      clearPolygon();
+      clearProjectPolygons();
+    }
+    setSelectedProject(null);
+    setTerritory(null);
+  }
+};
+
+
+
 const handleTerritorySelect = (territoryData: Territory | null) => {
   clearProjectPolygons(); // reset any previous territory's projects
 
@@ -102,17 +117,17 @@ const handleTerritorySelect = (territoryData: Territory | null) => {
   };
 
   const clearProjectPolygons = () => {
-    const m = map.current;
-    if (!m) return;
+  const m = map.current;
+  if (!m) return;
 
-    const src = m.getSource("projects-source") as maplibregl.GeoJSONSource;
-    if (src) {
-      src.setData({
-        type: "FeatureCollection",
-        features: []
-      });
-    }
-  };
+  const src = m.getSource("projects-source");
+  if (!src) return;  // prevents crash
+
+  (src as maplibregl.GeoJSONSource).setData({
+    type: "FeatureCollection",
+    features: []
+  });
+};
 
   const plotProjectPolygons = (projects: any[]) => {
     const m = map.current;
@@ -350,17 +365,18 @@ const handleTerritorySelect = (territoryData: Territory | null) => {
   const handleFullscreen = () => { const el = mapContainer.current; if (!el) return; if (!document.fullscreenElement) el.requestFullscreen?.(); else document.exitFullscreen(); };
 
   const clearPolygon = () => {
-    const m = map.current;
-    if (!m) return;
+  const m = map.current;
+  if (!m) return;
 
-    const src = m.getSource('selected-territory') as maplibregl.GeoJSONSource;
-    if (src) {
-      src.setData({
-        type: 'FeatureCollection',
-        features: []
-      });
-    }
-  };
+  const src = m.getSource('selected-territory');
+  if (!src) return;   // prevents crash
+
+  (src as maplibregl.GeoJSONSource).setData({
+    type: 'FeatureCollection',
+    features: []
+  });
+};
+  
   const handleLogout = () => {
     logout();
     localStorage.removeItem('lastActivePath');
@@ -527,7 +543,7 @@ const handleTerritorySelect = (territoryData: Territory | null) => {
           <h1>Side Bar</h1>
         </div>
       </CustomDrawer>
-      <CustomDrawer open={drawerOpen} onOpenChange={setDrawerOpen} handleSearch={handleSearch} direction="left">
+      <CustomDrawer open={drawerOpen} onOpenChange={handleDrawerState} handleSearch={handleSearch} direction="left">
         <div>
           <ViewTerritories territory={territory} project={selectedProject} />
         </div>
