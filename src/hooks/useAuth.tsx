@@ -1,89 +1,43 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { setupAuthListener, signIn, signUp, signOut, AuthContextType } from "@/lib/auth";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  role: string; // Keep as string for PrivateRoute compatibility
-  userRoles?: string[]; // Optional array for flexibility
-  avatar?: string;
-}
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  session: null,
+  loading: true,
+  signIn,
+  signUp,
+  signOut,
+});
 
-interface AuthContextType {
-  isAuthenticated: boolean;
-  user: User | null;
-  login: (userData: User, token: string) => void;
-  logout: () => void;
-  updateUser: (userData: Partial<User>) => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    const userData = localStorage.getItem('userInfo');
-
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        // Transform userRoles to role if needed
-        const transformedUser: User = {
-          id: parsedUser.id || '',
-          name: parsedUser.firstName + ' ' + parsedUser.lastName || '',
-          email: parsedUser.email || '',
-          phone: parsedUser.phone || '',
-          role: parsedUser.userRoles?.join(',') || '',
-          avatar: parsedUser.avatar || ''
-        };
-        setUser(transformedUser);
-        setIsAuthenticated(true);
-      } catch (error) {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('userInfo');
-      }
-    }
+    const subscription = setupAuthListener(setUser, setSession);
+    setLoading(false);
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (userData: User, token: string) => {
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('userInfo', JSON.stringify(userData));
-    setUser(userData);
-    setIsAuthenticated(true);
+  const value = {
+    user,
+    session,
+    loading,
+    signIn,
+    signUp,
+    signOut,
   };
 
-  const logout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('userInfo');
-    localStorage.removeItem('lastActivePath');
-    localStorage.clear();
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      localStorage.setItem('userInfo', JSON.stringify(updatedUser));
-    }
-  };
-
-  return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, updateUser }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 };

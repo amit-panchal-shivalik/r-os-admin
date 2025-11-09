@@ -1,298 +1,313 @@
-# 🏘️ Community Platform - Frontend
+# Team Udaan - Community Management Platform
 
-> A complete React + TypeScript frontend for the Shivalik Rapid Codeathon 1.0 Community Platform
+A comprehensive community management platform built for connecting and managing local communities, events, volunteer programs, and social initiatives.
 
-## 🚀 Quick Start
+## 🌟 Features
 
-```bash
-# Install dependencies
-npm install
+### Core Features
+- **Community Management**: Create and manage multiple communities with territory-based organization
+- **Event Management**: Organize events with QR-based attendance tracking and registration
+- **Pulses**: Social feed for sharing updates, stories, and community moments
+- **Marketplace**: Buy and sell items within your community
+- **Volunteer Programs**: Track volunteer opportunities and contributions
+- **Member Directory**: Search and connect with community members
+- **Territory Mapping**: Interactive maps powered by OpenLayers
+- **Real-time Updates**: Live notifications and data synchronization
 
-# Start development server
-npm start
-```
+### User Roles
+- **Admin**: Full system access, user management, and analytics
+- **Manager**: Community and event management capabilities  
+- **User**: Participate in communities, events, and marketplace
 
-The app will open at `http://localhost:3001`
+## 🛠️ Tech Stack
 
-## 🎯 What's This?
-
-A fully-featured community management platform with:
-- **Role-based access** (User, Manager, Admin)
-- **Community management** with 5-tab interface
-- **Content moderation** (Pulses, Marketplace, Events)
-- **Member management** with block/unblock
-- **Event registration** system
-- **Join request approval** workflow
-
-## 📋 Test Credentials
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@communityplatform.com | Admin@123 |
-| Manager | manager@communityplatform.com | Manager@123 |
-| User | john.doe@example.com | User@123 |
-
-## ✨ Key Features
-
-### For Users
-- Browse and join communities
-- Create pulses (community posts)
-- List items in marketplace
-- Register for events
-- View member directory
-
-### For Managers
-- All user features +
-- Approve/reject join requests
-- Moderate pulses and listings
-- Create and manage events
-- Block/unblock members
-- 5-tab management dashboard
-
-### For Admins
-- All manager features +
-- Create new communities
-- Manage territories
-- View analytics
-
-## 🗂️ Project Structure
-
-```
-src/
-├── api/              # API clients (7 files)
-├── components/       # React components (15 files)
-│   ├── layout/      # Sidebar, Header, Layout
-│   ├── community/   # Community components
-│   ├── pulses/      # Pulse components
-│   ├── marketplace/ # Marketplace components
-│   ├── events/      # Event components
-│   └── directory/   # Directory components
-├── pages/           # Page components (6 files)
-│   ├── auth/       # Login, Register
-│   ├── dashboard/  # Dashboard
-│   └── communities/# Community pages
-├── contexts/        # React contexts
-├── types/          # TypeScript types
-├── App.tsx         # Main app with routing
-└── App.css         # Global styles
-```
-
-## 🎨 Screenshots
-
-### Dashboard
-Clean, role-based dashboard with quick links to all features.
-
-### Community Management (5 Tabs)
-1. **Join Requests** - Approve/reject members
-2. **Pulses** - Moderate community posts
-3. **Marketplace** - Moderate listings
-4. **Directory** - Manage members
-5. **Events** - Manage events
-
-### Responsive Design
-Works perfectly on desktop, tablet, and mobile devices.
-
-## 🔧 Tech Stack
-
-- **React 19** - UI library
+### Frontend
+- **React 18.3.1** - UI library
 - **TypeScript** - Type safety
-- **React Router v7** - Navigation
-- **Axios** - API calls
-- **Context API** - State management
-- **CSS3** - Styling
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Styling framework
+- **Radix UI** - Accessible component primitives
+- **React Router DOM** - Client-side routing
+- **TanStack React Query** - Data fetching and caching
+- **React Hook Form + Zod** - Form validation
 
-## 📚 Documentation
+### Backend (Lovable Cloud)
+- **PostgreSQL** - Database
+- **Supabase Auth** - Authentication system
+- **Supabase Storage** - File storage
+- **Row Level Security** - Database security
+- **Real-time subscriptions** - Live data updates
 
-- **[QUICK_START.md](QUICK_START.md)** - Get started in 3 steps
-- **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** - Detailed technical docs
-- **[FEATURES_CHECKLIST.md](FEATURES_CHECKLIST.md)** - Complete feature list
-- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Project overview
+### Additional Libraries
+- **OpenLayers** - Interactive maps
+- **Recharts** - Data visualization
+- **Lucide React** - Icons
+- **QRCode** - QR code generation
+- **Sonner** - Toast notifications
 
-## 🎯 Features Implemented
+## 📋 Prerequisites
 
-### ✅ Core Features (100%)
-- [x] Authentication & Authorization
-- [x] Communities CRUD
-- [x] Join Request Management
-- [x] Pulses (Community Posts)
-- [x] Marketplace with Approval
-- [x] Events with Registration
-- [x] Member Directory
-- [x] Block/Unblock Members
-- [x] Role-Based Access Control
-- [x] 5-Tab Management Interface
-- [x] Responsive Design
+- **Node.js** 18.x or higher
+- **npm** or **bun** package manager
+- Modern web browser (Chrome, Firefox, Safari, Edge)
 
-### ✅ UI/UX Features
-- [x] Sidebar Navigation
-- [x] Tab Navigation
-- [x] Modal Forms
-- [x] Status Badges
-- [x] Loading States
-- [x] Error Handling
-- [x] Search Functionality
-- [x] Hover Effects
-- [x] Smooth Transitions
+## 🚀 Getting Started
 
-## 🚀 Available Scripts
+### 1. Clone the Repository
 
 ```bash
-# Start development server
-npm start
-
-# Build for production
-npm run build
-
-# Run tests
-npm test
-
-# Eject (not recommended)
-npm run eject
+git clone <your-repository-url>
+cd <project-directory>
 ```
 
-## 🌐 Environment Variables
+### 2. Install Dependencies
 
-Create a `.env` file:
+```bash
+npm install
+# or
+bun install
+```
+
+### 3. Environment Variables
+
+The project uses Lovable Cloud (Supabase) for backend services. Environment variables are automatically configured when connected to Lovable Cloud:
 
 ```env
-REACT_APP_API_URL=http://localhost:3000/api
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+VITE_SUPABASE_PROJECT_ID=your_project_id
 ```
 
-## 📱 Responsive Breakpoints
+> **Note**: These are automatically provided by Lovable Cloud integration.
 
-- **Desktop**: > 768px (full sidebar)
-- **Tablet**: 480-768px (narrow sidebar)
-- **Mobile**: < 480px (icon-only sidebar)
+### 4. Run Development Server
 
-## 🎨 Color Palette
+```bash
+npm run dev
+# or
+bun run dev
+```
 
-- **Primary**: #3498db (Blue)
-- **Success**: #27ae60 (Green)
-- **Danger**: #e74c3c (Red)
-- **Warning**: #f39c12 (Orange)
-- **Dark**: #2c3e50
-- **Light**: #f5f5f5
+The application will be available at `http://localhost:8080`
 
-## 🔐 Security
+### 5. Build for Production
 
-- JWT token-based authentication
-- Protected routes
-- Role-based access control
-- Secure token storage
-- Auto-logout on token expiration
+```bash
+npm run build
+# or
+bun run build
+```
+
+The production build will be created in the `dist/` directory.
+
+## 📁 Project Structure
+
+```
+├── public/                 # Static assets
+├── src/
+│   ├── components/        # Reusable components
+│   │   ├── ui/           # Shadcn UI components
+│   │   └── layout/       # Layout components
+│   ├── pages/            # Route pages
+│   │   ├── admin/        # Admin dashboard pages
+│   │   └── user/         # User-facing pages
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Utility functions
+│   ├── integrations/     # Supabase integration
+│   └── index.css         # Global styles & design tokens
+├── supabase/             # Database migrations (auto-managed)
+└── tailwind.config.ts    # Tailwind configuration
+```
+
+## 🗄️ Database Schema
+
+### Key Tables
+- `profiles` - User profile information
+- `user_roles` - Role-based access control
+- `communities` - Community data
+- `community_members` - Community membership
+- `events` - Event information
+- `event_registrations` - Event attendance
+- `pulses` - Social feed posts
+- `marketplace_listings` - Marketplace items
+- `volunteer_opportunities` - Volunteer programs
+- `volunteer_hours` - Volunteer tracking
+
+### Storage Buckets
+- `avatars` - User profile pictures
+- `community-banners` - Community images
+- `event-banners` - Event images
+- `pulse-images` - Pulse post images
+- `listing-images` - Marketplace images
+
+## 🔐 Authentication
+
+The platform uses email/password authentication with automatic profile creation:
+
+1. **Sign Up**: Users register with email, password, name, territory, and pincode
+2. **Email Confirmation**: Auto-enabled for development (can be configured)
+3. **Profile Creation**: Automatic profile and role assignment on signup
+4. **Session Management**: Persistent sessions with auto-refresh tokens
+
+### Default Roles
+- New users are assigned the `user` role by default
+- Admins can be assigned through database management
+- Managers can be promoted by admins
+
+## 🎨 Design System
+
+The project uses a semantic design system with:
+- **CSS Variables**: Defined in `src/index.css`
+- **Tailwind Tokens**: Extended in `tailwind.config.ts`
+- **Dark Mode**: Full dark mode support
+- **Responsive Design**: Mobile-first approach
+
+### Color Tokens
+- `--primary`: Main brand color
+- `--secondary`: Secondary surfaces
+- `--accent`: Accent elements
+- `--muted`: Subdued elements
+- `--background`: Background surfaces
+- `--foreground`: Text on background
+
+## 📱 Responsive Design
+
+- **Desktop**: Full feature set with 2x2 grid layouts
+- **Tablet**: Optimized layouts with responsive grids
+- **Mobile**: Single-column layouts with touch-optimized UI
+
+## 🚢 Deployment
+
+### Deploying with Lovable
+
+1. Click the **Publish** button in the top-right (desktop) or bottom-right (mobile in Preview mode)
+2. Click **Update** to deploy frontend changes
+3. Backend changes (migrations, edge functions) deploy automatically
+
+### Custom Domain
+
+1. Navigate to **Project → Settings → Domains**
+2. Add your custom domain
+3. Configure DNS records as instructed
+4. Wait for SSL certificate provisioning
+
+> **Note**: Custom domains require a paid Lovable plan
+
+### Self-Hosting
+
+The project can be self-hosted on any static hosting platform:
+
+**Vercel**:
+```bash
+npm run build
+vercel --prod
+```
+
+**Netlify**:
+```bash
+npm run build
+netlify deploy --prod --dir=dist
+```
+
+**Other Platforms**:
+- Build the project: `npm run build`
+- Deploy the `dist/` directory
+- Configure redirects for SPA (see `vercel.json` or `public/_redirects`)
+
+### Environment Configuration
+
+For self-hosting, ensure you configure:
+1. Supabase project URL and anon key
+2. OAuth redirect URLs (if using social login)
+3. CORS settings in Supabase dashboard
+4. RLS policies for security
+
+## 🔧 Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+### Code Style
+
+- **TypeScript**: Strict mode enabled
+- **ESLint**: Configured for React and TypeScript
+- **Formatting**: Consistent code style
+- **Naming Conventions**: 
+  - Components: PascalCase
+  - Files: PascalCase for components, camelCase for utilities
+  - Hooks: camelCase with `use` prefix
+
+### Adding New Features
+
+1. Create components in `src/components/`
+2. Add pages in `src/pages/user/` or `src/pages/admin/`
+3. Create custom hooks in `src/hooks/`
+4. Update routes in `src/App.tsx`
+5. Add database changes through Lovable Cloud migration tool
 
 ## 🐛 Troubleshooting
 
-### Can't connect to API?
-- Ensure backend is running on port 3000
-- Check `REACT_APP_API_URL` in `.env`
-- Verify CORS is enabled on backend
+### Common Issues
 
-### Login not working?
-- Clear localStorage
-- Check credentials
-- Verify backend is running
+**Build Errors**:
+- Clear node_modules: `rm -rf node_modules && npm install`
+- Clear cache: `rm -rf .vite && npm run dev`
 
-### Build errors?
-```bash
-rm -rf node_modules
-npm install
-npm run build
-```
+**Authentication Issues**:
+- Check environment variables
+- Verify Supabase connection
+- Check browser console for errors
 
-## 📊 Project Stats
+**Database Issues**:
+- Verify RLS policies are configured
+- Check user roles are assigned
+- Review migration history
 
-- **40+ Files** created
-- **15+ Components** built
-- **7 API Clients** integrated
-- **6 Pages** implemented
-- **3 User Roles** supported
-- **100+ Features** delivered
+**Styling Issues**:
+- Verify Tailwind classes
+- Check CSS variable definitions
+- Inspect element in browser DevTools
 
-## 🏆 Competition Ready
+## 📊 Analytics & Monitoring
 
-This implementation includes all requirements for the Shivalik Rapid Codeathon 1.0:
-
-✅ User authentication and registration  
-✅ Community creation and management  
-✅ Join request approval system  
-✅ Pulses (community posts)  
-✅ Marketplace with approval workflow  
-✅ Events with registration  
-✅ Member directory  
-✅ Block/unblock functionality  
-✅ Role-based access control  
-✅ 5-tab management interface  
-✅ Responsive design  
-✅ Clean, professional UI  
+The admin dashboard provides:
+- User growth metrics
+- Community statistics
+- Event participation rates
+- Marketplace activity
+- Volunteer hours tracking
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is created for the Shivalik Rapid Codeathon 1.0.
+This project is part of the Shivalik Rapid Codeathon 1.0.
 
-## 🎓 Learning Resources
+## 🔗 Resources
 
-- [React Documentation](https://react.dev)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [React Router](https://reactrouter.com)
-- [Axios Documentation](https://axios-http.com)
+- [Lovable Documentation](https://docs.lovable.dev/)
+- [React Documentation](https://react.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Radix UI](https://www.radix-ui.com/)
+- [Supabase Documentation](https://supabase.com/docs)
 
-## 💡 Tips
+## 💬 Support
 
-- Use different browser tabs to test different roles
-- Check browser console for errors
-- Use React DevTools for debugging
-- Test on different screen sizes
-
-## 🚀 Deployment
-
-### Build for Production
-```bash
-npm run build
-```
-
-### Deploy to Netlify
-```bash
-npm install -g netlify-cli
-netlify deploy --prod
-```
-
-### Deploy to Vercel
-```bash
-npm install -g vercel
-vercel --prod
-```
-
-## 📞 Support
-
-For issues or questions:
-1. Check the documentation files
-2. Review the implementation guide
-3. Test with different user roles
-4. Check browser console for errors
-
-## 🎉 Success!
-
-You now have a complete, production-ready community platform frontend!
-
-### Next Steps:
-1. ✅ Test all features
-2. ✅ Integrate with backend
-3. ✅ Deploy to production
-4. ✅ Submit to competition
+For support and questions:
+- Check the documentation
+- Review existing issues
+- Create a new issue with detailed description
 
 ---
 
-**Built with ❤️ for Shivalik Rapid Codeathon 1.0**
-
-**Status**: Production Ready ✅  
-**Last Updated**: November 8, 2025  
-**Version**: 1.0.0
+**Built with ❤️ for Team Udaan**
