@@ -38,7 +38,7 @@ const navItems: NavItem[] = [
       { title: "Leave Groups", href: "/leave/groups" },
       { title: "Bulk Leave Assignment", href: "/leave/bulk-assign" },
       { title: "Leave Balance", href: "/leave/balance" },
-      // { title: "Leave Requests", href: "/leave/requests" },
+      { title: "Leave Requests", href: "/leave/requests" },
     ],
   },
   {

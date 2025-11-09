@@ -294,3 +294,38 @@ export const getManagerLeaveRequestsApi = async (data: GetManagerLeaveRequestsPa
     data,
   });
 };
+
+export type ApproveLeavePayload = {
+  request_id: string;
+};
+
+export type ApproveLeaveResponse = {
+  message: Record<string, unknown> | string;
+  result?: Record<string, unknown>;
+};
+
+export const approveLeaveApi = async (data: ApproveLeavePayload): Promise<ApproveLeaveResponse> => {
+  return apiRequest<ApproveLeaveResponse>({
+    method: 'POST',
+    url: 'users/approve-leave',
+    data,
+  });
+};
+
+export type RejectLeavePayload = {
+  request_id: string;
+  rejection_reason: string;
+};
+
+export type RejectLeaveResponse = {
+  message: Record<string, unknown> | string;
+  result?: Record<string, unknown>;
+};
+
+export const rejectLeaveApi = async (data: RejectLeavePayload): Promise<RejectLeaveResponse> => {
+  return apiRequest<RejectLeaveResponse>({
+    method: 'POST',
+    url: 'users/reject-leave',
+    data,
+  });
+};

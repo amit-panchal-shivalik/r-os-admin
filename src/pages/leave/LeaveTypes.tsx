@@ -89,20 +89,14 @@ export default function LeaveTypes() {
       toast({ title: 'Validation', description: 'Please choose whether leave applies on past days', variant: 'destructive' });
       return;
     }
-    // applyBeforeDays validation depends on applyOnPastDays
-    if (formData.applyOnPastDays === 'Yes') {
-      if (formData.applyBeforeDays === undefined || formData.applyBeforeDays === null || String(formData.applyBeforeDays).trim() === '') {
-        toast({ title: 'Validation', description: 'Please enter Apply Before Days (number)', variant: 'destructive' });
-        return;
-      }
-      // numeric check and minimum 1
-      if (!/^[0-9]+$/.test(String(formData.applyBeforeDays)) || Number(formData.applyBeforeDays) < 1) {
-        toast({ title: 'Validation', description: 'Apply Before Days must be an integer >= 1', variant: 'destructive' });
-        return;
-      }
-    } else {
-      // when applyOnPastDays is No, ensure it's 0
-      setFormData({ ...formData, applyBeforeDays: '0' });
+    if (formData.applyBeforeDays === undefined || formData.applyBeforeDays === null || String(formData.applyBeforeDays).trim() === '') {
+      toast({ title: 'Validation', description: 'Please enter Apply Before Days (number)', variant: 'destructive' });
+      return;
+    }
+    // numeric check
+    if (!/^[0-9]+$/.test(String(formData.applyBeforeDays))) {
+      toast({ title: 'Validation', description: 'Apply Before Days must be a non-negative integer', variant: 'destructive' });
+      return;
     }
     if (formData.status !== 'Active' && formData.status !== 'Inactive') {
       toast({ title: 'Validation', description: 'Please choose a status', variant: 'destructive' });
@@ -244,17 +238,7 @@ export default function LeaveTypes() {
                   <Label htmlFor="applyOnPastDays">Apply Leave on Past Days</Label>
                   <Select
                     value={formData.applyOnPastDays}
-                      onValueChange={(value) => {
-                        // when Apply on Past Days is set to No, default applyBeforeDays to 0 and freeze it
-                        if (value === 'No') {
-                          setFormData({ ...formData, applyOnPastDays: value, applyBeforeDays: '0' });
-                        } else {
-                          // when Yes, ensure applyBeforeDays is at least 1
-                          const current = String(formData.applyBeforeDays || '').trim();
-                          const next = (!current || current === '0') ? '1' : current;
-                          setFormData({ ...formData, applyOnPastDays: value, applyBeforeDays: next });
-                        }
-                      }}
+                    onValueChange={(value) => setFormData({ ...formData, applyOnPastDays: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select option" />
@@ -273,22 +257,10 @@ export default function LeaveTypes() {
                     placeholder="Number of days"
                     value={formData.applyBeforeDays}
                     onChange={(e) => {
-                      let val = e.target.value.replace(/[^0-9]/g, '');
-                      // if applyOnPastDays is Yes, enforce minimum 1
-                      if (formData.applyOnPastDays === 'Yes') {
-                        if (val === '' ) {
-                          // allow empty while typing but will enforce on blur/submit
-                        } else if (Number(val) < 1) {
-                          val = '1';
-                        }
-                      } else {
-                        // when disabled state (No), always keep 0
-                        val = '0';
-                      }
+                      const val = e.target.value.replace(/[^0-9]/g, '');
                       setFormData({ ...formData, applyBeforeDays: val });
                     }}
                     inputMode="numeric"
-                    disabled={formData.applyOnPastDays !== 'Yes'}
                   />
                 </div>
 
