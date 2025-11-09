@@ -8,7 +8,9 @@ import { User } from '../../types/CommonTypes';
 function* handleVerifyOTP(action: PayloadAction<any>) {
     try {
         // Call the verifyOTPApi API function
+        console.log('Verifying OTP with payload:', action.payload);
         const user: User = yield call(verifyOTPApi, action.payload);
+        console.log('OTP verified successfully:', user);
         // Dispatch the verifyOTPSuccess action
         yield put(verifyOTPSuccess(user));
     } catch (error: any) {

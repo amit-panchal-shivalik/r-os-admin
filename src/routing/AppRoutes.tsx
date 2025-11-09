@@ -4,6 +4,7 @@ import { PublicRoute } from './PublicRoute';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { OtpPage } from '../pages/auth/OtpPage';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
+import BaseMap from '@/pages/map/baseMap';
 
 /* current user roles */
 const getUserRoles = (): string[] => {
@@ -17,7 +18,7 @@ const getUserRoles = (): string[] => {
 
 /* Role default route mapping */
 const ROLE_DEFAULTS: Record<string, string> = {
-  SuperAdmin: '/users',
+  SuperAdmin: '/map',
 };
 
 /* Component that decides where to redirect  */
@@ -33,12 +34,13 @@ const RedirectByRole = () => {
   // Find the first matching default route
   for (const role of roles) {
     if (ROLE_DEFAULTS[role]) {
-      return <Navigate to={ROLE_DEFAULTS[role]} replace />;
+      console.log(`Redirecting ${role} to ${ROLE_DEFAULTS[role]}`);
+      return <Navigate to="/map" replace />;
     }
   }
 
   // Fallback for unknown / Guest
-  return <Navigate to="/users" replace />;
+  return <Navigate to="/map" replace />;
 };
 
 /* ────── Main router ────── */
@@ -72,16 +74,19 @@ export const AppRoutes = () => {
           </PrivateRoute>
         }
       >
-        {/* Default entry point – decides where to go based on current role */}
         <Route index element={<RedirectByRole />} />
-
-        {/* All private pages  */}
-        {/* <Route path="users" element={<PeoplePage />} /> */}
-
-        {/* Catch-all inside private area (keeps the layout) */}
         <Route path="*" element={<RedirectByRole />} />
       </Route>
 
+      <Route
+        path="/map"
+        element={
+          <BaseMap />
+        }
+      >
+      </Route>
+
+     
       {/* Global catch-all (outside private area) */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
