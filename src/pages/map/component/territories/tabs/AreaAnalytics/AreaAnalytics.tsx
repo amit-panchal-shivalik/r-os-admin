@@ -55,7 +55,7 @@ export default function AreaAnalytics({ projects = [] }: any){
             <YAxis allowDecimals={false} />
             <Tooltip formatter={(value: number) => `${value}`} />
             <Legend  />
-            <Bar dataKey="count" fill="#8884d8" name="Projects" />
+            <Bar dataKey="count" fill="#00008B" name="Projects" />
             {/* <Bar dataKey="totalUnits" fill="#82ca9d" name="Units" /> */}
           </BarChart>
         </ResponsiveContainer>

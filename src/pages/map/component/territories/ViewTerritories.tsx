@@ -10,15 +10,18 @@ import EventsTab from "./tabs/events-tab"
 import { Building2, Users, Home, Lightbulb, TrendingUp, Shield, Calendar } from "lucide-react"
 import { Territory } from "@/apis/apiService"
 import ViewPulses from "../pulses/ViewPulses"
+import TPTab from "./tabs/tp-tab"
 
 const tabs = [
   { id: "overview", label: "Overview", icon: Building2 },
   { id: "projects", label: "Projects", icon: Home },
+  { id: "TP", label: "Town Plan Scheme", icon: Users },
   { id: "professionals", label: "Professionals", icon: Users },
   { id: "opportunities", label: "Opportunities", icon: Lightbulb },
   { id: "pulses", label: "Pulses", icon: TrendingUp },
   { id: "governance", label: "Governance", icon: Shield },
   { id: "events", label: "Events", icon: Calendar },
+
 ]
 
 export function ViewTerritories({ territory }: any) {
@@ -41,16 +44,19 @@ export function ViewTerritories({ territory }: any) {
         return <GovernanceTab />
       case "events":
         return <EventsTab />
+      case "TP":
+        return <TPTab territory={territory} />
       default:
         return <OverviewTab />
     }
   }
+  
 
   return (
     <div className=" bg-card border-r border-border flex flex-col h-screen shadow-lg">
       {/* Flash Banner */}
       <div className="w-full bg-gradient-to-r from-primary/90 to-primary text-primary-foreground shadow-md">
-        <div className="px-4 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="px-4 pt-8 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
           {/* Name + City */}
           <div>
