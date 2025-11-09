@@ -1,23 +1,34 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { PrivateRoute } from './PrivateRoute';
-import { PublicRoute } from './PublicRoute';
-import { LoginPage } from '../pages/auth/LoginPage';
-import { OtpPage } from '../pages/auth/OtpPage';
-import { DashboardLayout } from '../components/layout/DashboardLayout';
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { PrivateRoute } from "./PrivateRoute";
+import { PublicRoute } from "./PublicRoute";
+import { LoginPage } from "../pages/auth/LoginPage";
+import { OtpPage } from "../pages/auth/OtpPage";
+import { RegisterPage } from "@/pages/auth/RegisterPage";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { TerritoryDashboardPage } from "@/pages/territory/Dashboard";
+import { TerritoryProjectsPage } from "@/pages/territory/Projects";
+import { TerritoryLandPage } from "@/pages/territory/Land";
+import { TerritoryVendorPage } from "@/pages/territory/Vendor";
+import { TerritoryStorePage } from "@/pages/territory/Store";
+import { TerritoryInstitutePage } from "@/pages/territory/Institute";
+import { TerritorySocietyAdminPage } from "@/pages/territory/SocietyAdmin";
+import { TerritoryOpportunityPage } from "@/pages/territory/Opportunity";
+import { TerritoryBlueCollarJobPage } from "@/pages/territory/BlueCollarJob";
+import { TerritoryEventPage } from "@/pages/territory/EventPage";
 
 /* current user roles */
 const getUserRoles = (): string[] => {
   try {
-    const info = JSON.parse(localStorage.getItem('userInfo') ?? '{}');
-    return Array.isArray(info.userRoles) ? info.userRoles : ['Guest'];
+    const info = JSON.parse(localStorage.getItem("userInfo") ?? "{}");
+    return Array.isArray(info.userRoles) ? info.userRoles : ["Guest"];
   } catch {
-    return ['Guest'];
+    return ["Guest"];
   }
 };
 
 /* Role default route mapping */
 const ROLE_DEFAULTS: Record<string, string> = {
-  SuperAdmin: '/users',
+  SuperAdmin: "/users",
 };
 
 /* Component that decides where to redirect  */
@@ -26,7 +37,7 @@ const RedirectByRole = () => {
   const roles = getUserRoles();
 
   // If we are already on a page that belongs to the user – stay there
-  if (location.pathname !== '/' && location.pathname !== '') {
+  if (location.pathname !== "/" && location.pathname !== "") {
     return null; // let the child route render
   }
 
@@ -55,6 +66,14 @@ export const AppRoutes = () => {
         }
       />
       <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+      <Route
         path="/otp"
         element={
           <PublicRoute>
@@ -76,7 +95,32 @@ export const AppRoutes = () => {
         <Route index element={<RedirectByRole />} />
 
         {/* All private pages  */}
-        {/* <Route path="users" element={<PeoplePage />} /> */}
+        {/* Territory */}
+        <Route
+          path="territory/dashboard"
+          element={<TerritoryDashboardPage />}
+        />
+        <Route path="territory/project" element={<TerritoryProjectsPage />} />
+        <Route path="territory/land" element={<TerritoryLandPage />} />
+        <Route path="territory/vendor" element={<TerritoryVendorPage />} />
+        <Route path="territory/store" element={<TerritoryStorePage />} />
+        <Route
+          path="territory/institute"
+          element={<TerritoryInstitutePage />}
+        />
+        <Route
+          path="territory/society-admin"
+          element={<TerritorySocietyAdminPage />}
+        />
+        <Route
+          path="territory/opportunity"
+          element={<TerritoryOpportunityPage />}
+        />
+        <Route
+          path="territory/blue-collar-job"
+          element={<TerritoryBlueCollarJobPage />}
+        />
+        <Route path="territory/event" element={<TerritoryEventPage />} />
 
         {/* Catch-all inside private area (keeps the layout) */}
         <Route path="*" element={<RedirectByRole />} />

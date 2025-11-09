@@ -10,6 +10,8 @@ interface StatsCardProps {
   icon?: React.ReactNode;
   progress?: number;
   dark?: boolean;
+  compact?: boolean;
+  size?: 'default' | 'compact' | 'mini';
 }
 
 export const StatsCard = ({ 
@@ -19,25 +21,56 @@ export const StatsCard = ({
   color = 'gray', 
   icon, 
   progress,
-  dark = false 
+  dark = false,
+  compact = false,
+  size,
 }: StatsCardProps) => {
   const DiffIcon = diff && diff > 0 ? IconArrowUp : IconArrowDown;
+  const mode: 'default' | 'compact' | 'mini' = size ?? (compact ? 'compact' : 'default');
+  const cfg = {
+    default: {
+      pad: 'xl' as const,
+      titleSize: 'sm' as const,
+      valueSize: '2xl' as const,
+      shadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      prog: 50,
+      radius: 12,
+    },
+    compact: {
+      pad: 'sm' as const,
+      titleSize: 'xs' as const,
+      valueSize: 'xl' as const,
+      shadow: '0 1px 2px rgba(0,0,0,.06)',
+      prog: 40,
+      radius: 12,
+    },
+    mini: {
+      pad: 'xs' as const,
+      titleSize: 'xs' as const,
+      valueSize: 'md' as const,
+      shadow: '0 1px 1px rgba(0,0,0,.05)',
+      prog: 32,
+      radius: 10,
+    },
+  }[mode];
   
   return (
     <Paper 
-      p="xl"
-      radius="12"
+      p={cfg.pad}
+      radius={String(cfg.radius)}
       style={{
         backgroundColor: dark ? '#111827' : '#ffffff',
         color: dark ? '#ffffff' : '#111827',
         border: '1px solid #e5e7eb',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        boxShadow: cfg.shadow,
         transition: 'all 0.2s ease',
         cursor: 'pointer',
       }}
       onMouseOver={(e) => {
-        e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
-        e.currentTarget.style.transform = 'translateY(-2px)';
+        if (mode === 'default') {
+          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+        }
       }}
       onMouseOut={(e) => {
         e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
@@ -53,7 +86,7 @@ export const StatsCard = ({
               </Box>
             )}
             <Text 
-              size="sm" 
+              size={cfg.titleSize}
               fw={500}
               style={{ 
                 color: dark ? '#9ca3af' : '#6b7280',
@@ -67,7 +100,7 @@ export const StatsCard = ({
           
           <Text 
             fw={700} 
-            size="2xl"
+            size={cfg.valueSize}
             style={{ 
               color: dark ? '#ffffff' : '#111827', 
               marginBottom: rem(8),
@@ -107,9 +140,9 @@ export const StatsCard = ({
         {progress !== undefined && (
           <Box
             style={{
-              width: rem(50),
-              height: rem(50),
-              borderRadius: rem(25),
+              width: rem(cfg.prog),
+              height: rem(cfg.prog),
+              borderRadius: rem(cfg.prog / 2),
               backgroundColor: dark ? '#374151' : '#f9fafb',
               display: 'flex',
               alignItems: 'center',
@@ -120,7 +153,7 @@ export const StatsCard = ({
             visibleFrom="sm"
           >
             <Text 
-              size="xs" 
+              size={mode === 'mini' ? 'xs' : 'xs'} 
               fw={700}
               style={{ color: dark ? '#ffffff' : '#111827' }}
             >

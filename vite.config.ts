@@ -23,5 +23,8 @@ export default defineConfig(({ mode }) => {
     define: {
       'import.meta.env': env,
     },
+    esbuild: {
+      drop: mode === 'production' ? ['console', 'debugger'] : [],
+    },
   };
 });

@@ -11,14 +11,17 @@ export interface SelectInputProps {
     label: string;
     register?: UseFormRegister<any>;
     errors?: FieldErrors<FieldValues>;
-    setValue: UseFormSetValue<any>;
+    setValue?: UseFormSetValue<any>;
     required?: boolean;
     options?: Option[];
     disabled?: boolean;
     onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLSelectElement>) => void;
     validate?: (value: string) => true | string;
     value?: string;
     mode?: 'create' | 'edit';
+    placeholder?: string;
+    errorMessage?: string;
 }
 
 export interface FileUploadProps {
