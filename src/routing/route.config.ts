@@ -35,7 +35,6 @@ export const ROLE_ROUTES: Record<string, string[]> = {
     '/building-settings/notice-board',
     '/building-settings/parking',
     '/building-settings/amenities',
-    // Legacy routes for backward compatibility
     '/building-details',
     '/floors',
     '/blocks',

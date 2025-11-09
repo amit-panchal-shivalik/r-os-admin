@@ -44,6 +44,7 @@ export const LoginPage = () => {
         email: userData.email || "",
         phone: userData.mobileNumber || "",
         role: userData.role || "",
+        societyId: userData.society,
         userRoles: userData.roles || userData.role ? [userData.role] : [],
         avatar: userData.avatar || "",
       };
