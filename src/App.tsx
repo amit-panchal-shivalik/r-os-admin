@@ -5,7 +5,12 @@ import { AppRoutes } from './routing/AppRoutes';
 // Main App
 const App = () => {
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>
